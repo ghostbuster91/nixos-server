@@ -21,6 +21,7 @@
         inherit system;
         modules = [
           ./machines/deckard/configuration.nix
+          ./modules
           home-manager.nixosModules.home-manager
           {
             home-manager = {
