@@ -2,15 +2,23 @@
   # grafana configuration
   services.grafana = {
     enable = true;
-    domain = "grafana.deckard";
-    port = 2342;
-    addr = "127.0.0.1";
+    settings = {
+      server = {
+        # Listening Address
+        http_addr = "127.0.0.1";
+        # and Port
+        http_port = 3000;
+        # Grafana needs to know on which domain and URL it's running
+        domain = "deckard.lan";
+      };
+    };
   };
 
-  # nginx reverse proxy
-  services.nginx.virtualHosts.${config.services.grafana.domain} = {
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:${toString config.services.grafana.port}";
+  services.nginx.virtualHosts."your.domain" = {
+    addSSL = true;
+    enableACME = true;
+    locations."/grafana/" = {
+      proxyPass = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}/";
       proxyWebsockets = true;
     };
   };
