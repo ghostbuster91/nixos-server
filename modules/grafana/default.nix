@@ -14,13 +14,25 @@
       };
     };
   };
+<<<<<<< Updated upstream
 
   services.nginx.virtualHosts."deckard.lan" = {
+||||||| Stash base
+
+  services.nginx.virtualHosts."your.domain" = {
+=======
+  services.nginx.enable = true;
+  services.nginx.virtualHosts."your.domain" = {
+>>>>>>> Stashed changes
     addSSL = true;
     enableACME = true;
     locations."/grafana/" = {
       proxyPass = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}/";
       proxyWebsockets = true;
     };
+  };
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "foo@bar.com";
   };
 }
