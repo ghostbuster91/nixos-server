@@ -16,7 +16,7 @@
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; 
+  boot.loader.grub.device = "/dev/sda";
 
   networking.hostName = "deckard"; # Define your hostname.
   networking.hostId = "69163a45";
@@ -55,7 +55,32 @@
   # services.xserver.enable = true;
 
 
+  nix = {
+    # Automate garbage collection
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 60d";
+    };
 
+    # Flakes settings
+    package = pkgs.nixVersions.stable;
+
+    settings = {
+      # Automate `nix store --optimise`
+      auto-optimise-store = true;
+
+      # Required by Cachix to be used as non-root user
+      trusted-users = [ "root" username ];
+
+      experimental-features = [ "nix-command" "flakes" ];
+      warn-dirty = false;
+
+      # Avoid unwanted garbage collection when using nix-direnv
+      keep-outputs = true;
+      keep-derivations = true;
+    };
+  };
 
   # Configure keymap in X11
   # services.xserver.layout = "us";
@@ -98,7 +123,7 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-  programs.zsh.enable=true;
+  programs.zsh.enable = true;
 
   # List services that you want to enable:
 
