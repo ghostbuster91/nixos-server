@@ -22,6 +22,10 @@
     nix-tree
     ripgrep
     fd # faster find
+    htop
+    btop
+    nethogs
+    bmon
   ];
 
   programs = {
