@@ -10,11 +10,12 @@
         http_port = 3000;
         # Grafana needs to know on which domain and URL it's running
         domain = "deckard.lan";
+        root_url = "https://deckard.lan/grafana/";
       };
     };
   };
 
-  services.nginx.virtualHosts."your.domain" = {
+  services.nginx.virtualHosts."deckard.lan" = {
     addSSL = true;
     enableACME = true;
     locations."/grafana/" = {
