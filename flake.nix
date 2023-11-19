@@ -15,6 +15,11 @@
     let
       username = "kghost";
       system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
     in
     {
       nixosConfigurations.deckard = nixpkgs.lib.nixosSystem {
@@ -35,5 +40,7 @@
         ];
         specialArgs = { inherit username; };
       };
+      formatter.${system} = pkgs.nixpkgs-fmt;
+
     };
 }

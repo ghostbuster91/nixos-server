@@ -1,5 +1,6 @@
 {
   imports = [
     ./grafana
+    ./prometheus
   ];
 }

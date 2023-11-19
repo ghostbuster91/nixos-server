@@ -36,6 +36,21 @@
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFeU4GXH+Ae00DipGGJN7uSqPJxWFmgRo9B+xjV3mK4" ];
     initialHashedPassword = "$y$j9T$aeZHaSe8QKeC0ruAi9TKo.$zooI/IZUwOupVDbMReaukiargPrF93H/wdR/.0zsrr.";
   };
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      80
+      443
+      3000
+      9001 # prometheus
+      9002 # prometheus exporter
+      9093 # alertmanager
+    ];
+    allowedUDPPortRanges = [
+      { from = 4000; to = 4007; }
+      { from = 8000; to = 8010; }
+    ];
+  };
   # Set your time zone.
   # time.timeZone = "Europe/Amsterdam";
 
