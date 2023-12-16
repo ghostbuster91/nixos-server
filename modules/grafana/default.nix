@@ -1,42 +1,70 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }: 
+let 
+  roleName = "grafana";
+  grafana-dashboards = pkgs.stdenv.mkDerivation {
+    name = "grafana-dashboards";
+    src = ./.;
+    installPhase = ''
+      mkdir -p $out/
+      install -D -m755 $src/dashboards/*.json $out/
+    '';
+  };
+in 
+{
   # grafana configuration
+  networking.firewall.allowedTCPPorts = [
+    config.services.grafana.settings.server.http_port
+    80
+    443
+  ];
+
   services.grafana = {
     enable = true;
+
     settings = {
+      analytics.reporting_enabled = false;
+
       server = {
-        # Listening Address
-        # http_addr = "127.0.0.1";
-        http_addr = "0.0.0.0";
-        # and Port
-        http_port = 3000;
-        # Grafana needs to know on which domain and URL it's running
-        # domain = "deckard.lan";
-        # root_url = "http://deckard.lan/";
+        domain = "${roleName}.${config.homelab.domain}";
+        addr = "127.0.0.1";
+
       };
     };
+
+    provision.datasources.settings.datasources = [
+      {
+        name = "Prometheus";
+        type = "prometheus";
+        access = "proxy";
+        url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+      }
+      # {
+      #   name = "Loki";
+      #   type = "loki";
+      #   access = "proxy";
+      #   url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+      # }
+    ];
+
+    provision.dashboards.settings.providers = [{
+      name = "default";
+      options.path = grafana-dashboards;
+    }];
   };
 
   services.nginx.enable = true;
-  services.nginx.virtualHosts."deckard.lan" = {
-    addSSL = false;
-    enableACME = false;
-    locations."/grafana/" = {
-      proxyPass = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}/";
-      proxyWebsockets = true;
+  services.nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
+    # Use wildcard domain
+    # useACMEHost = config.homelab.domain;
+    forceSSL = false;
+
+    locations."/" = {
       extraConfig = ''
+        proxy_pass http://127.0.0.1:${toString config.services.grafana.settings.server.http_port};
         proxy_set_header Host $host;
-      '';
-    };
-    locations."/prometheus/" = {
-      proxyPass = "http://127.0.0.1:${toString config.services.prometheus.port}/";
-      proxyWebsockets = true;
-      extraConfig = ''
-        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;      
       '';
     };
   };
-  # security.acme = {
-  #   acceptTerms = true;
-  #   defaults.email = "foo@bar.com";
-  # };
 }
