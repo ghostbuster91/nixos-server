@@ -2,6 +2,7 @@
   imports = [
     ./grafana
     ./prometheus
+    ./loki
   ];
 
   options = with lib; {

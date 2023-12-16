@@ -35,7 +35,7 @@ in {
     # Use wildcard domain
     # useACMEHost = config.homelab.domain;
     forceSSL = false;
-
+    serverName = "prometheus.deckard.lan";
     locations."/" = {
       extraConfig = ''
         proxy_pass http://127.0.0.1:${toString cfg.port};
