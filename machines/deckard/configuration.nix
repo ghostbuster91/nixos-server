@@ -27,6 +27,8 @@
   services.openssh.settings.PermitRootLogin = "no";
   services.openssh.settings.PasswordAuthentication = false;
 
+  security.sudo.wheelNeedsPassword = false;
+
   users.users.${username} = {
     name = username;
     home = "/home/${username}";
