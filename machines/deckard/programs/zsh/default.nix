@@ -15,7 +15,9 @@ in
   programs.zsh = {
     enable = true;
     enableAutosuggestions = true;
-    enableSyntaxHighlighting = true;
+    syntaxHighlighting = {
+      enable = true;
+    };
     enableVteIntegration = true;
     defaultKeymap = "emacs";
     plugins = [
@@ -87,7 +89,7 @@ in
     '';
     history = { extended = true; };
     shellAliases = {
-      lsd = "${pkgs.exa}/bin/exa --long --header --git --all";
+      lsd = "${lib.getExe pkgs.eza} --long --header --git --all";
     };
   };
 }
