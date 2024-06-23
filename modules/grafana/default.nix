@@ -1,5 +1,5 @@
-{ config, pkgs, ... }: 
-let 
+{ config, pkgs, ... }:
+let
   roleName = "grafana";
   grafana-dashboards = pkgs.stdenv.mkDerivation {
     name = "grafana-dashboards";
@@ -9,7 +9,7 @@ let
       install -D -m755 $src/dashboards/*.json $out/
     '';
   };
-in 
+in
 {
   # grafana configuration
   networking.firewall.allowedTCPPorts = [
@@ -17,55 +17,55 @@ in
     80
     443
   ];
+  services = {
+    grafana = {
+      enable = true;
 
-  services.grafana = {
-    enable = true;
+      settings = {
+        analytics.reporting_enabled = false;
 
-    settings = {
-      analytics.reporting_enabled = false;
-
-      server = {
-        domain = "${roleName}.${config.homelab.domain}";
-        addr = "127.0.0.1";
-
+        server = {
+          domain = "${roleName}.${config.homelab.domain}";
+          addr = "127.0.0.1";
+        };
       };
+
+      provision.datasources.settings.datasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+        }
+        {
+          name = "Loki";
+          type = "loki";
+          access = "proxy";
+          url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+        }
+      ];
+
+      provision.dashboards.settings.providers = [{
+        name = "default";
+        options.path = grafana-dashboards;
+      }];
     };
 
-    provision.datasources.settings.datasources = [
-      {
-        name = "Prometheus";
-        type = "prometheus";
-        access = "proxy";
-        url = "http://127.0.0.1:${toString config.services.prometheus.port}";
-      }
-      {
-        name = "Loki";
-        type = "loki";
-        access = "proxy";
-        url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
-      }
-    ];
+    nginx.enable = true;
+    nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
+      # Use wildcard domain
+      # useACMEHost = config.homelab.domain;
+      serverName = "grafana.deckard.lan";
+      forceSSL = false;
 
-    provision.dashboards.settings.providers = [{
-      name = "default";
-      options.path = grafana-dashboards;
-    }];
-  };
-
-  services.nginx.enable = true;
-  services.nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
-    # Use wildcard domain
-    # useACMEHost = config.homelab.domain;
-    serverName = "grafana.deckard.lan";
-    forceSSL = false;
-
-    locations."/" = {
-      extraConfig = ''
-        proxy_pass http://127.0.0.1:${toString config.services.grafana.settings.server.http_port};
-        proxy_set_header Host $host;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;      
-      '';
+      locations."/" = {
+        extraConfig = ''
+          proxy_pass http://127.0.0.1:${toString config.services.grafana.settings.server.http_port};
+          proxy_set_header Host $host;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection $connection_upgrade;      
+        '';
+      };
     };
   };
 }
