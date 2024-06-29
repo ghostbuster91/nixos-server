@@ -8,12 +8,23 @@ in
     port_loki
   ];
 
+
+    # remedy for no usable address found on interface..
+  systemd.services.loki = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
   services.loki = {
     enable = true;
     configuration = {
       server.http_listen_port = port_loki;
       auth_enabled = false;
 
+      common = {
+        instance_interface_names = [
+          "enp3s0"
+        ];
+      };
       ingester = {
         lifecycler = {
           address = "127.0.0.1";
