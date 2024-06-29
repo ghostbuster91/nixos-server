@@ -1,8 +1,9 @@
 { config, pkgs, ... }:
-let 
+let
   roleName = "prometheus";
   cfg = config.services.prometheus;
-in {
+in
+{
   services.prometheus = {
     enable = true;
     port = 9001;
@@ -44,5 +45,5 @@ in {
         proxy_set_header Connection $connection_upgrade;      
       '';
     };
-};
+  };
 }
