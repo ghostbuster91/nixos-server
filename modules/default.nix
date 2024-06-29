@@ -4,6 +4,7 @@
     ./prometheus
     ./loki
     ./esphome
+    ./avahi
   ];
 
   options = with lib; {
