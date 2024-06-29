@@ -9,7 +9,7 @@ in
   ];
 
 
-    # remedy for no usable address found on interface..
+  # remedy for no usable address found on interface..
   systemd.services.loki = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
@@ -96,7 +96,7 @@ in
   services.nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
     # Use wildcard domain
     # useACMEHost = config.homelab.domain;
-    serverName = "loki.deckard.lan";
+    serverName = "${roleName}.${config.homelab.domain}";
     forceSSL = false;
 
     locations."/" = {

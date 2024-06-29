@@ -55,7 +55,7 @@ in
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;
-      serverName = "grafana.deckard.lan";
+      serverName = "${roleName}.${config.homelab.domain}";
       forceSSL = false;
 
       locations."/" = {

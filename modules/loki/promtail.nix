@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  roleName = "loki";
+  roleName = "promtail";
   port_promtail = 3031;
 in
 {
@@ -14,7 +14,7 @@ in
     configuration = {
       server = {
         # http_listen_port = port_promtail;
-        disable=true;
+        disable = true;
       };
       # positions = {
       #   filename = "/var/log/positions.yaml";
@@ -40,10 +40,10 @@ in
   };
 
   services.nginx.enable = true;
-  services.nginx.virtualHosts."promtail.${config.homelab.domain}" = {
+  services.nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
     # Use wildcard domain
     # useACMEHost = config.homelab.domain;
-    serverName= "promtail.deckard.lan";
+    serverName = "${roleName}.${config.homelab.domain}";
     forceSSL = false;
 
     locations."/" = {

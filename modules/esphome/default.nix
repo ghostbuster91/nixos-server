@@ -32,7 +32,9 @@ in
       virtualHosts."${roleName}.${config.homelab.domain}" = {
         # Use wildcard domain
         # useACMEHost = config.homelab.domain;
-        # serverName = "esphome.deckard.lan";
+        serverName = "${roleName}.${config.homelab.domain}";
+        # sslCertificate = "/var/lib/acme/terenver.uk/full.pem";
+        # sslCertificateKey = "/var/lib/acme/terenver.uk/key.pem";
         forceSSL = false;
 
         locations."/" = {
