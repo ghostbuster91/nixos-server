@@ -5,6 +5,7 @@
     ./loki
     ./esphome
     ./avahi
+    ./ha
   ];
 
   options = with lib; {
