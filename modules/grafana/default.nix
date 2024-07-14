@@ -13,7 +13,7 @@ in
 {
   # grafana configuration
   networking.firewall.allowedTCPPorts = [
-    config.services.grafana.settings.server.http_port
+    # config.services.grafana.settings.server.http_port
     80
     443
   ];
@@ -59,12 +59,9 @@ in
       forceSSL = false;
 
       locations."/" = {
-        extraConfig = ''
-          proxy_pass http://127.0.0.1:${toString config.services.grafana.settings.server.http_port};
-          proxy_set_header Host $host;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection $connection_upgrade;      
-        '';
+        proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";
+        proxyWebsockets = true;
+        recommendedProxySettings = true;
       };
     };
   };
