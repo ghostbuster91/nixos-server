@@ -77,7 +77,7 @@ with lib; {
 
 
     services.mdns-publisher = {
-      names = [ "grafana.local" "esphome.local" ];
+      names = [ "grafana.local" "esphome.local" "esphome-firmware.local" ];
     };
 
     networking.firewall = {

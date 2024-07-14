@@ -23,6 +23,12 @@ in
   systemd.services.nginx.serviceConfig.ProtectHome = false;
   services = {
     nginx = {
+      commonHttpConfig = ''
+        # needed for github proxy
+        large_client_header_buffers 4 16k;
+        client_body_buffer_size 128k;
+      '';
+      resolver.addresses = [ "8.8.8.8" ];
       upstreams."esphome" = {
         servers."unix:/run/esphome/esphome.sock" = { };
         extraConfig = ''
@@ -46,6 +52,21 @@ in
             proxy_set_header    Host                $host;
             proxy_set_header    X-Forwarded-Host    $host;
             proxy_set_header    X-Forwarded-Port    $server_port;
+          '';
+        };
+      };
+      virtualHosts."${roleName}-firmware.${config.homelab.domain}" = {
+        serverName = "${roleName}-firmware.${config.homelab.domain}";
+        forceSSL = false;
+
+        locations."/" = {
+          proxyPass = "https://github.com";
+          extraConfig = ''
+            proxy_buffers 8 16k;
+            proxy_buffer_size 16k;
+            proxy_busy_buffers_size 24k;
+
+            proxy_redirect https://github.com http://esphome-firmware.local;
           '';
         };
       };
