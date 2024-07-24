@@ -1,9 +1,14 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   roleName = "prometheus";
   cfg = config.services.prometheus;
 in
 {
+  # options = with lib; {
+  #   homelab.domain = mkOption {
+  #     type = types.str;
+  #   };
+  # };
   services = {
     prometheus = {
       enable = true;

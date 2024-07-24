@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ config, ... }:
 let
   roleName = "loki";
   port_loki = 8084;

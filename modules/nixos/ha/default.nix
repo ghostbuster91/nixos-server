@@ -1,8 +1,14 @@
-{ config, pkgs-unstable, ... }:
+{ config, ... }:
 let
   roleName = "ha";
 in
 {
+
+  # options = with lib; {
+  #   homelab.domain = mkOption {
+  #     type = types.str;
+  #   };
+  # };
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1w"
   ];

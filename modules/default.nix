@@ -1,20 +1,6 @@
-{ lib, ... }: {
+_: {
   imports = [
-    ./grafana
-    ./prometheus
-    ./loki
-    ./esphome
-    ./avahi
-    ./ha
+    ./nixos
+    ./hm
   ];
-
-  options = with lib; {
-    homelab.domain = mkOption {
-      type = types.str;
-    };
-  };
-
-  config = {
-    homelab.domain = "local";
-  };
 }

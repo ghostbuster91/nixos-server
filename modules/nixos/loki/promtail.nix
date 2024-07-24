@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ config, ... }:
 let
   roleName = "promtail";
   port_promtail = 3031;

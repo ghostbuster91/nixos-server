@@ -11,12 +11,17 @@ let
   };
 in
 {
+  # options = with lib; {
+  #   homelab.domain = mkOption {
+  #     type = types.str;
+  #   };
+  # };
   # grafana configuration
-  networking.firewall.allowedTCPPorts = [
-    # config.services.grafana.settings.server.http_port
-    80
-    443
-  ];
+  # networking.firewall.allowedTCPPorts = [
+  #   # config.services.grafana.settings.server.http_port
+  #   80
+  #   443
+  # ];
   services = {
     grafana = {
       enable = true;
