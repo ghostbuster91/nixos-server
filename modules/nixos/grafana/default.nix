@@ -17,11 +17,10 @@ in
   #   };
   # };
   # grafana configuration
-  # networking.firewall.allowedTCPPorts = [
-  #   # config.services.grafana.settings.server.http_port
-  #   80
-  #   443
-  # ];
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = [ "grafana" ];
+    requires = [ "grafana.service" ];
+  };
   services = {
     grafana = {
       enable = true;
@@ -56,7 +55,6 @@ in
       }];
     };
 
-    nginx.enable = true;
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;

@@ -8,6 +8,10 @@ in
   #   port_loki
   # ];
 
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = [ "loki" ];
+    requires = [ "loki.service" ];
+  };
 
   # remedy for no usable address found on interface..
   systemd.services.loki = {
@@ -93,7 +97,6 @@ in
       };
     };
 
-    nginx.enable = true;
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;

@@ -31,6 +31,11 @@
     initialHashedPassword = "$y$j9T$aeZHaSe8QKeC0ruAi9TKo.$zooI/IZUwOupVDbMReaukiargPrF93H/wdR/.0zsrr.";
   };
 
+  services.nginx.enable = true;
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
   # networking.firewall = {
   #   enable = true;
   #   allowedTCPPorts = [
