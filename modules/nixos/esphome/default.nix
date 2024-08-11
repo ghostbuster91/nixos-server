@@ -26,7 +26,7 @@ in
       5353 # mDNS for esphome
     ];
   };
-  systemd.services.nginx.serviceConfig.ProtectHome = false;
+  # systemd.services.nginx.serviceConfig.ProtectHome = false;
   services = {
     nginx = {
       upstreams."esphome" = {
@@ -38,8 +38,8 @@ in
       };
       virtualHosts."${roleName}.${config.homelab.domain}" = {
         serverName = "${roleName}.${config.homelab.domain}";
-        sslCertificate = "/var/nginx-selfsigned.crt";
-        sslCertificateKey = "/var/nginx-selfsigned.key";
+        sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
+        sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
         forceSSL = true;
 
         locations."/" = {

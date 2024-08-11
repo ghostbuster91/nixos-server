@@ -107,6 +107,18 @@
   ];
 
   programs.zsh.enable = true;
+  age.secrets."nginx-selfsigned.cert" = {
+    file = ../../secrets/nginx-selfsigned.cert.age;
+    mode = "440";
+    owner = "nginx";
+    group = "nginx";
+  };
+  age.secrets."nginx-selfsigned.key" = {
+    file = ../../secrets/nginx-selfsigned.key.age;
+    mode = "440";
+    owner = "nginx";
+    group = "nginx";
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

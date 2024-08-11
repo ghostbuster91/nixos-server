@@ -43,8 +43,12 @@ in
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;
-      forceSSL = false;
       serverName = "${roleName}.${config.homelab.domain}";
+
+      sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
+      sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+      forceSSL = true;
+
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString cfg.port}";
         proxyWebsockets = true;

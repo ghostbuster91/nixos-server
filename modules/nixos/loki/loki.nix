@@ -100,7 +100,10 @@ in
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;
       serverName = "${roleName}.${config.homelab.domain}";
-      forceSSL = false;
+
+      sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
+      sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+      forceSSL = true;
 
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString port_loki}";

@@ -1,4 +1,5 @@
 { self
+, inputs
 , ...
 }: {
   perSystem = { pkgs, lib, system, ... }:
@@ -9,5 +10,11 @@
     {
       # Add all the nixos configurations to the checks
       checks = lib.mapAttrs' (name: value: { name = "nixos-toplevel-${name}"; value = value.config.system.build.toplevel; }) sysConfigs;
+
+      devshells.default = {
+        packages = [
+          inputs.agenix.outputs.packages.${system}.agenix
+        ];
+      };
     };
 }

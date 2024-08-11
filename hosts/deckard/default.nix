@@ -21,6 +21,7 @@
         config.homelab.domain = "local";
       }
       inputs.self.nixosModules.meta
+      inputs.agenix.nixosModules.default
     ];
 
   home-manager = {

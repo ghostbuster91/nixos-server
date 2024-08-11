@@ -34,9 +34,11 @@ in
     # Use wildcard domain
     # useACMEHost = config.homelab.domain;
     serverName = "${roleName}.${config.homelab.domain}";
+
+    sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
+    sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
     forceSSL = true;
-    sslCertificate = "/var/nginx-selfsigned.crt";
-    sslCertificateKey = "/var/nginx-selfsigned.key";
+
     extraConfig = ''
       proxy_buffering off;
     '';

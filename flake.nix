@@ -23,6 +23,11 @@
       url = "github:Mic92/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    devshell.url = "github:numtide/devshell";
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -30,8 +35,9 @@
       imports = [
         ./nix/hosts.nix
         ./nix/devshell.nix
-        inputs.treefmt-nix.flakeModule
         ./modules
+        inputs.treefmt-nix.flakeModule
+        inputs.devshell.flakeModule
       ];
       perSystem.treefmt = {
         imports = [ ./treefmt.nix ];
