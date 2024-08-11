@@ -10,25 +10,30 @@ in
     "openssl-1.1.1w"
   ];
 
-  services.home-assistant = {
-    enable = true;
-    extraComponents = [
+  services.home-assistant =
+    let
       # Components required to complete the onboarding
-      "esphome"
-      "met"
-      "radio_browser"
-    ];
-    config = {
-      # Includes dependencies for a basic setup
-      # https://www.home-assistant.io/integrations/default_config/
-      default_config = { };
-      http = {
-        server_host = "::1";
-        trusted_proxies = [ "::1" ];
-        use_x_forwarded_for = true;
+      onboardingRequiredComponents = [
+        "esphome"
+        "met"
+        "radio_browser"
+      ];
+    in
+    {
+      enable = true;
+      extraComponents = onboardingRequiredComponents ++ [ "prometheus" ];
+      config = {
+        # Includes dependencies for a basic setup
+        # https://www.home-assistant.io/integrations/default_config/
+        default_config = { };
+        http = {
+          server_host = "::1";
+          trusted_proxies = [ "::1" ];
+          use_x_forwarded_for = true;
+        };
+        prometheus = { };
       };
     };
-  };
 
   services.nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
     # Use wildcard domain
