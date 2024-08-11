@@ -6,6 +6,7 @@
     esphome = ./esphome;
     avahi = ./avahi;
     ha = ./ha;
+    meta = ./meta.nix;
   };
 
 }

@@ -1,4 +1,4 @@
-{ inputs, username, lib, ... }:
+{ inputs, username, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
@@ -18,17 +18,9 @@
       inputs.home-manager.nixosModule
       inputs.nix-index-database.nixosModules.nix-index
       {
-
-        options = with lib; {
-          homelab.domain = mkOption {
-            type = types.str;
-          };
-        };
-
-        config = {
-          homelab.domain = "local";
-        };
+        config.homelab.domain = "local";
       }
+      inputs.self.nixosModules.meta
     ];
 
   home-manager = {

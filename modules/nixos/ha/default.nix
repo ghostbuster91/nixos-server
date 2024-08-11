@@ -3,14 +3,8 @@ let
   roleName = "ha";
 in
 {
-
-  # options = with lib; {
-  #   homelab.domain = mkOption {
-  #     type = types.str;
-  #   };
-  # };
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "home-assistant" ];
+    serviceConfig.SupplementaryGroups = [ "hass" ];
     requires = [ "home-assistant.service" ];
   };
   nixpkgs.config.permittedInsecurePackages = [
