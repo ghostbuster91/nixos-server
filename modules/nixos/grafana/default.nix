@@ -18,7 +18,6 @@ in
   # };
   # grafana configuration
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "grafana" ];
     requires = [ "grafana.service" ];
   };
   services = {

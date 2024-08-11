@@ -9,7 +9,6 @@ in
   # ];
 
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "loki" ];
     requires = [ "loki.service" ];
   };
 

@@ -10,7 +10,6 @@ in
   #   };
   # };
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "prometheus" ];
     requires = [ "prometheus.service" ];
   };
   services = {

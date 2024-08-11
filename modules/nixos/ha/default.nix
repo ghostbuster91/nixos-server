@@ -4,7 +4,6 @@ let
 in
 {
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "hass" ];
     requires = [ "home-assistant.service" ];
   };
   nixpkgs.config.permittedInsecurePackages = [

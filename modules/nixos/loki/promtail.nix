@@ -9,7 +9,6 @@ in
   #   port_promtail
   # ];
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = [ "promtail" ];
     requires = [ "promtail.service" ];
   };
   services = {
