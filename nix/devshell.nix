@@ -14,6 +14,7 @@
       devshells.default = {
         packages = [
           inputs.agenix.outputs.packages.${system}.agenix
+          pkgs.nix
         ];
       };
     };
