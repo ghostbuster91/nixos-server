@@ -1,8 +1,18 @@
-{ config, pkgs-unstable, ... }:
+{ config, ... }:
 let
   roleName = "ha";
 in
 {
+
+  # options = with lib; {
+  #   homelab.domain = mkOption {
+  #     type = types.str;
+  #   };
+  # };
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = [ "home-assistant" ];
+    requires = [ "home-assistant.service" ];
+  };
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1w"
   ];

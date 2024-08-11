@@ -10,43 +10,31 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-index-database = {
+      url = "github:Mic92/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, disko, nixpkgs-unstable }:
-    let
-      username = "kghost";
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
+      imports = [
+        ./modules
+        ./machines
+        inputs.treefmt-nix.flakeModule
+      ];
+      perSystem.treefmt = {
+        imports = [ ./treefmt.nix ];
       };
-      pkgs-unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-    in
-    {
-      nixosConfigurations.deckard = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          ./machines/deckard/configuration.nix
-          ./modules
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useUserPackages = true;
-              useGlobalPkgs = true;
-              users.${username} = ./machines/deckard/home.nix;
-              extraSpecialArgs = { inherit username; };
-            };
-          }
-          disko.nixosModules.disko
-        ];
-        specialArgs = {
-          inherit username; inherit pkgs-unstable;
-        };
-      };
-      formatter.${ system} = pkgs.nixpkgs-fmt;
-
     };
 }
+

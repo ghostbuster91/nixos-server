@@ -1,9 +1,9 @@
-{ pkgs, config, inputs, lib, username, ... }: {
+{ pkgs, username, ... }: {
 
   home = {
     inherit username;
     homeDirectory = "/home/${username}";
-    stateVersion = "22.05";
+    stateVersion = "24.05";
   };
 
   # Let Home Manager install and manage itself.
@@ -12,25 +12,14 @@
     EDITOR = "nvim";
   };
 
-  imports = [
-    ./programs/nvim
-    ./programs/git
-    ./programs/zsh
-  ];
-
   home.packages = with pkgs; [
     nix-tree
     ripgrep
     fd # faster find
-    htop
-    btop
-    nethogs
-    bmon
-    lsof
   ];
 
   programs = {
-    eza = {
+    exa = {
       enable = true;
     };
     fzf = {
@@ -50,6 +39,12 @@
     };
     ssh = {
       enable = true;
+      extraConfig = ''
+        Host rpi5
+          IdentitiesOnly yes
+          IdentityFile /home/kghost/.ssh/nixremote
+          User nixremote
+      '';
     };
   };
 }

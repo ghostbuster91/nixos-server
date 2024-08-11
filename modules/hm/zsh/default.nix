@@ -1,4 +1,4 @@
-{ pkgs, config, lib, ... }:
+{ pkgs, lib, ... }:
 let
   omz = pkgs.fetchFromGitHub
     {
@@ -14,10 +14,8 @@ in
   };
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting = {
-      enable = true;
-    };
+    enableAutosuggestions = true;
+    enableSyntaxHighlighting = true;
     enableVteIntegration = true;
     defaultKeymap = "emacs";
     plugins = [
@@ -89,7 +87,7 @@ in
     '';
     history = { extended = true; };
     shellAliases = {
-      lsd = "${lib.getExe pkgs.eza} --long --header --git --all";
+      lsd = "${pkgs.eza}/bin/exa --long --header --git --all";
     };
   };
 }

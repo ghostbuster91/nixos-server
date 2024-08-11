@@ -1,9 +1,18 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   roleName = "prometheus";
   cfg = config.services.prometheus;
 in
 {
+  # options = with lib; {
+  #   homelab.domain = mkOption {
+  #     type = types.str;
+  #   };
+  # };
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = [ "prometheus" ];
+    requires = [ "prometheus.service" ];
+  };
   services = {
     prometheus = {
       enable = true;
@@ -32,7 +41,6 @@ in
       ];
     };
 
-    nginx.enable = true;
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;

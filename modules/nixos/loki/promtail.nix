@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ config, ... }:
 let
   roleName = "promtail";
   port_promtail = 3031;
@@ -8,6 +8,10 @@ in
   # networking.firewall.allowedTCPPorts = [
   #   port_promtail
   # ];
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = [ "promtail" ];
+    requires = [ "promtail.service" ];
+  };
   services = {
     promtail = {
       enable = true;
@@ -39,7 +43,6 @@ in
       };
     };
 
-    nginx.enable = true;
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
       # Use wildcard domain
       # useACMEHost = config.homelab.domain;
