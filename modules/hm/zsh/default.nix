@@ -14,8 +14,8 @@ in
   };
   programs.zsh = {
     enable = true;
-    enableAutosuggestions = true;
-    enableSyntaxHighlighting = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
     enableVteIntegration = true;
     defaultKeymap = "emacs";
     plugins = [

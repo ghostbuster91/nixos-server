@@ -19,7 +19,7 @@
   ];
 
   programs = {
-    exa = {
+    eza = {
       enable = true;
     };
     fzf = {
