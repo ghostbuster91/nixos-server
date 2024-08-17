@@ -41,45 +41,42 @@
       };
     };
     zpool = {
-      rpool1 = {
-        type = "zpool";
+      rpool1 =
+        let
+          unmountable = { type = "zfs_fs"; };
+          filesystem = mountpoint: {
+            type = "zfs_fs";
+            options = {
+              mountpoint = "legacy";
+            };
+          };
+        in
+        {
+          type = "zpool";
 
-        rootFsOptions = {
-          compression = "lz4";
-          "com.sun:auto-snapshot" = "false";
-          canmount = "off";
-          xattr = "sa";
-          atime = "off";
-        };
-        options = {
-          ashift = "12";
-          autotrim = "on";
-        };
-        datasets = {
-          zroot = {
-            type = "zfs_fs";
-            mountpoint = "/";
-            postCreateHook = "zfs snapshot rpool1/zroot@blank";
-            options = {
-              mountpoint = "legacy";
-            };
+          rootFsOptions = {
+            compression = "lz4";
+            "com.sun:auto-snapshot" = "false";
+            canmount = "off";
+            xattr = "sa";
+            atime = "off";
           };
-          znix = {
-            type = "zfs_fs";
-            mountpoint = "/nix";
-            options = {
-              mountpoint = "legacy";
-            };
+          options = {
+            ashift = "12";
+            autotrim = "on";
           };
-          zvar = {
-            type = "zfs_fs";
-            mountpoint = "/var";
-            options = {
-              mountpoint = "legacy";
+          datasets = {
+            "local" = unmountable;
+            "local/root" = filesystem "/" // {
+              postCreateHook = "zfs snapshot rpool1/zroot@blank";
             };
+            "local/nix" = filesystem "/nix";
+            "local/state" = filesystem "/state";
+
+            "safe" = unmountable;
+            "safe/persist" = filesystem "/persist";
           };
         };
-      };
     };
   };
 }
