@@ -1,4 +1,4 @@
-{ disks, ... }: {
+{ disks ? [ "/dev/sda" ], ... }: {
   disko.devices = {
     disk = {
       sda = {
@@ -49,6 +49,7 @@
             options = {
               mountpoint = "legacy";
             };
+            inherit mountpoint;
           };
         in
         {
@@ -68,7 +69,7 @@
           datasets = {
             "local" = unmountable;
             "local/root" = filesystem "/" // {
-              postCreateHook = "zfs snapshot rpool1/zroot@blank";
+              postCreateHook = "zfs snapshot rpool1/local/root@blank";
             };
             "local/nix" = filesystem "/nix";
             "local/state" = filesystem "/state";
