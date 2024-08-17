@@ -11,10 +11,20 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # flake-parts
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    flake-root.url = "github:srid/flake-root";
+    devshell.url = "github:numtide/devshell";
+
+    # utilities
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,17 +37,16 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    devshell.url = "github:numtide/devshell";
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
       imports = [
-        ./nix/hosts.nix
-        ./nix/devshell.nix
+        ./nix
         ./modules
         inputs.treefmt-nix.flakeModule
         inputs.devshell.flakeModule
+        inputs.flake-root.flakeModule
       ];
       perSystem.treefmt = {
         imports = [ ./treefmt.nix ];

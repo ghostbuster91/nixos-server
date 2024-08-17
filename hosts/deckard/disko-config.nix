@@ -1,42 +1,34 @@
-{ disks, ... }: {
+{ disks ? [ "/dev/sda" ], ... }: {
   disko.devices = {
     disk = {
       sda = {
         type = "disk";
         device = builtins.elemAt disks 0;
         content = {
-          type = "table";
-          format = "gpt";
-          partitions = [
-            {
-              name = "boot";
-              start = "0";
-              end = "1M";
-              part-type = "primary";
-              flags = [ "bios_grub" ];
-            }
-            {
-              name = "root";
-              # leave space for the grub aka BIOS boot
-              start = "1M";
-              end = "-32G";
-              part-type = "primary";
-              bootable = true;
+          type = "gpt";
+          partitions = {
+            boot = {
+              size = "1M";
+              type = "EF02";
+              priority = 1;
+            };
+            root = {
+              size = "160G";
               content = {
                 type = "zfs";
                 pool = "rpool1";
               };
-            }
-            {
-              name = "swap";
-              start = "-32G";
-              end = "100%";
+              priority = 2;
+            };
+            swap = {
+              size = "100%";
               content = {
                 type = "swap";
                 randomEncryption = false;
               };
-            }
-          ];
+              priority = 3;
+            };
+          };
         };
       };
     };
@@ -49,6 +41,7 @@
             options = {
               mountpoint = "legacy";
             };
+            inherit mountpoint;
           };
         in
         {
@@ -68,7 +61,7 @@
           datasets = {
             "local" = unmountable;
             "local/root" = filesystem "/" // {
-              postCreateHook = "zfs snapshot rpool1/zroot@blank";
+              postCreateHook = "zfs snapshot rpool1/local/root@blank";
             };
             "local/nix" = filesystem "/nix";
             "local/state" = filesystem "/state";

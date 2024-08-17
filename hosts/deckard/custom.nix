@@ -2,7 +2,10 @@
 {
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
+  # Its not necessary to set `boot.loader.grub.device` here, since Disko
+  # will take care of that automatically.
+  boot.loader.grub.efiSupport = true;
+  boot.loader.grub.efiInstallAsRemovable = true;
 
   networking = {
     hostName = "deckard"; # Define your hostname.
