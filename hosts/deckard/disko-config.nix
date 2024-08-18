@@ -7,26 +7,28 @@
         content = {
           type = "gpt";
           partitions = {
-            boot = {
+            grub = {
               size = "1M";
               type = "EF02";
               priority = 1;
             };
+            boot = {
+              size = "512M";
+              content = {
+                type = "filesystem";
+                format = "vfat";
+                mountpoint = "/boot";
+              };
+              priority = 2;
+              hybrid.mbrBootableFlag = true;
+            };
             root = {
-              size = "160G";
+              size = "128G";
               content = {
                 type = "zfs";
                 pool = "rpool1";
               };
-              priority = 2;
-            };
-            swap = {
-              size = "100%";
-              content = {
-                type = "swap";
-                randomEncryption = false;
-              };
-              priority = 3;
+              priority = 4;
             };
           };
         };
@@ -39,7 +41,8 @@
           filesystem = mountpoint: {
             type = "zfs_fs";
             options = {
-              mountpoint = "legacy";
+              canmount = "noauto";
+              inherit mountpoint;
             };
             inherit mountpoint;
           };
@@ -57,6 +60,7 @@
           options = {
             ashift = "12";
             autotrim = "on";
+            compatibility = "grub2";
           };
           datasets = {
             "local" = unmountable;
