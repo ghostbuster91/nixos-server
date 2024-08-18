@@ -3,6 +3,13 @@ let
   roleName = "esphome";
 in
 {
+
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/private/esphome";
+      mode = "0700";
+    }
+  ];
   # options = with lib; {
   #   homelab.domain = mkOption {
   #     type = types.str;

@@ -9,6 +9,10 @@ let
     };
 in
 {
+  home.persistence."/persist".directories = [
+    ".local/share/zsh" # History
+  ];
+
   programs.starship = import ./starship.nix {
     inherit lib;
   };

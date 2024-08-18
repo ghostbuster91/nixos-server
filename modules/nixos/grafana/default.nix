@@ -11,6 +11,14 @@ let
   };
 in
 {
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.grafana.dataDir;
+      user = "grafana";
+      group = "grafana";
+      mode = "0700";
+    }
+  ];
   # options = with lib; {
   #   homelab.domain = mkOption {
   #     type = types.str;
