@@ -9,6 +9,8 @@
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];
       })
+      ./impermanence.nix
+      inputs.impermanence.nixosModules.impermanence
       inputs.self.nixosModules.grafana
       inputs.self.nixosModules.prometheus
       inputs.self.nixosModules.loki

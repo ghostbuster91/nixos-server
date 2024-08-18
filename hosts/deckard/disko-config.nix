@@ -13,63 +13,81 @@
               priority = 1;
             };
             root = {
-              size = "160G";
+              size = "140G";
               content = {
-                type = "zfs";
-                pool = "rpool1";
-              };
-              priority = 2;
-            };
-            swap = {
-              size = "100%";
-              content = {
-                type = "swap";
-                randomEncryption = false;
+                type = "btrfs";
+                extraArgs = [
+                  "-f"
+                  "-L NixOS" # Filesystem label
+                ];
+
+                # Create the initial blank snapshot
+                postCreateHook = ''
+                  mount -o subvol=/ /dev/disk/by-partlabel/disk-sda-root /mnt
+                  btrfs sub snap -r /mnt/@ /mnt/@-blank
+                  umount /mnt
+                '';
+
+                subvolumes =
+                  let
+                    commonOptions = [
+                      "compress=zstd"
+                      "noatime"
+                      "nodiscard" # Prefer periodic TRIM
+                    ];
+                  in
+                  {
+                    # Root subvolume
+                    "/@" = {
+                      mountpoint = "/";
+                      mountOptions = commonOptions;
+                    };
+
+                    # Persistent data
+                    "/@persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = commonOptions ++ [
+                        "nodev"
+                        "nosuid"
+                        "noexec"
+                      ];
+                    };
+
+                    # User home directories
+                    "/@home" = {
+                      mountpoint = "/home";
+                      mountOptions = commonOptions ++ [
+                        "nodev"
+                        "nosuid"
+                      ];
+                    };
+
+                    # Nix data, including the store
+                    "/@nix" = {
+                      mountpoint = "/nix";
+                      mountOptions = commonOptions ++ [
+                        "nodev"
+                        "nosuid"
+                      ];
+                    };
+
+                    # System logs
+                    "/@log" = {
+                      mountpoint = "/var/log";
+                      mountOptions = commonOptions ++ [
+                        "nodev"
+                        "nosuid"
+                        "noexec"
+                      ];
+                    };
+                  };
+
               };
               priority = 3;
             };
           };
         };
       };
-    };
-    zpool = {
-      rpool1 =
-        let
-          unmountable = { type = "zfs_fs"; };
-          filesystem = mountpoint: {
-            type = "zfs_fs";
-            options = {
-              mountpoint = "legacy";
-            };
-            inherit mountpoint;
-          };
-        in
-        {
-          type = "zpool";
-
-          rootFsOptions = {
-            compression = "lz4";
-            "com.sun:auto-snapshot" = "false";
-            canmount = "off";
-            xattr = "sa";
-            atime = "off";
-          };
-          options = {
-            ashift = "12";
-            autotrim = "on";
-          };
-          datasets = {
-            "local" = unmountable;
-            "local/root" = filesystem "/" // {
-              postCreateHook = "zfs snapshot rpool1/local/root@blank";
-            };
-            "local/nix" = filesystem "/nix";
-            "local/state" = filesystem "/state";
-
-            "safe" = unmountable;
-            "safe/persist" = filesystem "/persist";
-          };
-        };
     };
   };
 }
