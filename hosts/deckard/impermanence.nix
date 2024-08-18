@@ -40,22 +40,16 @@ in
 
   # State that should be kept across reboots, but is otherwise
   # NOT important information in any way that needs to be backed up.
-  # fileSystems."/state".neededForBoot = true;
-  # environment.persistence."/state" = {
-  #   hideMounts = true;
-  #   directories =
-  #     [
-  #       "/var/lib/systemd"
-  #       "/var/log"
-  #       "/var/spool"
-  #     ]
-  #     ++ optionals config.networking.wireless.iwd.enable [
-  #       {
-  #         directory = "/var/lib/iwd";
-  #         mode = "0700";
-  #       }
-  #     ];
-  # };
+  fileSystems."/state".neededForBoot = true;
+  environment.persistence."/state" = {
+    hideMounts = true;
+    directories =
+      [
+        "/var/lib/systemd"
+        "/var/log"
+        "/etc/NetworkManager/system-connections"
+      ];
+  };
 
   # State that should be kept forever, and backed up accordingly.
   fileSystems."/persist".neededForBoot = true;
@@ -68,11 +62,7 @@ in
       { file = "/var/keys/secret_file"; parentDirectory = { mode = "u=rwx,g=,o="; }; }
     ];
     directories = [
-      "/var/log"
-      "/var/lib/bluetooth"
       "/var/lib/nixos"
-      "/var/lib/systemd/coredump"
-      "/etc/NetworkManager/system-connections"
       { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
     ];
     # directories =
