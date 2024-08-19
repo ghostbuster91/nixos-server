@@ -43,16 +43,18 @@ in
 
       provision.datasources.settings.datasources = [
         {
+          uuid = "PBFA97CFB590B2093";
           name = "Prometheus";
           type = "prometheus";
           access = "proxy";
-          url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+          url = "http://localhost:${toString config.services.prometheus.port}";
         }
         {
+          uuid = "P8E80F9AEF21F6940";
           name = "Loki";
           type = "loki";
           access = "proxy";
-          url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+          url = "http://localhost:${toString config.services.loki.configuration.server.http_listen_port}";
         }
       ];
 

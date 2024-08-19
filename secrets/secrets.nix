@@ -1,6 +1,6 @@
 let
   kghost = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFeU4GXH+Ae00DipGGJN7uSqPJxWFmgRo9B+xjV3mK4";
-  deckard = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+d9WDqu+Wq5zy+lxASNMMWi2ZzJk8KRssDN+5JwQKp";
+  deckard = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJF6U22I97ZyRPXJmJmlmvgHI7akGC8z/mlUVaCiLaOf";
 in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];

@@ -23,7 +23,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "a8b1ecab-db5d-4145-8f20-6318242cc367"
+        "uid": "PBFA97CFB590B2093"
       },
       "fieldConfig": {
         "defaults": {
@@ -102,18 +102,12 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "a8b1ecab-db5d-4145-8f20-6318242cc367"
+            "uid": "PBFA97CFB590B2093"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "homeassistant_light_brightness_percent{entity=\"light.boneio_dr_8ch_03_4023d4_chl_01_02\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
+          "expr": "",
           "instant": false,
-          "legendFormat": "__auto",
           "range": true,
-          "refId": "A",
-          "useBackend": false
+          "refId": "A"
         }
       ],
       "title": "Panel Title",
