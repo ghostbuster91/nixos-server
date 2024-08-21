@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ lib, config, pkgs, ... }:
 let
   inherit
     (lib)
@@ -36,6 +36,35 @@ in
         });
       };
     }
+  ];
+
+  environment.systemPackages = [
+    (
+      let
+        persistenceConf = config.environment.persistence;
+        directories = map (n: n.directory)
+          (persistenceConf."/persist".directories ++ persistenceConf."/state".directories);
+        files = map (n: n.file)
+          (persistenceConf."/persist".files ++ persistenceConf."/state".files);
+        allFiles = builtins.toJSON (files ++ directories);
+      in
+      pkgs.writeShellApplication {
+        runtimeInputs = [
+          pkgs.jq
+          pkgs.gawk
+          pkgs.zfs
+        ];
+        text = ''
+          newFiles="$(zfs diff rpool1/local/root@blank | grep '+' | awk '{print $2}' | jq -R . | jq -s .)"
+          persistedFiles='${allFiles}'
+          files_in_json_not_in_command="$(jq --argjson a "$newFiles" --argjson b "$persistedFiles" -n '$a - $b')"
+
+          >&2 echo "Not persisted files:"
+          echo "$files_in_json_not_in_command"
+        '';
+        name = "zfs-diff";
+      }
+    )
   ];
 
   # State that should be kept across reboots, but is otherwise
