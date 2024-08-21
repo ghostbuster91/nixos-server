@@ -57,10 +57,10 @@ in
         text = ''
           newFiles="$(zfs diff rpool1/local/root@blank | grep '+' | awk '{print $2}' | jq -R . | jq -s .)"
           persistedFiles='${allFiles}'
-          files_in_json_not_in_command="$(jq --argjson a "$newFiles" --argjson b "$persistedFiles" -n '$a - $b')"
+          notPersistedFiles="$(jq --argjson a "$newFiles" --argjson b "$persistedFiles" -n '$a - $b')"
 
           >&2 echo "Not persisted files:"
-          echo "$files_in_json_not_in_command"
+          echo "$notPersistedFiles"
         '';
         name = "zfs-diff";
       }
