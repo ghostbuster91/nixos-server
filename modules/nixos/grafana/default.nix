@@ -48,6 +48,10 @@ in
           type = "prometheus";
           access = "proxy";
           url = "http://localhost:${toString config.services.prometheus.port}";
+          ## https://github.com/rfmoz/grafana-dashboards/issues/169
+          jsonData = {
+            timeInterval = (builtins.elemAt config.services.prometheus.scrapeConfigs 0).scrape_interval;
+          };
         }
         {
           uuid = "P8E80F9AEF21F6940";

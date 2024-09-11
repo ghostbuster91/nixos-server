@@ -29,25 +29,27 @@ in
           port = 9002;
         };
       };
-      scrapeConfigs = [
+      scrapeConfigs = let scrape_interval = "60s"; in [
         {
           job_name = "deckard";
+          inherit scrape_interval;
           static_configs = [{
-            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
+            targets = [ "127.0.0.1:${ toString config. services. prometheus. exporters. node. port}" ];
           }];
         }
         {
           job_name = "haas";
           metrics_path = "/api/prometheus";
-          scrape_interval = "60s";
+          inherit scrape_interval;
           # Long-Lived Access Token
-          authorization.credentials_file = config.age.secrets."prometheus-hass-token".path;
+          authorization. credentials_file = config.age.secrets."prometheus-hass-token".path;
           static_configs = [{
             targets = [ "localhost:${toString config.services.home-assistant.config.http.server_port}" ];
           }];
         }
         {
           job_name = "surfer";
+          inherit scrape_interval;
           static_configs = [{
             targets = [ "192.168.10.1:${toString config.services.prometheus.exporters.node.port}" ];
           }];
