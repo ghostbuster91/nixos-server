@@ -4,6 +4,14 @@ let
   cfg = config.services.prometheus;
 in
 {
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/${config.services.prometheus.stateDir}";
+      user = "prometheus";
+      group = "prometheus";
+      mode = "0700";
+    }
+  ];
   age.secrets."prometheus-hass-token" = {
     file = ../../../secrets/prometheus-hass-token.age;
     mode = "440";
