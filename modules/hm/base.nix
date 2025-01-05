@@ -16,6 +16,7 @@
     nix-tree
     ripgrep
     fd # faster find
+    htop
   ];
 
   programs = {
