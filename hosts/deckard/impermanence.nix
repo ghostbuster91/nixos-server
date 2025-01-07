@@ -3,7 +3,6 @@ let
   inherit
     (lib)
     mkOption
-    optionals
     types
     ;
 in
