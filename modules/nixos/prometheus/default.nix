@@ -59,7 +59,7 @@ in
           job_name = "surfer";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "192.168.10.1:${toString config.services.prometheus.exporters.node.port}" ];
+            targets = [ "surfer.local:${toString config.services.prometheus.exporters.node.port}" ];
           }];
         }
       ];
