@@ -6,5 +6,6 @@ in
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
   "prometheus-hass-token.age".publicKeys = [ kghost deckard ];
+  "alertmanager.age".publicKeys = [ kghost deckard ];
 }
 

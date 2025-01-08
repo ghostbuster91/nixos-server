@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, lib, ... }:
 let
   roleName = "prometheus";
   cfg = config.services.prometheus;
@@ -18,6 +18,12 @@ in
     owner = "prometheus";
     group = "prometheus";
   };
+  age.secrets."alertmanager" = {
+    file = ../../../secrets/alertmanager.age;
+    mode = "440";
+    owner = "prometheus";
+    group = "prometheus";
+  };
   systemd.services.nginx = {
     requires = [ "prometheus.service" ];
   };
@@ -30,19 +36,95 @@ in
       # This however cannot work if any of these paths refers to age/sops secrets as these files are created during the activation phase.
       checkConfig = "syntax-only";
 
+      # Test alertmanager
+      # curl -H 'Content-Type: application/json' -d '[{"labels":{"alertname":"myalert"}}]' http://127.0.0.1:9093/api/v2/alerts
+      alertmanagers = [
+        {
+          scheme = "http";
+          path_prefix = "/";
+          static_configs = [{ targets = [ "127.0.0.1:${toString config.services.prometheus.alertmanager.port}" ]; }];
+        }
+      ];
+
+      # alertmanager might fail to start if impermanence mounts esphome directory first. In this case disable temporary esphome mount and restart alertmanager
+      alertmanager = {
+        enable = true;
+        logLevel = "debug";
+
+        # Secret content all variables content
+        # example:
+        # alertmanager: |
+        #  var_name1=value1
+        #  var_name2=value2
+        environmentFile = config.age.secrets.alertmanager.path;
+        extraFlags = [
+          "--cluster.listen-address=" # disables HA mode
+        ];
+        configuration = {
+          receivers = [
+            {
+              name = "pushover";
+              pushover_configs = [
+                {
+                  send_resolved = true;
+                  user_key = "$PUSHOVER_USER_KEY";
+                  token = "$PUSHOVER_TOKEN";
+                }
+              ];
+            }
+          ];
+
+          route = {
+            receiver = "pushover";
+            routes = [
+              {
+                group_wait = "30s";
+                group_interval = "2m";
+                repeat_interval = "4h";
+                group_by = [ "alertname" "alias" ];
+                receiver = "pushover";
+              }
+            ];
+          };
+        };
+      };
+
+      ruleFiles = [
+        (pkgs.writeText "prometheus-rules.yml" (
+          builtins.toJSON {
+            groups = [
+              {
+                name = "alerting-rules";
+                rules = import ./alert-rules.nix { inherit lib; };
+              }
+            ];
+          }
+        ))
+      ];
+
       exporters = {
         node = {
           enable = true;
-          enabledCollectors = [ "systemd" ];
           port = 9002;
+        };
+        systemd = {
+          enable = true;
+          port = 9003;
+        };
+        zfs = {
+          enable = true;
+          port = 9004;
         };
       };
       scrapeConfigs = let scrape_interval = "60s"; in [
         {
-          job_name = "deckard";
+          job_name = "node_exporter";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "127.0.0.1:${ toString config. services. prometheus. exporters. node. port}" ];
+            targets = [
+              "127.0.0.1:${toString config.services.prometheus.exporters.node.port}"
+              "surfer.local:${toString config.services.prometheus.exporters.node.port}"
+            ];
           }];
         }
         {
@@ -56,10 +138,17 @@ in
           }];
         }
         {
-          job_name = "surfer";
+          job_name = "zfs";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "surfer.local:${toString config.services.prometheus.exporters.node.port}" ];
+            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.zfs.port}" ];
+          }];
+        }
+        {
+          job_name = "systemd";
+          inherit scrape_interval;
+          static_configs = [{
+            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.systemd.port}" ];
           }];
         }
       ];
