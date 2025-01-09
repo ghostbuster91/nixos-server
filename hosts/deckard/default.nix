@@ -25,6 +25,8 @@
       inputs.self.nixosModules.meta
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.zfs
+      inputs.nix-topology.nixosModules.default
+      ./topology.nix
     ];
 
   home-manager = {

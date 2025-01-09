@@ -40,6 +40,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     deploy-rs.url = "github:serokell/deploy-rs";
+
+    nix-topology = {
+      url = "github:oddlama/nix-topology";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -50,9 +55,13 @@
         inputs.treefmt-nix.flakeModule
         inputs.devshell.flakeModule
         inputs.flake-root.flakeModule
+        inputs.nix-topology.flakeModule
       ];
       perSystem.treefmt = {
         imports = [ ./treefmt.nix ];
+      };
+      perSystem.topology = {
+        modules = [ ./topology.nix ];
       };
     };
 }
