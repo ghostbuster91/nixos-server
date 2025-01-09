@@ -2,7 +2,7 @@
 {
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
+  # boot.loader.grub.device = "/dev/sda";
 
   networking = {
     hostName = "deckard"; # Define your hostname.
@@ -119,6 +119,7 @@
     owner = "nginx";
     group = "nginx";
   };
+
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

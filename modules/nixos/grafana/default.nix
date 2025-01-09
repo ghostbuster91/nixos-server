@@ -11,6 +11,14 @@ let
   };
 in
 {
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.grafana.dataDir;
+      user = "grafana";
+      group = "grafana";
+      mode = "0700";
+    }
+  ];
   # options = with lib; {
   #   homelab.domain = mkOption {
   #     type = types.str;
@@ -35,16 +43,22 @@ in
 
       provision.datasources.settings.datasources = [
         {
+          uuid = "PBFA97CFB590B2093";
           name = "Prometheus";
           type = "prometheus";
           access = "proxy";
-          url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+          url = "http://localhost:${toString config.services.prometheus.port}";
+          ## https://github.com/rfmoz/grafana-dashboards/issues/169
+          jsonData = {
+            timeInterval = (builtins.elemAt config.services.prometheus.scrapeConfigs 0).scrape_interval;
+          };
         }
         {
+          uuid = "P8E80F9AEF21F6940";
           name = "Loki";
           type = "loki";
           access = "proxy";
-          url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+          url = "http://localhost:${toString config.services.loki.configuration.server.http_listen_port}";
         }
       ];
 

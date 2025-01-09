@@ -4,9 +4,14 @@ let
   port_loki = 8084;
 in
 {
-  # networking.firewall.allowedTCPPorts = [
-  #   port_loki
-  # ];
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/loki";
+      user = "loki";
+      group = "loki";
+      mode = "0700";
+    }
+  ];
 
   systemd.services.nginx = {
     requires = [ "loki.service" ];

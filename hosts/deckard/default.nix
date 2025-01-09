@@ -9,6 +9,8 @@
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];
       })
+      ./impermanence.nix
+      inputs.impermanence.nixosModules.impermanence
       inputs.self.nixosModules.grafana
       inputs.self.nixosModules.prometheus
       inputs.self.nixosModules.loki
@@ -22,6 +24,7 @@
       }
       inputs.self.nixosModules.meta
       inputs.agenix.nixosModules.default
+      inputs.self.nixosModules.zfs
     ];
 
   home-manager = {

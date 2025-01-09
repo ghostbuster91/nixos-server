@@ -7,6 +7,7 @@
     avahi = ./avahi;
     ha = ./ha;
     meta = ./meta.nix;
+    zfs = ./zfs.nix;
   };
 
 }

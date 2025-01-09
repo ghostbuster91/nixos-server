@@ -10,6 +10,15 @@ in
     "openssl-1.1.1w"
   ];
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.home-assistant.configDir;
+      user = "hass";
+      group = "hass";
+      mode = "0700";
+    }
+  ];
+
   services.home-assistant =
     let
       # Components required to complete the onboarding
