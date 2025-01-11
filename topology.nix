@@ -2,8 +2,6 @@
 let
   inherit (config.lib.topology)
     mkInternet
-    mkDevice
-    mkSwitch
     mkRouter
     mkConnection
     ;
