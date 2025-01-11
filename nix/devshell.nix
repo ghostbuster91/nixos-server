@@ -16,7 +16,7 @@
         packages = [
           inputs.agenix.outputs.packages.${system}.agenix
           pkgs.nix
-
+          pkgs.deploy-rs
         ];
         commands =
           let
