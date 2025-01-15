@@ -102,16 +102,16 @@ in
         ))
       ];
 
-      
+
       scrapeConfigs = let scrape_interval = "60s"; in [
         {
           job_name = "node_exporter";
           inherit scrape_interval;
           static_configs = [{
             targets = [
-              "deckard.local:${toString config.services.prometheus.exporters.node.port}"
-              "surfer.local:${toString config.services.prometheus.exporters.node.port}"
-              "malina5.local:${toString config.services.prometheus.exporters.node.port}"
+              "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
+              "surfer.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
+              "malina5.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
             ];
           }];
         }
@@ -129,14 +129,14 @@ in
           job_name = "zfs";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.local:${toString config.services.prometheus.exporters.zfs.port}" ];
+            targets = [ "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
           }];
         }
         {
           job_name = "systemd";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.local:${toString config.services.prometheus.exporters.systemd.port}" ];
+            targets = [ "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
           }];
         }
       ];
