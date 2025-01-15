@@ -7,5 +7,10 @@ in
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
   "prometheus-hass-token.age".publicKeys = [ kghost deckard ];
   "alertmanager.age".publicKeys = [ kghost deckard ];
+
+  "zigbee2mqtt-network-key.age".publicKeys = [ kghost deckard ];
+  "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost deckard ];
+  "mosquitto-pw-zigbee2mqtt.age".publicKeys = [ kghost deckard ];
+  "mosquitto-pw-home_assistant.age".publicKeys = [ kghost deckard ];
 }
 

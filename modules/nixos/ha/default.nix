@@ -3,13 +3,6 @@ let
   roleName = "ha";
 in
 {
-  systemd.services.nginx = {
-    requires = [ "home-assistant.service" ];
-  };
-  nixpkgs.config.permittedInsecurePackages = [
-    "openssl-1.1.1w"
-  ];
-
   environment.persistence."/persist".directories = [
     {
       directory = config.services.home-assistant.configDir;
@@ -18,7 +11,13 @@ in
       mode = "0700";
     }
   ];
-
+  systemd.services.nginx = {
+    requires = [ "home-assistant.service" ];
+  };
+  nixpkgs.config.permittedInsecurePackages = [
+    "openssl-1.1.1w"
+  ];
+  topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.domain}";
   services.home-assistant =
     let
       # Components required to complete the onboarding
@@ -30,7 +29,7 @@ in
     in
     {
       enable = true;
-      extraComponents = onboardingRequiredComponents ++ [ "prometheus" ];
+      extraComponents = onboardingRequiredComponents ++ [ "prometheus" "mqtt" ];
       config = {
         # Includes dependencies for a basic setup
         # https://www.home-assistant.io/integrations/default_config/

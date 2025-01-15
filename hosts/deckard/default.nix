@@ -30,6 +30,8 @@
       inputs.self.nixosModules.zfs
       inputs.nix-topology.nixosModules.default
       ./topology.nix
+      inputs.self.nixosModules.zigbee2mqtt
+      inputs.self.nixosModules.mosquitto
     ];
 
   home-manager = {
