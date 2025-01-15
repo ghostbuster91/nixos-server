@@ -106,14 +106,17 @@ in
         node = {
           enable = true;
           port = 9002;
+          openFirewall = true;
         };
         systemd = {
           enable = true;
           port = 9003;
+          openFirewall = true;
         };
         zfs = {
           enable = true;
           port = 9004;
+          openFirewall = true;
         };
       };
       scrapeConfigs = let scrape_interval = "60s"; in [
@@ -122,8 +125,9 @@ in
           inherit scrape_interval;
           static_configs = [{
             targets = [
-              "127.0.0.1:${toString config.services.prometheus.exporters.node.port}"
+              "deckard.local:${toString config.services.prometheus.exporters.node.port}"
               "surfer.local:${toString config.services.prometheus.exporters.node.port}"
+              "malina5.local:${toString config.services.prometheus.exporters.node.port}"
             ];
           }];
         }
@@ -141,14 +145,14 @@ in
           job_name = "zfs";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.zfs.port}" ];
+            targets = [ "deckard.local:${toString config.services.prometheus.exporters.zfs.port}" ];
           }];
         }
         {
           job_name = "systemd";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.systemd.port}" ];
+            targets = [ "deckard.local:${toString config.services.prometheus.exporters.systemd.port}" ];
           }];
         }
       ];
