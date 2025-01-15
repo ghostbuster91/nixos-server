@@ -26,6 +26,14 @@
   #   zfs.poolMetrics = true;
   # };
 
+  services.prometheus.exporters = {
+    zfs = {
+      enable = true;
+      port = 9004;
+      openFirewall = true;
+    };
+  };
+
   boot.initrd.postDeviceCommands = lib.mkAfter ''
     zfs rollback -r rpool1/local/root@blank
   '';

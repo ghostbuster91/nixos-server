@@ -12,8 +12,10 @@
       ./impermanence.nix
       inputs.impermanence.nixosModules.impermanence
       inputs.self.nixosModules.grafana
-      inputs.self.nixosModules.prometheus
-      inputs.self.nixosModules.loki
+      inputs.self.nixosModules.prometheus-server
+      inputs.self.nixosModules.prometheus-client
+      inputs.self.nixosModules.logs-loki
+      inputs.self.nixosModules.logs-promtail
       inputs.self.nixosModules.esphome
       inputs.self.nixosModules.avahi
       inputs.self.nixosModules.ha
@@ -21,6 +23,7 @@
       inputs.nix-index-database.nixosModules.nix-index
       {
         config.homelab.domain = "local";
+        config.homelab.hostname = "deckard";
       }
       inputs.self.nixosModules.meta
       inputs.agenix.nixosModules.default

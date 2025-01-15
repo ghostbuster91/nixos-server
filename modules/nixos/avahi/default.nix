@@ -48,9 +48,6 @@ let
     { inherit (pkgs.python3Packages) buildPythonPackage fetchPypi dbus-python; };
 in
 with lib; {
-  options.homelab.domain = mkOption {
-    type = types.str;
-  };
   options.services.mdns-publisher = {
     names = mkOption {
       type = with types; listOf str;

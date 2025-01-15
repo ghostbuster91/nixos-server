@@ -102,23 +102,7 @@ in
         ))
       ];
 
-      exporters = {
-        node = {
-          enable = true;
-          port = 9002;
-          openFirewall = true;
-        };
-        systemd = {
-          enable = true;
-          port = 9003;
-          openFirewall = true;
-        };
-        zfs = {
-          enable = true;
-          port = 9004;
-          openFirewall = true;
-        };
-      };
+      
       scrapeConfigs = let scrape_interval = "60s"; in [
         {
           job_name = "node_exporter";
