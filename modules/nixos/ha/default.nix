@@ -29,7 +29,7 @@ in
     in
     {
       enable = true;
-      extraComponents = onboardingRequiredComponents ++ [ "prometheus" "mqtt" ];
+      extraComponents = onboardingRequiredComponents ++ [ "prometheus" "mqtt" "cast" ];
       config = {
         # Includes dependencies for a basic setup
         # https://www.home-assistant.io/integrations/default_config/
@@ -40,6 +40,7 @@ in
           use_x_forwarded_for = true;
         };
         prometheus = { };
+        mqtt = { };
       };
     };
 

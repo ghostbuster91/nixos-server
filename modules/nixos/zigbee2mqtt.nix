@@ -16,6 +16,14 @@ in
     mode = "440";
     owner = "zigbee2mqtt";
   };
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.zigbee2mqtt.dataDir;
+      user = "zigbee2mqtt";
+      group = "zigbee2mqtt";
+      mode = "0700";
+    }
+  ];
 
   topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
   services.zigbee2mqtt = {
@@ -39,7 +47,7 @@ in
       homeassistant = true;
       permit_join = true;
       serial = {
-        port = "mdns://slzb-06p10";
+        port = "tcp://192.168.1.30:6638";
       };
       mqtt = {
         base_topic = "zigbee2mqtt";
@@ -49,7 +57,10 @@ in
       };
       # TODO once 1.30.3 is out
       # frontend.host = "/run/zigbee2mqtt/zigbee2mqtt.sock";
-      frontend.port = 8072;
+      frontend = {
+        enabled = true;
+        port = 8072;
+      };
     };
   };
 

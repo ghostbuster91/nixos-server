@@ -77,7 +77,7 @@ with lib; {
 
 
     services.mdns-publisher = {
-      names = [ "grafana.local" "esphome.local" "prometheus.local" "loki.local" "promtail.local" "ha.local" ];
+      names = [ "grafana.local" "esphome.local" "prometheus.local" "loki.local" "promtail.local" "ha.local" "zigbee.local" ];
     };
 
     networking.firewall = {

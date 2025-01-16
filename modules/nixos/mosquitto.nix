@@ -13,6 +13,10 @@
     group = "mosquitto";
   };
 
+  networking.firewall.allowedTCPPorts = [
+    1883
+  ];
+
   services.mosquitto = {
     enable = true;
     persistence = true;
