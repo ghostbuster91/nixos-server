@@ -48,6 +48,8 @@ in
       permit_join = true;
       serial = {
         port = "tcp://192.168.1.30:6638";
+        # mdns doesn't work due to some hardening that happens in the serivce definition
+        # port = "mdns://SLZB-06";
       };
       mqtt = {
         base_topic = "zigbee2mqtt";
