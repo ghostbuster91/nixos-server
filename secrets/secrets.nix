@@ -12,5 +12,6 @@ in
   "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost deckard ];
   "mosquitto-pw-zigbee2mqtt.age".publicKeys = [ kghost deckard ];
   "mosquitto-pw-home_assistant.age".publicKeys = [ kghost deckard ];
+  "mosquitto-ampio-bridge-pw.age".publicKeys = [ kghost deckard ];
 }
 

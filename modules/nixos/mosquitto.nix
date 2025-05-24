@@ -36,5 +36,15 @@
         settings.allow_anonymous = false;
       }
     ];
+    bridges = {
+      ampio = {
+        addresses = [{ port = 1883; address = "ampio.local"; }];
+        topics = [ "ampio/from/# in 0" ];
+        settings = {
+          remote_username = "admin";
+
+        };
+      };
+    };
   };
 }

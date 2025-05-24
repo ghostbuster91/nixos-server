@@ -110,7 +110,8 @@ in
           static_configs = [{
             targets = [
               "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
-              "surfer.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
+              # TODO: why mDNS is not resolved anymore?
+              "192.168.1.47:${toString config.services.prometheus.exporters.node.port}"
               "malina5.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
             ];
           }];
