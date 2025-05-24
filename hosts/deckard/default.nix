@@ -32,6 +32,7 @@
       ./topology.nix
       inputs.self.nixosModules.zigbee2mqtt
       inputs.self.nixosModules.mosquitto
+      inputs.self.nixosModules.voip
     ];
 
   home-manager = {

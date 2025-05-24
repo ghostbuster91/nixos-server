@@ -12,6 +12,7 @@
     zfs = ./zfs.nix;
     zigbee2mqtt = ./zigbee2mqtt.nix;
     mosquitto = ./mosquitto.nix;
+    voip = ./voip;
   };
 
 }
