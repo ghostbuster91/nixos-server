@@ -19,7 +19,7 @@
       inputs.self.nixosModules.esphome
       inputs.self.nixosModules.avahi
       inputs.self.nixosModules.ha
-      inputs.home-manager.nixosModule
+      inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
       {
         config.homelab.domain = "local";
@@ -43,6 +43,7 @@
         inputs.self.homeModules.nvim
         inputs.self.homeModules.zsh
         inputs.self.homeModules.git
+        inputs.impermanence.homeManagerModules.impermanence
       ];
     };
     extraSpecialArgs = { inherit username; };

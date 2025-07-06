@@ -43,6 +43,8 @@
         settings = {
           remote_username = "admin";
 
+          # TODO: fix me!
+          remote_password = "blaghtway4";
         };
       };
     };
