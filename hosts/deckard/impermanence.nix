@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ config, pkgs, ... }:
 {
   # Give agenix access to the hostkey independent of impermanence activation
   age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
