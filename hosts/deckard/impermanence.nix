@@ -1,35 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 {
   # Give agenix access to the hostkey independent of impermanence activation
   age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
 
-  # Expose a home manager module for each user that allows extending
-  # environment.persistence.${sourceDir}.users.${userName} simply by
-  # specifying home.persistence.${sourceDir} in home manager.
-  # home-manager.sharedModules = [
-  #   {
-  #     options.home.persistence = mkOption {
-  #       description = "Additional persistence config for the given source path";
-  #       default = { };
-  #       type = types.attrsOf (types.submodule {
-  #         options = {
-  #           files = mkOption {
-  #             description = "Additional files to persist via NixOS impermanence.";
-  #             type = types.listOf (types.either types.attrs types.str);
-  #             default = [ ];
-  #           };
-  #
-  #           directories = mkOption {
-  #             description = "Additional directories to persist via NixOS impermanence.";
-  #             type = types.listOf (types.either types.attrs types.str);
-  #             default = [ ];
-  #           };
-  #         };
-  #       });
-  #     };
-  #   }
-  # ];
-  #
+
   environment.systemPackages = [
     (
       let
@@ -86,31 +60,12 @@
       "/var/lib/nixos"
       { directory = "/var/lib/colord"; user = "colord"; group = "colord"; mode = "u=rwx,g=rx,o="; }
     ];
-    # directories =
-    #   [
-    #     "/var/lib/nixos"
-    #   ]
-    #   ++ optionals config.security.acme.acceptTerms [
-    #     {
-    #       directory = "/var/lib/acme";
-    #       user = "acme";
-    #       group = "acme";
-    #       mode = "0755";
-    #     }
-    #   ]
-    #   ++ optionals config.services.printing.enable [
-    #     {
-    #       directory = "/var/lib/cups";
-    #       mode = "0700";
-    #     }
-    #   ]
-    #   ++ optionals config.services.postgresql.enable [
-    #     {
-    #       directory = "/var/lib/postgresql";
-    #       user = "postgres";
-    #       group = "postgres";
-    #       mode = "0700";
-    #     }
-    #   ];
+    # This should be specified in zsh module but the zsh module is hm-based
+    # workaround for: https://github.com/nix-community/impermanence/issues/184
+    users.${username} = {
+      directories = [
+        ".local/share/zsh_history"
+      ];
+    };
   };
 }

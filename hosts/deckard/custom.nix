@@ -107,6 +107,7 @@
   ];
 
   programs.zsh.enable = true;
+  programs.zsh.histFile = "$HOME/.local/share/zsh_history";
   age.secrets."nginx-selfsigned.cert" = {
     file = ../../secrets/nginx-selfsigned.cert.age;
     mode = "440";
