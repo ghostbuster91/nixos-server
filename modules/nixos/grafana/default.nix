@@ -69,12 +69,25 @@ in
     };
 
     nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
-      # Use wildcard domain
-      # useACMEHost = config.homelab.domain;
-      serverName = "${roleName}.${config.homelab.domain}";
+      # serverName = "${roleName}.${config.homelab.domain}";
       sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
       sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
       forceSSL = true;
+
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";
+        proxyWebsockets = true;
+        recommendedProxySettings = true;
+      };
+    };
+    nginx.virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
+      # Use wildcard domain
+      useACMEHost = config.homelab.ext-domain;
+      # serverName = "${roleName}.${config.homelab.ext-domain}";
+      # sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
+      # sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+      forceSSL = true;
+      # serverAliases = [ "${roleName}.${config.homelab.ext-domain}" ];
 
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";

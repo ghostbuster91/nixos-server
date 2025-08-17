@@ -1,4 +1,4 @@
-{ inputs, username, ... }:
+{ inputs, username, config, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
@@ -19,6 +19,7 @@
       inputs.self.nixosModules.esphome
       inputs.self.nixosModules.avahi
       inputs.self.nixosModules.ha
+      inputs.self.nixosModules.proxy
       inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
       {

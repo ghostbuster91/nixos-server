@@ -7,8 +7,6 @@
   networking = {
     hostName = "deckard"; # Define your hostname.
     hostId = "69163a45";
-    # Pick only one of the below networking options.
-    # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
     networkmanager.enable = true;
     firewall.allowedTCPPorts = [
       80
@@ -22,8 +20,6 @@
       settings.PermitRootLogin = "no";
       settings.PasswordAuthentication = false;
     };
-
-    nginx.enable = true;
   };
 
   security.sudo.wheelNeedsPassword = false;
@@ -37,38 +33,6 @@
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFeU4GXH+Ae00DipGGJN7uSqPJxWFmgRo9B+xjV3mK4" ];
     initialHashedPassword = "$y$j9T$aeZHaSe8QKeC0ruAi9TKo.$zooI/IZUwOupVDbMReaukiargPrF93H/wdR/.0zsrr.";
   };
-  # networking.firewall = {
-  #   enable = true;
-  #   allowedTCPPorts = [
-  #     80
-  #     443
-  #     3000
-  #     9001 # prometheus
-  #     9002 # prometheus exporter
-  #     9093 # alertmanager
-  #   ];
-  #   allowedUDPPortRanges = [
-  #     { from = 4000; to = 4007; }
-  #     { from = 8000; to = 8010; }
-  #   ];
-  # };
-  # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkbOptions in tty.
-  # };
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
 
   nix = {
     # Automate garbage collection
@@ -97,10 +61,8 @@
     };
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    vim
     git
     wget
     lshw
@@ -108,19 +70,8 @@
 
   programs.zsh.enable = true;
   programs.zsh.histFile = "$HOME/.local/share/zsh_history";
-  age.secrets."nginx-selfsigned.cert" = {
-    file = ../../secrets/nginx-selfsigned.cert.age;
-    mode = "440";
-    owner = "nginx";
-    group = "nginx";
-  };
-  age.secrets."nginx-selfsigned.key" = {
-    file = ../../secrets/nginx-selfsigned.key.age;
-    mode = "440";
-    owner = "nginx";
-    group = "nginx";
-  };
 
+  services.tailscale.enable = true;
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

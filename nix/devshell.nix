@@ -17,6 +17,8 @@
           inputs.agenix.outputs.packages.${system}.agenix
           pkgs.nix
           pkgs.deploy-rs
+          pkgs.age
+          pkgs.nix
         ];
         commands =
           let
@@ -61,6 +63,25 @@
             #   exec = "exec ./result/bin/run-*-vm";
             # };
           ];
+        env = [
+          {
+            # Additionally configure nix-plugins with our extra builtins file.
+            # We need this for our repo secrets.
+            name = "NIX_CONFIG";
+            ## The patch is needed because otherwise we get:
+            ## $ agenix -e meta.nix.age                                                                                              18:51:29
+            ## error: could not dynamically open plugin file '"/nix/store/sbww4pi8vy1n8ssdxmyms33ksb4k3xb4-nix-plugins-15.0.0/lib/nix/plugins/libnix-extra-builtins.so"': 
+            ## /nix/store/sbww4pi8vy1n8ssdxmyms33ksb4k3xb4-nix-plugins-15.0.0/lib/nix/plugins/libnix-extra-builtins.so: undefined symbol: _ZN3nix9EvalState12callFunctionERNS_5ValueEmPPS1_S2_NS_6PosIdxE
+            ## https://github.com/shlevy/nix-plugins/issues/20
+            value = ''
+              plugin-files = ${pkgs.nix-plugins.overrideAttrs (o: {
+                buildInputs = [pkgs.nixVersions.latest pkgs.boost];
+                patches = (o.patches or []) ++ [ "${./..}/nix/nix-plugins.patch" ];
+              })}/lib/nix/plugins
+              extra-builtins-file = ${./..}/nix/extra-builtins.nix
+            '';
+          }
+        ];
       };
     };
 }
