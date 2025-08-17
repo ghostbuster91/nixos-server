@@ -29,7 +29,17 @@ in
     in
     {
       enable = true;
-      extraComponents = onboardingRequiredComponents ++ [ "prometheus" "mqtt" "cast" "androidtv_remote" "spotify" "tts" "my" ];
+      extraComponents = onboardingRequiredComponents ++ [
+        "prometheus"
+        "mqtt"
+        "cast"
+        "spotify"
+        "tts"
+        "my"
+        # Recommended for fast zlib compression
+        "isal"
+        "aws_s3"
+      ];
       config = {
         # Includes dependencies for a basic setup
         # https://www.home-assistant.io/integrations/default_config/
