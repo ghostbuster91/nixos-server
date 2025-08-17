@@ -66,6 +66,8 @@
     git
     wget
     lshw
+    dig
+    busybox
   ];
 
   programs.zsh.enable = true;

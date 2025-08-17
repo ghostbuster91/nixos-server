@@ -13,6 +13,7 @@
     zigbee2mqtt = ./zigbee2mqtt.nix;
     mosquitto = ./mosquitto.nix;
     proxy = ./proxy.nix;
+    backup = ./backup.nix;
   };
 
 }

@@ -18,5 +18,8 @@ in
   "acme-cloudflare-zone-token.age".publicKeys = [ kghost deckard ];
 
   "meta.nix.age".publicKeys = [ kghost deckard ];
+
+  "borgEncPass.age".publicKeys = [ kghost deckard ];
+  "borgSSHKey.age".publicKeys = [ kghost deckard ];
 }
 

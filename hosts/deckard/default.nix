@@ -20,6 +20,7 @@
       inputs.self.nixosModules.avahi
       inputs.self.nixosModules.ha
       inputs.self.nixosModules.proxy
+      inputs.self.nixosModules.backup
       inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
       {
