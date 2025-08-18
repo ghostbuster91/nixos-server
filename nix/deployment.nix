@@ -20,6 +20,14 @@
           sshUser = username;
           profiles.system.path =
             inputs.deploy-rs.lib.${system}.activate.nixos config.nixosConfigurations.${name};
+
+          # If the previous profile should be re-activated if activation fails.
+          # This defaults to `true`
+          autoRollback = false;
+
+          # See the earlier section about Magic Rollback for more information.
+          # This defaults to `true`
+          magicRollback = false;
         };
 
       # Get all folders in hosts/

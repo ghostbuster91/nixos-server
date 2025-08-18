@@ -14,6 +14,7 @@
     mosquitto = ./mosquitto.nix;
     proxy = ./proxy.nix;
     backup = ./backup.nix;
+    kanidm = ./kanidm.nix;
   };
 
 }

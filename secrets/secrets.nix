@@ -7,6 +7,7 @@ in
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
   "prometheus-hass-token.age".publicKeys = [ kghost deckard ];
   "alertmanager.age".publicKeys = [ kghost deckard ];
+  "grafana-secret-key.age".publicKeys = [ kghost deckard ];
 
   "zigbee2mqtt-network-key.age".publicKeys = [ kghost deckard ];
   "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost deckard ];
@@ -21,5 +22,14 @@ in
 
   "borgEncPass.age".publicKeys = [ kghost deckard ];
   "borgSSHKey.age".publicKeys = [ kghost deckard ];
+
+  "kanidm-selfsigned.key.age".publicKeys = [ kghost deckard ];
+  "kanidm-selfsigned.cert.age".publicKeys = [ kghost deckard ];
+
+  # replace with random agenix-rekey
+  "kanidm-admin-password.age".publicKeys = [ kghost deckard ];
+  "kanidm-idm-admin-password.age".publicKeys = [ kghost deckard ];
+  "kanidm-oauth2-grafana.age".publicKeys = [ kghost deckard ];
+
 }
 
