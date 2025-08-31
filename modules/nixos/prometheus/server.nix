@@ -12,6 +12,15 @@ in
       mode = "0700";
     }
   ];
+
+  environment.persistence."/state".directories = [
+    {
+      directory = "/var/lib/private/alertmanager";
+      user = "alertmanager";
+      group = "alertmanager";
+      mode = "0700";
+    }
+  ];
   age.secrets."prometheus-hass-token" = {
     file = ../../../secrets/prometheus-hass-token.age;
     mode = "440";

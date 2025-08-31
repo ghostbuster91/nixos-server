@@ -15,6 +15,8 @@
     proxy = ./proxy.nix;
     backup = ./backup.nix;
     kanidm = ./kanidm.nix;
+    oauth2 = ./oauth2.nix;
+    oauth2-proxy = ./oauth2proxy.nix;
   };
 
 }

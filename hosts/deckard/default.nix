@@ -25,7 +25,7 @@
       inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
       {
-        config.homelab.domain = "local";
+        config.homelab.domain = "local"; # TODO redundant?
         config.homelab.hostname = "deckard";
       }
       inputs.self.nixosModules.meta
@@ -35,6 +35,8 @@
       ./topology.nix
       inputs.self.nixosModules.zigbee2mqtt
       inputs.self.nixosModules.mosquitto
+      inputs.self.nixosModules.oauth2
+      inputs.self.nixosModules.oauth2-proxy
     ];
 
   home-manager = {

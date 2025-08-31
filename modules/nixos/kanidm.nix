@@ -21,6 +21,7 @@ in
   age.secrets.kanidm-admin-password = mkSecret ../../secrets/kanidm-admin-password.age;
   age.secrets.kanidm-idm-admin-password = mkSecret ../../secrets/kanidm-idm-admin-password.age;
   age.secrets.kanidm-oauth2-grafana = mkSecret ../../secrets/kanidm-oauth2-grafana.age;
+  age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -60,7 +61,7 @@ in
       persons = {
         "kasper" = {
           mailAddresses = [ "noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
+          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" ];
           displayName = "Kasper";
         };
       };
@@ -87,6 +88,28 @@ in
             "grafana.admins" = [ "admin" ];
             "grafana.server-admins" = [ "server_admin" ];
           };
+        };
+      };
+      # Web Sentinel
+      groups."web-sentinel.access" = { };
+      groups."web-sentinel.adguardhome" = { };
+      groups."web-sentinel.openwebui" = { };
+      groups."web-sentinel.analytics" = { };
+      systems.oauth2.web-sentinel = {
+        displayName = "Web Sentinel";
+        originUrl = "https://oauth2.${config.homelab.ext-domain}/oauth2/callback";
+        originLanding = "https://oauth2.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-proxy.path;
+        preferShortUsername = true;
+        scopeMaps."web-sentinel.access" = [
+          "openid"
+          "email"
+        ];
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup."web-sentinel.adguardhome" = [ "access_adguardhome" ];
+          valuesByGroup."web-sentinel.openwebui" = [ "access_openwebui" ];
+          valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
         };
       };
     };
