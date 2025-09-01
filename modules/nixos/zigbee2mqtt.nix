@@ -2,7 +2,7 @@
 , ...
 }:
 let
-  zigbeeDomain = "zigbee.${config.homelab.domain}";
+  zigbeeDomain = "zigbee.${config.homelab.ext-domain}";
 in
 {
   age.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
@@ -75,9 +75,7 @@ in
       '';
     };
     virtualHosts."${zigbeeDomain}" = {
-      serverName = "${zigbeeDomain}";
-      sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
-      sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+      useACMEHost = config.homelab.ext-domain;
       forceSSL = true;
 
       locations."/" = {

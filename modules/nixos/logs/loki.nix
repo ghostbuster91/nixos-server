@@ -101,13 +101,8 @@ in
       };
     };
 
-    nginx.virtualHosts."${roleName}.${config.homelab.domain}" = {
-      # Use wildcard domain
-      # useACMEHost = config.homelab.domain;
-      serverName = "${roleName}.${config.homelab.domain}";
-
-      sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
-      sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+    nginx.virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
+      useACMEHost = config.homelab.ext-domain;
       forceSSL = true;
 
       locations."/" = {

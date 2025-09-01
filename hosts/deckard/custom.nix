@@ -15,7 +15,6 @@
   };
   services = {
     openssh = {
-      # Easiest to use and most distros use this by default.
       enable = true;
       settings.PermitRootLogin = "no";
       settings.PasswordAuthentication = false;

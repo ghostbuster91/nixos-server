@@ -43,10 +43,8 @@ in
           keepalive 2;
         '';
       };
-      virtualHosts."${roleName}.${config.homelab.domain}" = {
-        serverName = "${roleName}.${config.homelab.domain}";
-        sslCertificate = config.age.secrets."nginx-selfsigned.cert".path;
-        sslCertificateKey = config.age.secrets."nginx-selfsigned.key".path;
+      virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
+        useACMEHost = config.homelab.ext-domain;
         forceSSL = true;
 
         locations."/" = {

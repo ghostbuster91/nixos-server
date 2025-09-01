@@ -30,20 +30,6 @@
     };
   };
 
-  age.secrets."nginx-selfsigned.cert" = {
-    file = ../../secrets/nginx-selfsigned.cert.age;
-    mode = "440";
-    owner = "nginx";
-    group = "nginx";
-  };
-
-  age.secrets."nginx-selfsigned.key" = {
-    file = ../../secrets/nginx-selfsigned.key.age;
-    mode = "440";
-    owner = "nginx";
-    group = "nginx";
-  };
-
   services = {
     nginx = {
       enable = true;

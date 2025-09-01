@@ -1,9 +1,10 @@
-{ inputs, username, config, ... }:
+{ inputs, username, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
     [
       ./custom.nix
+      ./backup.nix
       ./hardware-configuration.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {

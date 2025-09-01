@@ -11,6 +11,22 @@ let
     assert lib.assertMsg (builtins ? extraBuiltins.ageImportEncrypted)
       "The extra builtin 'ageImportEncrypted' is not available, so repo.secrets cannot be decrypted. Did you forget to add nix-plugins and point it to `./nix/extra-builtins.nix` ?";
     builtins.extraBuiltins.ageImportEncrypted;
+
+  addrType = types.submodule {
+    options = {
+      address = mkOption { type = types.str; };
+      prefixLength = mkOption { type = types.int; };
+    };
+  };
+
+  ifaceType = types.submodule ({ ... }: {
+    options = {
+      ipv4.addresses = mkOption { type = types.listOf addrType; default = [ ]; };
+      ipv6.addresses = mkOption { type = types.listOf addrType; default = [ ]; };
+      ipv4.routes = mkOption { type = types.listOf addrType; default = [ ]; };
+      ipv6.routes = mkOption { type = types.listOf addrType; default = [ ]; };
+    };
+  });
 in
 {
 
@@ -31,6 +47,15 @@ in
   };
 
   options.homelab.ext-domain = mkOption {
+    type = types.str;
+  };
+
+  options.homelab.vps.interfaces = mkOption {
+    type = types.attrsOf ifaceType;
+    default = { };
+  };
+
+  options.homelab.surfer.vlan.ip = mkOption {
     type = types.str;
   };
 }

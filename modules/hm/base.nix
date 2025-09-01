@@ -34,14 +34,5 @@
         unset LD_LIBRARY_PATH
       '';
     };
-    ssh = {
-      enable = true;
-      extraConfig = ''
-        Host rpi5
-          IdentitiesOnly yes
-          IdentityFile /home/kghost/.ssh/nixremote
-          User nixremote
-      '';
-    };
   };
 }
