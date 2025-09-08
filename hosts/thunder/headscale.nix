@@ -20,7 +20,11 @@ in {
         logtail.enabled = false;
         dns = {
           base_domain = "tail.${config.homelab.ext-domain}";
-          nameservers.global = [ config.homelab.surfer.vlan.ip ];
+          nameservers.global = [
+            config.homelab.surfer.vlan.ip
+            "1.1.1.1" # Cloudflare fallback
+            "9.9.9.9" # Quad9 fallback
+          ];
         };
       };
     };
