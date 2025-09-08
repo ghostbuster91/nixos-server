@@ -15,7 +15,6 @@
       devshells.default = {
         packages = [
           inputs.agenix.outputs.packages.${system}.agenix
-          pkgs.nix
           pkgs.deploy-rs
           pkgs.age
           pkgs.nix

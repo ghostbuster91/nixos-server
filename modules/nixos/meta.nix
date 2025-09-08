@@ -58,4 +58,8 @@ in
   options.homelab.surfer.vlan.ip = mkOption {
     type = types.str;
   };
+
+  options.homelab.deckard.vlan.ip = mkOption {
+    type = types.str;
+  };
 }
