@@ -118,10 +118,9 @@ in
           inherit scrape_interval;
           static_configs = [{
             targets = [
-              "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
-              # TODO: why mDNS is not resolved anymore?
-              "192.168.1.47:${toString config.services.prometheus.exporters.node.port}"
-              "malina5.${config.homelab.domain}:${toString config.services.prometheus.exporters.node.port}"
+              "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
+              "surfer.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
+              "malina5.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
             ];
           }];
         }
@@ -130,23 +129,30 @@ in
           metrics_path = "/api/prometheus";
           inherit scrape_interval;
           # Long-Lived Access Token
-          authorization. credentials_file = config.age.secrets."prometheus-hass-token".path;
+          authorization.credentials_file = config.age.secrets."prometheus-hass-token".path;
           static_configs = [{
-            targets = [ "localhost:${toString config.services.home-assistant.config.http.server_port}" ];
+            targets = [ "ha.${config.homelab.ext-domain}" ];
           }];
         }
         {
           job_name = "zfs";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
+            targets = [ "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
           }];
         }
         {
           job_name = "systemd";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.${config.homelab.domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
+            targets = [ "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
+          }];
+        }
+        {
+          job_name = "unbound";
+          inherit scrape_interval;
+          static_configs = [{
+            targets = [ "surfer.tail.${config.homelab.ext-domain}:9167" ];
           }];
         }
       ];

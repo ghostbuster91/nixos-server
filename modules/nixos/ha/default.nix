@@ -17,7 +17,7 @@ in
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1w"
   ];
-  topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.domain}";
+  topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
   services.home-assistant =
     let
       # Components required to complete the onboarding

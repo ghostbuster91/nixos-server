@@ -19,7 +19,7 @@ in {
         server_url = "https://${domain}";
         logtail.enabled = false;
         dns = {
-          magic_dns = true;  
+          magic_dns = true;
           base_domain = "tail.${config.homelab.ext-domain}";
           nameservers.global = [
             config.homelab.surfer.vlan.ip

@@ -18,6 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
+  "id": 38,
   "links": [],
   "panels": [
     {
@@ -37,6 +38,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -67,8 +69,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -94,28 +95,37 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "expr": "",
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "homeassistant_sensor_temperature_celsius",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "instant": false,
+          "legendFormat": "__auto",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title": "Panel Title",
+      "title": "Temperatury",
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 39,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": []
@@ -125,12 +135,10 @@
     "to": "now"
   },
   "timepicker": {
-    "refresh_intervals": [],
-    "time_options": []
+    "refresh_intervals": []
   },
   "timezone": "browser",
   "title": "Home assistant",
   "uid": "cLV5GDCkz",
-  "version": 1,
-  "weekStart": ""
+  "version": 1
 }
