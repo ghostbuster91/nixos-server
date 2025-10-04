@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 38,
+  "id": 55,
   "links": [],
   "panels": [
     {
@@ -113,7 +113,7 @@
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{friendly_name}}",
           "range": true,
           "refId": "A",
           "useBackend": false
