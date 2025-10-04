@@ -32,11 +32,6 @@ in
       mode = "0700";
     }
   ];
-  # options = with lib; {
-  #   homelab.domain = mkOption {
-  #     type = types.str;
-  #   };
-  # };
   # grafana configuration
   systemd.services.nginx = {
     requires = [ "grafana.service" ];

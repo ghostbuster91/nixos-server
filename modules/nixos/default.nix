@@ -17,6 +17,8 @@
     kanidm = ./kanidm.nix;
     oauth2 = ./oauth2.nix;
     oauth2-proxy = ./oauth2proxy.nix;
+    nix = ./nix.nix;
+    ssh = ./ssh.nix;
   };
 
 }

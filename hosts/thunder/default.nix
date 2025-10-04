@@ -25,6 +25,8 @@
       inputs.self.nixosModules.backup
       inputs.self.nixosModules.logs-promtail
       inputs.self.nixosModules.prometheus-client
+      inputs.self.nixosModules.ssh
+      inputs.self.nixosModules.nix
     ];
 
   home-manager = {

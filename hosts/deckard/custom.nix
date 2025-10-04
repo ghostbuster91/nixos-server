@@ -13,14 +13,6 @@
       443
     ];
   };
-  services = {
-    openssh = {
-      enable = true;
-      settings.PermitRootLogin = "no";
-      settings.PasswordAuthentication = false;
-    };
-  };
-
   security.sudo.wheelNeedsPassword = false;
 
   users.users.${username} = {
@@ -31,33 +23,6 @@
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFeU4GXH+Ae00DipGGJN7uSqPJxWFmgRo9B+xjV3mK4" ];
     initialHashedPassword = "$y$j9T$aeZHaSe8QKeC0ruAi9TKo.$zooI/IZUwOupVDbMReaukiargPrF93H/wdR/.0zsrr.";
-  };
-
-  nix = {
-    # Automate garbage collection
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 60d";
-    };
-
-    # Flakes settings
-    package = pkgs.nixVersions.stable;
-
-    settings = {
-      # Automate `nix store --optimise`
-      auto-optimise-store = true;
-
-      # Required by Cachix to be used as non-root user
-      trusted-users = [ "root" username ];
-
-      experimental-features = [ "nix-command" "flakes" ];
-      warn-dirty = false;
-
-      # Avoid unwanted garbage collection when using nix-direnv
-      keep-outputs = true;
-      keep-derivations = true;
-    };
   };
 
   environment.systemPackages = with pkgs; [
@@ -73,11 +38,6 @@
   programs.zsh.histFile = "$HOME/.local/share/zsh_history";
 
   services.tailscale.enable = true;
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  # system.copySystemConfiguration = true;
 
   # https://github.com/nix-community/impermanence/issues/254
   system.activationScripts."createPersistentStorageDirs".deps = [ "var-lib-private-permissions" "users" "groups" ];

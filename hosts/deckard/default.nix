@@ -26,7 +26,6 @@
       inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
       {
-        config.homelab.domain = "local"; # TODO redundant?
         config.homelab.hostname = "deckard";
       }
       inputs.self.nixosModules.meta
@@ -38,6 +37,8 @@
       inputs.self.nixosModules.mosquitto
       inputs.self.nixosModules.oauth2
       inputs.self.nixosModules.oauth2-proxy
+      inputs.self.nixosModules.ssh
+      inputs.self.nixosModules.nix
     ];
 
   home-manager = {

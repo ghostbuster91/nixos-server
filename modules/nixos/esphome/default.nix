@@ -10,12 +10,6 @@ in
       mode = "0700";
     }
   ];
-  # options = with lib; {
-  #   homelab.domain = mkOption {
-  #     type = types.str;
-  #   };
-  # };
-
   # copied from https://sourcegraph.com/github.com/oddlama/nix-config@e1e8997525624b2184a80d6277b0d2a0af818af3/-/blob/hosts/zackbiene/esphome.nix
   services.esphome = {
     enable = true;
