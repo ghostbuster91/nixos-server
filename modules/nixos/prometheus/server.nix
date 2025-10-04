@@ -40,6 +40,7 @@ in
     prometheus = {
       enable = true;
       port = 9001;
+      listenAddress = "127.0.0.1";
 
       # By default the check verifies also if all referenced paths exist.
       # This however cannot work if any of these paths refers to age/sops secrets as these files are created during the activation phase.
@@ -121,6 +122,7 @@ in
               "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
               "surfer.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
               "malina5.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
+              "thunder.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
             ];
           }];
         }
@@ -152,7 +154,7 @@ in
           job_name = "unbound";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "surfer.tail.${config.homelab.ext-domain}:9167" ];
+            targets = [ "thunder.tail.${config.homelab.ext-domain}:9167" ];
           }];
         }
       ];

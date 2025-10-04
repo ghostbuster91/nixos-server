@@ -8,11 +8,7 @@
         disable = true;
       };
       clients = [{
-        url = "https://loki.local/loki/api/v1/push";
-        # TODO validate against the real certificate
-        # This needs correct Subject Alternative Name to be assigned which needs subdomains 
-        # which needs moving to a public domain
-        tls_config.insecure_skip_verify = true;
+        url = "https://loki.${config.homelab.ext-domain}/loki/api/v1/push";
       }];
       scrape_configs = [{
         job_name = "journal";
@@ -20,7 +16,7 @@
           max_age = "12h";
           labels = {
             job = "systemd-journal";
-            host = config.homelab.hostname;
+            host = config.networking.hostName;
           };
         };
         relabel_configs = [{

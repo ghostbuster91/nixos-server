@@ -33,7 +33,11 @@ in
           instance_interface_names = [
             "enp3s0"
           ];
+          ring.kvstore.store = "inmemory";
+          path_prefix = "/var/lib/loki";
         };
+        frontend.scheduler_address = "";
+
         ingester = {
           lifecycler = {
             address = "127.0.0.1";

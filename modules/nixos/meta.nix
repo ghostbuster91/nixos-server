@@ -62,4 +62,13 @@ in
   options.homelab.deckard.vlan.ip = mkOption {
     type = types.str;
   };
+
+  options.homelab.thunder.vlan.ip = mkOption {
+    type = types.str;
+  };
+
+  options.homelab.vpnCidr = mkOption {
+    type = types.str;
+  };
+
 }

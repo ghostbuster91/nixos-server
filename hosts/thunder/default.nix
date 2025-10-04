@@ -9,10 +9,12 @@
       ./networking.nix # generated at runtime by nixos-infect
       ./topology.nix
       ./headscale.nix
+      ./dns.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];
       })
+      inputs.self.nixosModules.meta
       ./impermanence.nix
       inputs.impermanence.nixosModules.impermanence
       inputs.nix-topology.nixosModules.default
@@ -21,6 +23,8 @@
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.meta
       inputs.self.nixosModules.backup
+      inputs.self.nixosModules.logs-promtail
+      inputs.self.nixosModules.prometheus-client
     ];
 
   home-manager = {

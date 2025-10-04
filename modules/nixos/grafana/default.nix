@@ -90,7 +90,7 @@ in
             name = "Prometheus";
             type = "prometheus";
             access = "proxy";
-            url = "http://localhost:${toString config.services.prometheus.port}";
+            url = "https://prometheus.${config.homelab.ext-domain}";
             ## https://github.com/rfmoz/grafana-dashboards/issues/169
             jsonData = {
               timeInterval = (builtins.elemAt config.services.prometheus.scrapeConfigs 0).scrape_interval;
@@ -101,7 +101,7 @@ in
             name = "Loki";
             type = "loki";
             access = "proxy";
-            url = "http://localhost:${toString config.services.loki.configuration.server.http_listen_port}";
+            url = "https://loki.${config.homelab.ext-domain}";
           }
         ];
 

@@ -22,7 +22,7 @@ in {
           magic_dns = true;
           base_domain = "tail.${config.homelab.ext-domain}";
           nameservers.global = [
-            config.homelab.surfer.vlan.ip
+            config.homelab.thunder.vlan.ip
           ];
         };
       };
