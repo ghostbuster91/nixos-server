@@ -1,6 +1,10 @@
 { config, ... }:
-let domain = "headscale.${config.homelab.ext-domain}";
+let domain = "headscale.${config.homelab.sec-domain}";
 in {
+
+  networking.firewall.allowedTCPPorts = [
+    443
+  ];
   environment.persistence = {
     "/persist".directories = [{
       directory = "/var/lib/headscale";
@@ -30,7 +34,7 @@ in {
 
     nginx.virtualHosts.${domain} = {
       forceSSL = true;
-      useACMEHost = config.homelab.ext-domain;
+      useACMEHost = config.homelab.sec-domain;
 
       locations."/" = {
         proxyPass =

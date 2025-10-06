@@ -10,6 +10,7 @@
       ./topology.nix
       ./headscale.nix
       ./dns.nix
+      ./blog.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];

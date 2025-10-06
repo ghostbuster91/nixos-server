@@ -28,12 +28,16 @@
       extraDomainNames = [ config.homelab.ext-domain ];
       group = "nginx";
     };
+    certs."${config.homelab.sec-domain}" = {
+      domain = "*.${config.homelab.sec-domain}";
+      extraDomainNames = [ config.homelab.sec-domain ];
+      group = "nginx";
+    };
   };
 
   services = {
     nginx = {
       enable = true;
-      # recommendedSetup = true;
     };
   };
 }

@@ -45,6 +45,10 @@
       url = "github:oddlama/nix-topology";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    ghostbuster91-blog = {
+      url = "github:ghostbuster91/blogposts";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {

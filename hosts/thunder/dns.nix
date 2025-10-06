@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 let
   deckardIp = config.homelab.deckard.vlan.ip;
   vpnCidr = config.homelab.vpnCidr;
@@ -86,18 +86,13 @@ in
   };
 
   networking.firewall = {
-    interfaces."tailscale0" = {
-      allowedUDPPorts = [ 53 ];
-      allowedTCPPorts = [ 53 config.services.prometheus.exporters.unbound.port ];
-    };
+    trustedInterfaces = [ "tailscale0" ];
   };
 
   services.prometheus.exporters.unbound = {
     enable = true;
     unbound.host = "unix:///run/unbound/unbound.ctl";
-    listenAddress = "100.64.0.1";
+    listenAddress = config.homelab.thunder.vlan.ip;
     openFirewall = false; # We do this manually to limit opened interfaces
   };
-
-  systemd.services.adguardhome.serviceConfig.RestartSec = lib.mkForce "60"; # Retry every minute
 }

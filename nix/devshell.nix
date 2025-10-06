@@ -18,6 +18,7 @@
           pkgs.deploy-rs
           pkgs.age
           pkgs.nix
+          pkgs.cloudflared
         ];
         commands =
           let

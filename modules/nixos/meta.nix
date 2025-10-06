@@ -46,6 +46,10 @@ in
     type = types.str;
   };
 
+  options.homelab.sec-domain = mkOption {
+    type = types.str;
+  };
+
   options.homelab.vps.interfaces = mkOption {
     type = types.attrsOf ifaceType;
     default = { };

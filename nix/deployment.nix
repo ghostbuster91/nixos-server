@@ -15,7 +15,7 @@
 
       mkDeployment = { user, system, }: name:
         {
-          hostname = "${name}";
+          hostname = name;
           inherit user;
           sshUser = username;
           profiles.system.path =

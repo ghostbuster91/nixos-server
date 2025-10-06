@@ -35,5 +35,7 @@ in
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost deckard ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost deckard ];
+
+  "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
 }
 
