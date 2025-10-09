@@ -32,10 +32,13 @@ in
   "kanidm-idm-admin-password.age".publicKeys = [ kghost deckard ];
   "kanidm-oauth2-grafana.age".publicKeys = [ kghost deckard ];
   "kanidm-oauth2-proxy.age".publicKeys = [ kghost deckard ];
+  "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost deckard ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost deckard ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost deckard ];
 
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
+  "postgres-linkwarden-password.age".publicKeys = [ kghost deckard ];
+  "nextauth-linkwarden-secret.age".publicKeys = [ kghost deckard ];
 }
 

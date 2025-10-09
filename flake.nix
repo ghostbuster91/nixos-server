@@ -2,6 +2,7 @@
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
+    linkwardenPkgs.url = "github:nixos/nixpkgs/master";
     nixpkgs.follows = "nixpkgs-stable";
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";

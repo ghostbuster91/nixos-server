@@ -28,6 +28,7 @@ in
           ''"auth.${ext-domain}.        IN A ${deckardIp}"''
           ''"oauth2.${ext-domain}.      IN A ${deckardIp}"''
           ''"esphome.${ext-domain}.     IN A ${deckardIp}"''
+          ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
           ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
         ];
 

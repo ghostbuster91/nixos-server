@@ -22,6 +22,7 @@ in
   age.secrets.kanidm-idm-admin-password = mkSecret ../../secrets/kanidm-idm-admin-password.age;
   age.secrets.kanidm-oauth2-grafana = mkSecret ../../secrets/kanidm-oauth2-grafana.age;
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
+  age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -61,7 +62,7 @@ in
       persons = {
         "kasper" = {
           mailAddresses = [ "noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" ];
+          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" ];
           displayName = "Kasper";
         };
       };
@@ -111,6 +112,22 @@ in
           valuesByGroup."web-sentinel.openwebui" = [ "access_openwebui" ];
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
         };
+      };
+      # Linkwarden
+      groups."linkwarden.access" = { };
+      # TODO for now linkwarden doesn't read groups from oidc anyway..
+      # groups."linkwarden.admins" = { }; 
+      systems.oauth2.linkwarden = {
+        displayName = "Linkwarden";
+        originUrl = "https://linkwarden.${config.homelab.ext-domain}/api/v1/auth/callback/authentik";
+        originLanding = "https://linkwarden.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-linkwarden.path;
+        enableLegacyCrypto = true;
+        scopeMaps."linkwarden.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
     };
   };

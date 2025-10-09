@@ -3,6 +3,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
     [
+      "${inputs.linkwardenPkgs}/nixos/modules/services/web-apps/linkwarden.nix"
       ./custom.nix
       ./backup.nix
       ./hardware-configuration.nix
@@ -39,6 +40,7 @@
       inputs.self.nixosModules.oauth2-proxy
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      ./linkwarden.nix
     ];
 
   home-manager = {
