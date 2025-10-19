@@ -11,6 +11,7 @@ in
   services.unbound = {
     enable = true;
     enableRootTrustAnchor = true;
+    localControlSocketPath = "/run/unbound/unbound.ctl";
     settings = {
       server = {
         interface = [ "0.0.0.0" "::0" ]; # nasłuch na wszystkich interfejsach
