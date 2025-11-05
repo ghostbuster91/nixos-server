@@ -16,7 +16,7 @@ in
         credentialsFile = config.age.secrets.cloudflared-tunnel.path;
         default = "http_status:404";
         ingress = {
-          "blog.typesafebrew.dev" = "http://localhost:${toString localPort}";
+          "blog.${config.homelab.ext-domain}" = "http://localhost:${toString localPort}";
         };
       };
     };

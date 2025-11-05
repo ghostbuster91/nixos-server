@@ -71,10 +71,11 @@ in
           "127.0.0.0/8 allow"
           "::1/128 allow"
           "${vpnCidr} allow"
+          "0.0.0.0/0 refuse"
         ];
         root-hints = builtins.fetchurl {
           url = "https://www.internic.net/domain/named.cache";
-          sha256 = "sha256:1yq8hjqza405xfrn8qvr08awnrsk4gvyjn53fdvp19ig2c7adjfq";
+          sha256 = "sha256:15kmhck6187yl0kvs6y2mngz8pzy5bxzw3v8x8absfqmk8c4l9f0";
         };
         statistics-interval = 0; # stats on demand
         extended-statistics = true;

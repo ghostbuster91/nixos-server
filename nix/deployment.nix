@@ -23,11 +23,11 @@
 
           # If the previous profile should be re-activated if activation fails.
           # This defaults to `true`
-          autoRollback = false;
+          autoRollback = true;
 
           # See the earlier section about Magic Rollback for more information.
           # This defaults to `true`
-          magicRollback = false;
+          magicRollback = true;
         };
 
       # Get all folders in hosts/
