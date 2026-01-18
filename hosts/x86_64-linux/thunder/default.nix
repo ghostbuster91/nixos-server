@@ -28,6 +28,7 @@
       inputs.self.nixosModules.prometheus-client
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.impermanence
     ];
 
   home-manager = {

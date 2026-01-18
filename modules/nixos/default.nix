@@ -19,6 +19,7 @@
     oauth2-proxy = ./oauth2proxy.nix;
     nix = ./nix.nix;
     ssh = ./ssh.nix;
+    impermanence = ./impermanence.nix;
   };
 
 }

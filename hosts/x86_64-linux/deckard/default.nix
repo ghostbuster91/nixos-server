@@ -40,6 +40,7 @@
       inputs.self.nixosModules.oauth2-proxy
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.impermanence
       ./linkwarden.nix
     ];
 
