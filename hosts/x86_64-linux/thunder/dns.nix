@@ -75,7 +75,7 @@ in
         ];
         root-hints = builtins.fetchurl {
           url = "https://www.internic.net/domain/named.cache";
-          sha256 = "sha256:0sh7gwq2g8lqws99jw18qcrb28xpc60rr1rf8h791vigih07wkzq";
+          sha256 = "sha256:1h6bw71dsifjnfggq7lxc0l16bzdbxl6vr5qlj7yc3msfjaxizf3";
         };
         statistics-interval = 0; # stats on demand
         extended-statistics = true;

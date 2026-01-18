@@ -28,28 +28,28 @@ in
   ];
 
   age.secrets."postgres-linkwarden-password" = {
-    file = ../../secrets/postgres-linkwarden-password.age;
+    file = ../../../secrets/postgres-linkwarden-password.age;
     mode = "0400";
     owner = "postgres";
     group = "postgres";
   };
 
   age.secrets."linkwarden-postgres-password" = {
-    file = ../../secrets/postgres-linkwarden-password.age;
+    file = ../../../secrets/postgres-linkwarden-password.age;
     mode = "0400";
     owner = "linkwarden";
     group = "linkwarden";
   };
 
   age.secrets."nextauth-linkwarden-secret" = {
-    file = ../../secrets/nextauth-linkwarden-secret.age;
+    file = ../../../secrets/nextauth-linkwarden-secret.age;
     mode = "0400";
     owner = "linkwarden";
     group = "linkwarden";
   };
 
   age.secrets."linkwarden-oauth2-kanidm" = {
-    file = ../../secrets/kanidm-oauth2-linkwarden.age;
+    file = ../../../secrets/kanidm-oauth2-linkwarden.age;
     mode = "0400";
     owner = "linkwarden";
     group = "linkwarden";

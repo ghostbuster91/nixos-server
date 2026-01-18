@@ -13,10 +13,10 @@
         genAttrs
         ;
 
-      mkDeployment = { user, system, }: name:
+      mkDeploymentFor = system: name:
         {
           hostname = name;
-          inherit user;
+          user = "root";
           sshUser = username;
           profiles.system.path =
             inputs.deploy-rs.lib.${system}.activate.nixos config.nixosConfigurations.${name};
@@ -30,10 +30,29 @@
           magicRollback = true;
         };
 
-      # Get all folders in hosts/
-      hosts = builtins.attrNames (filterAttrs (_: type: type == "directory") (builtins.readDir ../hosts));
+      systems =
+        builtins.attrNames (
+          filterAttrs (_: type: type == "directory")
+            (builtins.readDir ../hosts)
+        );
+
+      hostsFor = system:
+        builtins.attrNames (
+          filterAttrs (_: type: type == "directory")
+            (builtins.readDir ../hosts/${system})
+        );
     in
     {
-      deploy.nodes = genAttrs hosts (mkDeployment { user = "root"; system = "x86_64-linux"; });
+      deploy.nodes =
+        builtins.foldl'
+          (acc: system:
+            let
+              mkDeployment = mkDeploymentFor system; # f { name, ... } -> deployment
+            in
+            acc //
+            genAttrs (hostsFor system) (name: mkDeployment name)
+          )
+          { }
+          systems;
     };
 }

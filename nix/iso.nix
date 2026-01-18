@@ -45,7 +45,7 @@
             in
             {
               imports = [
-                (import ../hosts/deckard/disko-config.nix { })
+                (import ../hosts/x86_64-linux/deckard/disko-config.nix { })
               ];
 
               # we don't want to generate filesystem entries on this image

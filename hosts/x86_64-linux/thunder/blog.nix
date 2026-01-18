@@ -4,7 +4,7 @@ let
 in
 {
   age.secrets.cloudflared-tunnel = {
-    file = ../../secrets/cloudflared-tunnel.age;
+    file = ../../../secrets/cloudflared-tunnel.age;
     mode = "600";
     owner = username;
   };

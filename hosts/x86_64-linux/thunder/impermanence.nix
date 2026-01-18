@@ -39,6 +39,7 @@
     hideMounts = true;
     directories =
       [
+        "/var/lib/systemd"
         "/var/log"
         "/etc/NetworkManager/system-connections"
       ];
