@@ -39,6 +39,7 @@ in
         # Recommended for fast zlib compression
         "isal"
         "aws_s3"
+        "shelly"
       ];
       config = {
         # Includes dependencies for a basic setup
