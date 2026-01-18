@@ -2,6 +2,7 @@ let
   kghost = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFeU4GXH+Ae00DipGGJN7uSqPJxWFmgRo9B+xjV3mK4";
   deckard = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJF6U22I97ZyRPXJmJmlmvgHI7akGC8z/mlUVaCiLaOf";
   thunder = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHBzMDaORL8CemRY6V3B2Ziif1wwU5O2j9sXc0O7dvgn";
+  malina5 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBa0PJR7s0hD8Ht+obNNGavut8WlNNlX+Kax0bq83Xu1";
 in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
@@ -21,8 +22,8 @@ in
 
   "meta.nix.age".publicKeys = [ kghost deckard thunder ];
 
-  "borgEncPass.age".publicKeys = [ kghost deckard thunder ];
-  "borgSSHKey.age".publicKeys = [ kghost deckard thunder ];
+  "borgEncPass.age".publicKeys = [ kghost deckard thunder malina5 ];
+  "borgSSHKey.age".publicKeys = [ kghost deckard thunder malina5 ];
 
   "kanidm-selfsigned.key.age".publicKeys = [ kghost deckard ];
   "kanidm-selfsigned.cert.age".publicKeys = [ kghost deckard ];

@@ -1,5 +1,7 @@
 { config, pkgs, username, ... }:
 {
+  # Give agenix access to the hostkey independent of impermanence activation
+  age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
 
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/state".neededForBoot = true;
@@ -41,6 +43,10 @@
       [
         "/var/lib/nixos"
         "/var/log"
+        {
+          directory = "/var/lib/tailscale";
+          mode = "0700";
+        }
       ];
   };
 

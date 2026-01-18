@@ -28,6 +28,7 @@
           # See the earlier section about Magic Rollback for more information.
           # This defaults to `true`
           magicRollback = true;
+          # remoteBuild = system == "aarch64-linux";
         };
 
       systems =
