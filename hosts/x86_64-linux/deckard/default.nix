@@ -41,6 +41,7 @@
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
       inputs.self.nixosModules.impermanence
+      inputs.self.nixosModules.system-user
       ./linkwarden.nix
     ];
 
