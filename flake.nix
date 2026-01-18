@@ -1,4 +1,13 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "https://nixos-raspberrypi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+    ];
+    connect-timeout = 5;
+  };
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
@@ -49,6 +58,10 @@
 
     ghostbuster91-blog = {
       url = "github:ghostbuster91/blogposts";
+    };
+
+    nixos-raspberrypi = {
+      url = "github:nvmd/nixos-raspberrypi/main";
     };
   };
   outputs = inputs@{ flake-parts, ... }:
