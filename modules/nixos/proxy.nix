@@ -12,6 +12,10 @@
     group = "acme";
   };
 
+  environment.persistence."/state".directories = [
+    "/var/lib/acme"
+  ];
+
   security.acme = {
     acceptTerms = true;
     defaults = {

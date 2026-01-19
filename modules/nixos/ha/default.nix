@@ -17,14 +17,22 @@ in
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1w"
   ];
-  topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
+
+  # TODO: infinite recursion for rpi5 eval
+  # topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
   services.home-assistant =
     let
       # Components required to complete the onboarding
       onboardingRequiredComponents = [
-        "esphome"
+        "analytics"
+        "google_translate"
         "met"
         "radio_browser"
+        "shopping_list"
+        "roborock" # non-deterministic build process (sometimes fails)
+        "smlight"
+        "cast"
+        "ipp"
       ];
     in
     {
@@ -32,12 +40,12 @@ in
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
         "mqtt"
-        "cast"
-        "spotify"
-        "tts"
-        "my"
+        # "spotify"
+        # "tts"
+        # "my"
         # Recommended for fast zlib compression
         "isal"
+        "esphome"
         "aws_s3"
         "shelly"
       ];

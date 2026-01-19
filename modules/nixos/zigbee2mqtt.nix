@@ -25,7 +25,8 @@ in
     }
   ];
 
-  topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
+  # TODO: infinite recursion for rpi5 eval
+  # topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
   services.zigbee2mqtt = {
     enable = true;
     settings = {
@@ -44,10 +45,10 @@ in
         "0x0cae5ffffed01f90" = { friendly_name = "homelab/temp2"; };
         "0x28dba7fffe818e3f" = { friendly_name = "homelab/bathroom/wall/temp1"; };
       };
-      homeassistant = true;
       permit_join = true;
       serial = {
         port = "tcp://192.168.1.30:6638";
+        adapter = "zstack";
         # mdns doesn't work due to some hardening that happens in the serivce definition
         # port = "mdns://SLZB-06";
       };
@@ -70,7 +71,6 @@ in
     upstreams."zigbee2mqtt" = {
       servers."localhost:${toString config.services.zigbee2mqtt.settings.frontend.port}" = { };
       extraConfig = ''
-        zone zigbee2mqtt 64k;
         keepalive 2;
       '';
     };

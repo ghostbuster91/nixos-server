@@ -67,6 +67,10 @@ in
     type = types.str;
   };
 
+  options.homelab.malina5.vlan.ip = mkOption {
+    type = types.str;
+  };
+
   options.homelab.vpnCidr = mkOption {
     type = types.str;
   };

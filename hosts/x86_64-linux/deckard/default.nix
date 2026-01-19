@@ -20,7 +20,6 @@
       inputs.self.nixosModules.logs-promtail
       inputs.self.nixosModules.esphome
       inputs.self.nixosModules.avahi
-      inputs.self.nixosModules.ha
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.backup
       inputs.self.nixosModules.kanidm
@@ -34,8 +33,6 @@
       inputs.self.nixosModules.zfs
       inputs.nix-topology.nixosModules.default
       ./topology.nix
-      inputs.self.nixosModules.zigbee2mqtt
-      inputs.self.nixosModules.mosquitto
       inputs.self.nixosModules.oauth2
       inputs.self.nixosModules.oauth2-proxy
       inputs.self.nixosModules.ssh

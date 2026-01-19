@@ -1,12 +1,12 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
-  age.secrets.mosquitto-pw-zigbee2mqtt = {
+  age.secrets.mosquitto-pw-zigbee2mqtt = lib.mkIf config.services.zigbee2mqtt.enable {
     file = ../../secrets/mosquitto-pw-zigbee2mqtt.age;
     mode = "440";
     owner = "zigbee2mqtt";
     group = "mosquitto";
   };
-  age.secrets.mosquitto-pw-home_assistant = {
+  age.secrets.mosquitto-pw-home_assistant = lib.mkIf config.services.home-assistant.enable {
     file = ../../secrets/mosquitto-pw-home_assistant.age;
     mode = "440";
     owner = "hass";
@@ -24,11 +24,11 @@
       {
         acl = [ "pattern readwrite #" ];
         users = {
-          zigbee2mqtt = {
+          zigbee2mqtt = lib.mkIf config.services.zigbee2mqtt.enable {
             passwordFile = config.age.secrets.mosquitto-pw-zigbee2mqtt.path;
             acl = [ "readwrite #" ];
           };
-          home_assistant = {
+          home_assistant = lib.mkIf config.services.home-assistant.enable {
             passwordFile = config.age.secrets.mosquitto-pw-home_assistant.path;
             acl = [ "readwrite #" ];
           };

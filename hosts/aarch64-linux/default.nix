@@ -14,9 +14,9 @@ in
 (inputs.nixos-raspberrypi.lib.nixosSystemFull
 {
   specialArgs = {
-    inherit (config) nodes;
     inherit inputs username pkgs-unstable pkgs-stable;
     inherit (inputs) nixos-raspberrypi;
+    inherit (config) nodes;
   };
   modules = [
     ./${name}

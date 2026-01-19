@@ -6,6 +6,7 @@
       inputs.disko.nixosModules.disko
       inputs.impermanence.nixosModules.impermanence
       inputs.agenix.nixosModules.default
+      # Hardware configuration
       ./hw.nix
       ./disko-nvme-zfs.nix
       ./impermanence.nix
@@ -20,5 +21,12 @@
       inputs.self.nixosModules.system-user
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.backup
+      inputs.self.nixosModules.nix
+      # Homelab
+      inputs.self.nixosModules.proxy
+      inputs.self.nixosModules.zigbee2mqtt
+      inputs.self.nixosModules.ha
+      inputs.self.nixosModules.mosquitto
+      inputs.self.nixosModules.meta
     ];
 }

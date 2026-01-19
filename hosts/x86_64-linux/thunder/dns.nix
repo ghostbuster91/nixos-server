@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let
   deckardIp = config.homelab.deckard.vlan.ip;
+  malina5Ip = config.homelab.malina5.vlan.ip;
   vpnCidr = config.homelab.vpnCidr;
   ext-domain = config.homelab.ext-domain;
   unbound-zones-adblock = pkgs.callPackage ./unbound-zones-adblock.nix { };
@@ -21,10 +22,10 @@ in
         local-zone = [ ''"${ext-domain}." transparent'' ];
 
         local-data = [
-          ''"zigbee.${ext-domain}.      IN A ${deckardIp}"''
+          ''"zigbee.${ext-domain}.      IN A ${malina5Ip}"''
+          ''"ha.${ext-domain}.          IN A ${malina5Ip}"''
           ''"prometheus.${ext-domain}.  IN A ${deckardIp}"''
           ''"loki.${ext-domain}.        IN A ${deckardIp}"''
-          ''"ha.${ext-domain}.          IN A ${deckardIp}"''
           ''"grafana.${ext-domain}.     IN A ${deckardIp}"''
           ''"auth.${ext-domain}.        IN A ${deckardIp}"''
           ''"oauth2.${ext-domain}.      IN A ${deckardIp}"''

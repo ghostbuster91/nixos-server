@@ -7,18 +7,18 @@ in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
-  "prometheus-hass-token.age".publicKeys = [ kghost deckard ];
+  "prometheus-hass-token.age".publicKeys = [ kghost deckard malina5 ];
   "alertmanager.age".publicKeys = [ kghost deckard ];
   "grafana-secret-key.age".publicKeys = [ kghost deckard ];
 
-  "zigbee2mqtt-network-key.age".publicKeys = [ kghost deckard ];
-  "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost deckard ];
-  "mosquitto-pw-zigbee2mqtt.age".publicKeys = [ kghost deckard ];
-  "mosquitto-pw-home_assistant.age".publicKeys = [ kghost deckard ];
-  "mosquitto-ampio-bridge-pw.age".publicKeys = [ kghost deckard ];
+  "zigbee2mqtt-network-key.age".publicKeys = [ kghost malina5 ];
+  "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost malina5 ];
+  "mosquitto-pw-zigbee2mqtt.age".publicKeys = [ kghost malina5 ];
+  "mosquitto-pw-home_assistant.age".publicKeys = [ kghost malina5 ];
+  "mosquitto-ampio-bridge-pw.age".publicKeys = [ kghost malina5 ];
 
-  "acme-cloudflare-dns-token.age".publicKeys = [ kghost deckard thunder ];
-  "acme-cloudflare-zone-token.age".publicKeys = [ kghost deckard thunder ];
+  "acme-cloudflare-dns-token.age".publicKeys = [ kghost deckard thunder malina5 ];
+  "acme-cloudflare-zone-token.age".publicKeys = [ kghost deckard thunder malina5 ];
 
   "meta.nix.age".publicKeys = [ kghost deckard thunder ];
 
