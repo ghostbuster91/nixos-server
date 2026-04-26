@@ -11,6 +11,8 @@
       ./headscale.nix
       ./dns.nix
       ./blog.nix
+      ./mattermost.nix
+      ./cloudflare-tunnel.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];
