@@ -1,4 +1,4 @@
-{ inputs, system, lib, config, username, ... }:
+{ inputs, system, config, username, ... }:
 # Creates a new nixosSystem with the correct specialArgs, pkgs and name definition
 { name }:
 let
