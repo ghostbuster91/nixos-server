@@ -21,6 +21,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     # flake-parts
     flake-parts = {
       url = "github:hercules-ci/flake-parts";

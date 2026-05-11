@@ -1,4 +1,5 @@
 { pkgs, username, ... }: {
+  nixpkgs.config.allowUnfree = true;
   nix = {
     # Automate garbage collection
     gc = {

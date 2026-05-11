@@ -3,37 +3,38 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
     [
-      ./custom.nix
       ./backup.nix
-      ./hardware-configuration.nix
-      ./networking.nix # generated at runtime by nixos-infect
-      ./topology.nix
-      ./headscale.nix
-      ./dns.nix
-      ./blog.nix
-      ./mattermost.nix
-      ./cloudflare-tunnel.nix
+      ./custom.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
-        disks = [ "/dev/sda" ];
+        disks = [ "/dev/nvme0n1" ];
       })
-      inputs.self.nixosModules.meta
       ./impermanence.nix
+      ./nvidia.nix
       inputs.impermanence.nixosModules.impermanence
-      inputs.nix-topology.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
       inputs.agenix.nixosModules.default
-      inputs.self.nixosModules.proxy
-      inputs.self.nixosModules.meta
-      inputs.self.nixosModules.backup
-      inputs.self.nixosModules.logs-promtail
-      inputs.self.nixosModules.prometheus-client
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.system-user
       inputs.nix-index-database.nixosModules.nix-index
-      inputs.self.nixosModules.kanidm
+      inputs.nixos-facter-modules.nixosModules.facter
+      {
+        config.facter.reportPath =
+          if builtins.pathExists ./facter.json then
+            ./facter.json
+          else
+            throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
+      }
+      inputs.self.nixosModules.backup
+      {
+        config.homelab.hostname = "beast";
+      }
+      inputs.self.nixosModules.meta
+      inputs.self.nixosModules.proxy
+      inputs.self.nixosModules.oauth2
+      inputs.self.nixosModules.oauth2-proxy
     ];
 
   home-manager = {

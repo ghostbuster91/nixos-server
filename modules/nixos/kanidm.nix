@@ -39,7 +39,7 @@ in
   };
 
   services.kanidm = {
-    package = pkgs.kanidm.withSecretProvisioning;
+    package = pkgs.kanidmWithSecretProvisioning_1_10;
     enableServer = true;
     serverSettings = {
       origin = "https://${kanidmDomainExt}";

@@ -71,6 +71,10 @@ in
     type = types.str;
   };
 
+  options.homelab.beast.vlan.ip = mkOption {
+    type = types.str;
+  };
+
   options.homelab.vpnCidr = mkOption {
     type = types.str;
   };

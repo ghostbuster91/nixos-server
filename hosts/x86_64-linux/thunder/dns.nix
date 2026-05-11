@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 let
+  beastIp = config.homelab.beast.vlan.ip;
+  thunderIp = config.homelab.thunder.vlan.ip;
   deckardIp = config.homelab.deckard.vlan.ip;
   malina5Ip = config.homelab.malina5.vlan.ip;
   vpnCidr = config.homelab.vpnCidr;
@@ -27,10 +29,11 @@ in
           ''"prometheus.${ext-domain}.  IN A ${deckardIp}"''
           ''"loki.${ext-domain}.        IN A ${deckardIp}"''
           ''"grafana.${ext-domain}.     IN A ${deckardIp}"''
-          ''"auth.${ext-domain}.        IN A ${deckardIp}"''
-          ''"oauth2.${ext-domain}.      IN A ${deckardIp}"''
+          ''"auth.${ext-domain}.        IN A ${thunderIp}"''
+          ''"oauth2.${ext-domain}.      IN A ${beastIp}"''
           ''"esphome.${ext-domain}.     IN A ${deckardIp}"''
           ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
+          ''"chat.${ext-domain}.        IN A ${beastIp}"''
           ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
         ];
 
@@ -76,7 +79,7 @@ in
         ];
         root-hints = builtins.fetchurl {
           url = "https://www.internic.net/domain/named.cache";
-          sha256 = "sha256:0hqknd6s2dp9lik9a7iywx5m6c9l9x2hn66h0r16kc889hjk0ai6";
+          sha256 = "sha256:0hqngq0q7adps3rkcfrpf7mfsy26g57854ydps28jydad9lhj9n6";
         };
         statistics-interval = 0; # stats on demand
         extended-statistics = true;

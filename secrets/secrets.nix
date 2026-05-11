@@ -3,6 +3,7 @@ let
   deckard = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJF6U22I97ZyRPXJmJmlmvgHI7akGC8z/mlUVaCiLaOf";
   thunder = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHBzMDaORL8CemRY6V3B2Ziif1wwU5O2j9sXc0O7dvgn";
   malina5 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBa0PJR7s0hD8Ht+obNNGavut8WlNNlX+Kax0bq83Xu1";
+  beast = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwcg1+0/b3eIKQUBwSNMHpo8dNIFCZmEWCEsmS3v6R3";
 in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
@@ -17,26 +18,27 @@ in
   "mosquitto-pw-home_assistant.age".publicKeys = [ kghost malina5 ];
   "mosquitto-ampio-bridge-pw.age".publicKeys = [ kghost malina5 ];
 
-  "acme-cloudflare-dns-token.age".publicKeys = [ kghost deckard thunder malina5 ];
-  "acme-cloudflare-zone-token.age".publicKeys = [ kghost deckard thunder malina5 ];
+  "acme-cloudflare-dns-token.age".publicKeys = [ kghost deckard thunder malina5 beast ];
+  "acme-cloudflare-zone-token.age".publicKeys = [ kghost deckard thunder malina5 beast ];
 
-  "meta.nix.age".publicKeys = [ kghost deckard thunder ];
+  "meta.nix.age".publicKeys = [ kghost deckard thunder beast ];
 
-  "borgEncPass.age".publicKeys = [ kghost deckard thunder malina5 ];
-  "borgSSHKey.age".publicKeys = [ kghost deckard thunder malina5 ];
+  "borgEncPass.age".publicKeys = [ kghost deckard thunder malina5 beast ];
+  "borgSSHKey.age".publicKeys = [ kghost deckard thunder malina5 beast ];
 
-  "kanidm-selfsigned.key.age".publicKeys = [ kghost deckard ];
-  "kanidm-selfsigned.cert.age".publicKeys = [ kghost deckard ];
+  "kanidm-selfsigned.key.age".publicKeys = [ kghost thunder ];
+  "kanidm-selfsigned.cert.age".publicKeys = [ kghost thunder ];
 
   # replace with random agenix-rekey
-  "kanidm-admin-password.age".publicKeys = [ kghost deckard ];
-  "kanidm-idm-admin-password.age".publicKeys = [ kghost deckard ];
-  "kanidm-oauth2-grafana.age".publicKeys = [ kghost deckard ];
-  "kanidm-oauth2-proxy.age".publicKeys = [ kghost deckard ];
-  "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost deckard ];
+  "kanidm-admin-password.age".publicKeys = [ kghost thunder ];
+  "kanidm-idm-admin-password.age".publicKeys = [ kghost thunder ];
+  "kanidm-oauth2-proxy.age".publicKeys = [ kghost thunder beast ];
 
-  "oauth2-cookie-secret.age".publicKeys = [ kghost deckard ];
-  "oauth2-cookie-client-secret.age".publicKeys = [ kghost deckard ];
+  "kanidm-oauth2-grafana.age".publicKeys = [ kghost thunder deckard ];
+  "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder deckard ];
+
+  "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast];
+  "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast ];
 
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
   "postgres-linkwarden-password.age".publicKeys = [ kghost deckard ];
