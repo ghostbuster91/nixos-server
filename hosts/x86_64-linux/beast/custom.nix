@@ -23,18 +23,29 @@
   };
 
   environment.systemPackages = with pkgs; [
+    jq
     vim
     git
     wget
     lshw
     dig
     busybox
+    curl
   ];
 
   programs.zsh.enable = true;
   programs.zsh.histFile = "$HOME/.local/share/zsh_history";
 
-  services.tailscale.enable = true;
+  age.secrets.beast-tailscale-key = {
+    file = ../../../secrets/beast-tailscale-key.age;
+    mode = "600";
+    owner = username;
+  };
+  services.tailscale = {
+    enable = true;
+    authKeyFile = config.age.secrets.beast-tailscale-key.path;
+    extraUpFlags = [ "--advertise-tags=tag:ai" "--login-server=https://headscale.${config.homelab.sec-domain}" ];
+  };
 
   # https://github.com/nix-community/impermanence/issues/254
   system.activationScripts."createPersistentStorageDirs".deps = [ "var-lib-private-permissions" "users" "groups" ];

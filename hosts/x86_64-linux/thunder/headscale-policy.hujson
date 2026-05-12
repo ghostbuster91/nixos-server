@@ -1,0 +1,31 @@
+{
+  "groups": {
+    "group:admins": ["kghost@"],
+    "group:family": ["kamil@", "kornel@"]
+  },
+
+  "tagOwners": {
+    "tag:media": ["group:admins"],
+    "tag:monitoring": ["group:admins"],
+    "tag:infra": ["group:admins"],
+    "tag:ai": ["group:admins"],
+    "tag:auth": ["group:admins"]
+  },
+
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["*:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["group:family"],
+      "dst": [
+        "tag:ai:443",
+        "tag:ai:80",
+        "tag:auth:*"
+      ]
+    }
+  ]
+}

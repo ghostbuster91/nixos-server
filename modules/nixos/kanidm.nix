@@ -39,7 +39,7 @@ in
   };
 
   services.kanidm = {
-    package = pkgs.kanidmWithSecretProvisioning_1_10;
+    package = pkgs.kanidmWithSecretProvisioning_1_9;
     enableServer = true;
     serverSettings = {
       origin = "https://${kanidmDomainExt}";
@@ -61,8 +61,18 @@ in
       enable = true;
       persons = {
         "kasper" = {
-          mailAddresses = [ "noreply@example.com" ];
+          mailAddresses = [ "kasper.noreply@example.com" ];
           groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" ];
+          displayName = "Kasper";
+        };
+        "kamil" = {
+          mailAddresses = [ "kamil.noreply@example.com" ];
+          groups = [ "web-sentinel.access" "web-sentinel.openwebui" ];
+          displayName = "Kasper";
+        };
+        "kornel" = {
+          mailAddresses = [ "kornel.noreply@example.com" ];
+          groups = [ "web-sentinel.access" "web-sentinel.openwebui" ];
           displayName = "Kasper";
         };
       };

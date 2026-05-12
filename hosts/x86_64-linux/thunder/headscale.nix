@@ -22,6 +22,12 @@ in {
       settings = {
         server_url = "https://${domain}";
         logtail.enabled = false;
+
+        policy = {
+          mode = "file";
+          path = ./headscale-policy.hujson;
+        };
+
         dns = {
           magic_dns = true;
           base_domain = "tail.${config.homelab.ext-domain}";

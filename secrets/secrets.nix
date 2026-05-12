@@ -43,5 +43,10 @@ in
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
   "postgres-linkwarden-password.age".publicKeys = [ kghost deckard ];
   "nextauth-linkwarden-secret.age".publicKeys = [ kghost deckard ];
+
+  "beast-tailscale-key.age".publicKeys = [ kghost beast ];
+  "mailna-tailscale-key.age".publicKeys = [ kghost malina5 ];
+  "thunder-tailscale-key.age".publicKeys = [ kghost thunder ];
+
 }
 
