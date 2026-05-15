@@ -16,6 +16,7 @@
       ./custom.nix
       ./nice-looking-console.nix
       ./backup.nix
+      ./actual.nix
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.zfs
       inputs.self.nixosModules.system-user

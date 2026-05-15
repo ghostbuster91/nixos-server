@@ -34,6 +34,7 @@ in
           ''"esphome.${ext-domain}.     IN A ${deckardIp}"''
           ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
           ''"chat.${ext-domain}.        IN A ${beastIp}"''
+          ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
           ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
         ];
 

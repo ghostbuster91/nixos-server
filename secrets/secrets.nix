@@ -36,6 +36,7 @@ in
 
   "kanidm-oauth2-grafana.age".publicKeys = [ kghost thunder deckard ];
   "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder deckard ];
+  "kanidm-oauth2-actual.age".publicKeys = [ kghost thunder malina5 ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast ];

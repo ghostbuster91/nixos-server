@@ -23,6 +23,7 @@ in
   age.secrets.kanidm-oauth2-grafana = mkSecret ../../secrets/kanidm-oauth2-grafana.age;
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
+  age.secrets.kanidm-oauth2-actual = mkSecret ../../secrets/kanidm-oauth2-actual.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -62,7 +63,7 @@ in
       persons = {
         "kasper" = {
           mailAddresses = [ "kasper.noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" ];
+          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access"];
           displayName = "Kasper";
         };
         "kamil" = {
@@ -134,6 +135,21 @@ in
         basicSecretFile = config.age.secrets.kanidm-oauth2-linkwarden.path;
         enableLegacyCrypto = true;
         scopeMaps."linkwarden.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+      };
+      # Actual
+      groups."actual.access" = { };
+      systems.oauth2.actual = {
+        displayName = "Actual";
+        originUrl = "https://actual.${config.homelab.ext-domain}/openid/callback";
+        originLanding = "https://actual.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-actual.path;
+        preferShortUsername = true;
+        enableLegacyCrypto = true;
+        scopeMaps."actual.access" = [
           "openid"
           "email"
           "profile"
