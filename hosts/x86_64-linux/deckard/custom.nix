@@ -18,15 +18,6 @@
     shell = pkgs.zsh;
   };
 
-  environment.systemPackages = with pkgs; [
-    vim
-    git
-    wget
-    lshw
-    dig
-    busybox
-  ];
-
   programs.zsh.enable = true;
   programs.zsh.histFile = "$HOME/.local/share/zsh_history";
 

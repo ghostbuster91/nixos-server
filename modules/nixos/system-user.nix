@@ -1,6 +1,17 @@
-{ username, ... }: {
-  # This is identical to what nixos installer does in
-  # (modulesPash + "profiles/installation-device.nix")
+{ username, pkgs, ... }: {
+
+  environment.systemPackages = with pkgs; [
+    jq
+    vim
+    git
+    wget
+    lshw
+    dig
+    busybox
+    curl
+    htop
+    tree
+  ];
 
   users.users.${username} = {
     isNormalUser = true;

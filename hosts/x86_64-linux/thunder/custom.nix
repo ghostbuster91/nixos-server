@@ -24,18 +24,6 @@
     shell = pkgs.zsh;
   };
 
-  environment.systemPackages = with pkgs; [
-    jq
-    vim
-    git
-    wget
-    lshw
-    dig
-    busybox
-    curl
-  ];
-
-
   services.fail2ban.enable = true;
   security.apparmor = {
     enable = true;

@@ -22,17 +22,6 @@
     shell = pkgs.zsh;
   };
 
-  environment.systemPackages = with pkgs; [
-    jq
-    vim
-    git
-    wget
-    lshw
-    dig
-    busybox
-    curl
-  ];
-
   programs.zsh.enable = true;
   programs.zsh.histFile = "$HOME/.local/share/zsh_history";
 

@@ -17,11 +17,6 @@
       ENV{UDISKS_IGNORE}="1"
   '';
 
-  environment.systemPackages = with pkgs; [
-    tree
-    vim
-  ];
-
   system.nixos.tags =
     let
       cfg = config.boot.loader.raspberryPi;
