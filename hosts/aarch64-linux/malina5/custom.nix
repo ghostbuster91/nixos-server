@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, ... }: {
 
   # We are stateless, so just default to latest.
   system.stateVersion = config.system.nixos.release;

@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 let
   databaseName = "linkwarden";
 in
@@ -57,7 +57,6 @@ in
 
   services.linkwarden = {
     enable = true;
-    package = inputs.linkwardenPkgs.legacyPackages.x86_64-linux.linkwarden;
     database = {
       createLocally = false;
       # TODO use unix domain socket?

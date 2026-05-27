@@ -63,7 +63,7 @@ in
       persons = {
         "kasper" = {
           mailAddresses = [ "kasper.noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access"];
+          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" ];
           displayName = "Kasper";
         };
         "kamil" = {

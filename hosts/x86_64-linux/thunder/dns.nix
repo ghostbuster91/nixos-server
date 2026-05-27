@@ -35,6 +35,7 @@ in
           ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
           ''"chat.${ext-domain}.        IN A ${beastIp}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
+          ''"attic.${ext-domain}.       IN A ${malina5Ip}"''
           ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
         ];
 
@@ -78,10 +79,7 @@ in
           "${vpnCidr} allow"
           "0.0.0.0/0 refuse"
         ];
-        root-hints = builtins.fetchurl {
-          url = "https://www.internic.net/domain/named.cache";
-          sha256 = "sha256:0hqngq0q7adps3rkcfrpf7mfsy26g57854ydps28jydad9lhj9n6";
-        };
+        root-hints = "${pkgs.dns-root-data}/root.hints";
         statistics-interval = 0; # stats on demand
         extended-statistics = true;
         statistics-cumulative = true;

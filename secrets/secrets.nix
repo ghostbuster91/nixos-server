@@ -49,5 +49,7 @@ in
   "mailna-tailscale-key.age".publicKeys = [ kghost malina5 ];
   "thunder-tailscale-key.age".publicKeys = [ kghost thunder ];
 
+  "atticd-env.age".publicKeys = [ kghost malina5 ];
+
 }
 

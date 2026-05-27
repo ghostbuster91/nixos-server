@@ -338,22 +338,6 @@
         "type": "github"
       }
     },
-    "linkwardenPkgs": {
-      "locked": {
-        "lastModified": 1759960223,
-        "narHash": "sha256-cHLfOTcWXgTmEFZGg3/y2rW68MfCS40KkT+xw56PZLE=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "4ec54e9efbbd1399a039f7161b4c4407c1813aef",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nix-index-database": {
       "inputs": {
         "nixpkgs": [
@@ -647,7 +631,6 @@
         "ghostbuster91-blog": "ghostbuster91-blog",
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
-        "linkwardenPkgs": "linkwardenPkgs",
         "nix-index-database": "nix-index-database",
         "nix-topology": "nix-topology",
         "nixos-facter-modules": "nixos-facter-modules",

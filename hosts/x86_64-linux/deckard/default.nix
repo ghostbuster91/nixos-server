@@ -3,7 +3,6 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
     [
-      "${inputs.linkwardenPkgs}/nixos/modules/services/web-apps/linkwarden.nix"
       ./custom.nix
       ./backup.nix
       ./hardware-configuration.nix
