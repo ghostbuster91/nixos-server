@@ -4,6 +4,13 @@ let
 in
 {
   age.secrets.atticd-env.file = ../../../secrets/atticd-env.age;
+  age.secrets.attic-pusher-config.file = ../../../secrets/attic-pusher-config.age;
+
+  services.attic-watch-store = {
+    enable = true;
+    cache = "malina5:system";
+    credentialsFile = config.age.secrets.attic-pusher-config.path;
+  };
 
   services.atticd = {
     enable = true;
@@ -41,12 +48,7 @@ in
 
   environment.persistence."/state" = {
     directories = [
-      {
-        directory = "/var/lib/atticd";
-        user = "atticd";
-        group = "atticd";
-        mode = "0750";
-      }
+      "/var/lib/private/atticd"
     ];
   };
 }

@@ -21,6 +21,7 @@
     ssh = ./ssh.nix;
     impermanence = ./impermanence.nix;
     system-user = ./system-user.nix;
+    attic-watch-store = ./attic-watch-store.nix;
   };
 
 }

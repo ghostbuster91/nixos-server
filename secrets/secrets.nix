@@ -50,6 +50,7 @@ in
   "thunder-tailscale-key.age".publicKeys = [ kghost thunder ];
 
   "atticd-env.age".publicKeys = [ kghost malina5 ];
+  "attic-pusher-config.age".publicKeys = [ kghost malina5 beast ];
 
 }
 

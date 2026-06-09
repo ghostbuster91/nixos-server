@@ -23,6 +23,7 @@
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.backup
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.attic-watch-store
       # Homelab
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.zigbee2mqtt

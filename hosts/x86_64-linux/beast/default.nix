@@ -5,6 +5,7 @@
     [
       ./backup.nix
       ./custom.nix
+      ./attic-pusher.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/nvme0n1" ];
@@ -16,6 +17,7 @@
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.attic-watch-store
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.system-user
       inputs.nix-index-database.nixosModules.nix-index

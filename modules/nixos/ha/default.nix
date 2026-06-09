@@ -48,6 +48,7 @@ in
         "esphome"
         "aws_s3"
         "shelly"
+        "tedee"
       ];
       config = {
         # Includes dependencies for a basic setup
