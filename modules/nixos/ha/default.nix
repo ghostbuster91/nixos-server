@@ -60,6 +60,37 @@ in
           use_x_forwarded_for = true;
         };
         prometheus = { };
+        automation = [
+          {
+            alias = "Lock front door at 23:00";
+            trigger = [{
+              platform = "time";
+              at = "23:00:00";
+            }];
+            action = [{
+              service = "lock.lock";
+              target.entity_id = "lock.drzwi_glowne";
+            }];
+          }
+          {
+            alias = "Re-lock front door if left unlocked at night";
+            trigger = [{
+              platform = "state";
+              entity_id = "lock.drzwi_glowne";
+              to = "unlocked";
+              for = "00:10:00";
+            }];
+            condition = [{
+              condition = "time";
+              after = "23:00:00";
+              before = "06:00:00";
+            }];
+            action = [{
+              service = "lock.lock";
+              target.entity_id = "lock.drzwi_glowne";
+            }];
+          }
+        ];
         mqtt = {
           sensor = [
             {
