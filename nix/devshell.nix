@@ -19,6 +19,7 @@
           pkgs.age
           pkgs.nix
           pkgs.cloudflared
+          pkgs.borgbackup
         ];
         commands =
           let
@@ -41,6 +42,47 @@
                 # Format
                 ${pv} -tpreb "$iso" | sudo dd bs=4M of="$dev" iflag=fullblock conv=notrunc,noerror oflag=sync
               '';
+            explore-backup = host:
+              let
+                agenix = inputs.agenix.outputs.packages.${system}.agenix;
+                borg = "${pkgs.borgbackup}/bin/borg";
+              in
+              pkgs.writeShellScriptBin "explore-backup-${host}" ''
+                set -euo pipefail
+
+                repo_id="$(nix eval --raw .#nixosConfigurations.${host}.config.backup.repoId)"
+                repo="ssh://''${repo_id}@''${repo_id}.repo.borgbase.com/./repo"
+
+                workdir="$(mktemp -d -t explore-backup-${host}.XXXXXX)"
+                mountpoint="$workdir/mnt"
+                mkdir -p "$mountpoint"
+
+                cleanup() {
+                  ${borg} umount "$mountpoint" 2>/dev/null || true
+                  rm -rf "$workdir"
+                }
+                trap cleanup EXIT
+
+                ( cd secrets && ${agenix}/bin/agenix -d borgEncPass.age ) > "$workdir/pass"
+                ( cd secrets && ${agenix}/bin/agenix -d borgSSHKey.age ) > "$workdir/sshkey"
+                chmod 600 "$workdir/pass" "$workdir/sshkey"
+
+                export BORG_REPO="$repo"
+                export BORG_PASSCOMMAND="cat $workdir/pass"
+                export BORG_RSH="ssh -i $workdir/sshkey -o StrictHostKeyChecking=accept-new"
+
+                echo "Mounting borg repo for ${host} ($repo)..."
+                ${borg} mount "$BORG_REPO" "$mountpoint"
+
+                echo ""
+                echo "Mounted at: $mountpoint"
+                echo "Each archive (snapshot) appears as a subdirectory."
+                echo "Exit this shell to unmount and clean up."
+                echo ""
+
+                cd "$mountpoint"
+                exec "$SHELL"
+              '';
           in
           [
             {
@@ -53,6 +95,22 @@
             {
               package = flash-iso-image "flash-deckard-iso" "live-iso";
               help = "Flash installer-iso image for deckard";
+            }
+            {
+              package = explore-backup "deckard";
+              help = "Mount deckard's BorgBase repo and drop into a subshell to browse it";
+            }
+            {
+              package = explore-backup "thunder";
+              help = "Mount thunder's BorgBase repo and drop into a subshell to browse it";
+            }
+            {
+              package = explore-backup "beast";
+              help = "Mount beast's BorgBase repo and drop into a subshell to browse it";
+            }
+            {
+              package = explore-backup "malina5";
+              help = "Mount malina5's BorgBase repo and drop into a subshell to browse it";
             }
 
 
