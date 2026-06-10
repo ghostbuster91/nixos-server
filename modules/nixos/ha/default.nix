@@ -97,7 +97,7 @@ in
           sensor = [
             {
               device_class = "temperature";
-              name = "Czujnik sypialnia";
+              name = "Czujnik temperatury i wilgotności";
               state_topic = "ampio/from/1C60E/state/t/1";
               state_class = "measurement";
               unique_id = "ampio_bedroom_temp";
@@ -105,7 +105,7 @@ in
             }
             {
               device_class = "temperature";
-              name = "Czujnik łazienka";
+              name = "Czujnik temperatury i wilgotności";
               state_topic = "ampio/from/1B6B0/state/t/1";
               state_class = "measurement";
               unique_id = "ampio_bathroom_temp";
@@ -113,7 +113,7 @@ in
             }
             {
               device_class = "temperature";
-              name = "Czujnik pralnia";
+              name = "Czujnik temperatury i wilgotności";
               state_topic = "ampio/from/1C5F3/state/t/1";
               state_class = "measurement";
               unique_id = "ampio_laundry_temp";
@@ -121,7 +121,7 @@ in
             }
             {
               device_class = "temperature";
-              name = "Czujnik gabinet";
+              name = "Czujnik temperatury i wilgotności";
               state_topic = "ampio/from/1C6ED/state/t/1";
               state_class = "measurement";
               unique_id = "ampio_study_temp";
@@ -129,7 +129,7 @@ in
             }
             {
               device_class = "temperature";
-              name = "Czujnik salon";
+              name = "Czujnik temperatury i wilgotności";
               state_topic = "ampio/from/1C625/state/t/1";
               state_class = "measurement";
               unique_id = "ampio_livingroom_temp";
