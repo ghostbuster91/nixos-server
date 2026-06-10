@@ -46,7 +46,10 @@
   services.ollama = {
     enable = true;
     package = pkgs.ollama-cuda;
+    host = "0.0.0.0";
   };
+
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ config.services.ollama.port ];
 
   services.open-webui = {
     enable = true;
