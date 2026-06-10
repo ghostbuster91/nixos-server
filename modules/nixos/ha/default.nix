@@ -50,6 +50,7 @@ in
         "shelly"
         "tedee"
         "wyoming"
+        "ollama"
       ];
       config = {
         # Includes dependencies for a basic setup
