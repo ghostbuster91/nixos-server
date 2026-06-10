@@ -49,6 +49,7 @@ in
         "aws_s3"
         "shelly"
         "tedee"
+        "wyoming"
       ];
       config = {
         # Includes dependencies for a basic setup

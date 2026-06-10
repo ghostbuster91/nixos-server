@@ -6,6 +6,7 @@
       ./backup.nix
       ./custom.nix
       ./attic-pusher.nix
+      ./whisper.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/nvme0n1" ];
