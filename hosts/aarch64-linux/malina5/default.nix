@@ -24,6 +24,15 @@
       inputs.self.nixosModules.backup
       inputs.self.nixosModules.nix
       inputs.self.nixosModules.attic-watch-store
+      inputs.self.nixosModules.nix-remote-builder
+      {
+        services.nix-remote-builder = {
+          enable = true;
+          authorizedKeys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHCRRt2uAKj46yJ61AjOJSFSXGzleSxbLsjr5f32F9Z/ root@focus"
+          ];
+        };
+      }
       # Homelab
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.zigbee2mqtt

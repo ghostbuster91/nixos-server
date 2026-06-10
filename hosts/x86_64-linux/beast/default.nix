@@ -19,6 +19,15 @@
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
       inputs.self.nixosModules.attic-watch-store
+      inputs.self.nixosModules.nix-remote-builder
+      {
+        services.nix-remote-builder = {
+          enable = true;
+          authorizedKeys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHCRRt2uAKj46yJ61AjOJSFSXGzleSxbLsjr5f32F9Z/ root@focus"
+          ];
+        };
+      }
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.system-user
       inputs.nix-index-database.nixosModules.nix-index
