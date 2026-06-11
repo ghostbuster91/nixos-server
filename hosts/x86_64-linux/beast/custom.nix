@@ -89,13 +89,6 @@
       #   expectedBodyRegex = "Open WebUI";
       # };
     };
-    upstreams.comfyui = {
-      servers."127.0.0.1:${toString config.services.comfyui.port}" = { };
-      extraConfig = ''
-        zone comfyui 64k;
-        keepalive 2;
-      '';
-    };
     virtualHosts."chat.${config.homelab.ext-domain}" = {
       forceSSL = true;
       useACMEHost = config.homelab.ext-domain;
@@ -111,21 +104,6 @@
         proxyPass = "http://open-webui";
         proxyWebsockets = true;
         # X-Frame-Options = "SAMEORIGIN";
-      };
-    };
-    virtualHosts."comfyui.${config.homelab.ext-domain}" = {
-      forceSSL = true;
-      useACMEHost = config.homelab.ext-domain;
-      oauth2 = {
-        enable = true;
-        allowedGroups = [ "access_openwebui" ];
-      };
-      extraConfig = ''
-        client_max_body_size 128M;
-      '';
-      locations."/" = {
-        proxyPass = "http://comfyui";
-        proxyWebsockets = true;
       };
     };
   };
