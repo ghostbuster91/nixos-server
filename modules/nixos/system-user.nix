@@ -11,6 +11,7 @@
     curl
     htop
     tree
+    duf
   ];
 
   users.users.${username} = {

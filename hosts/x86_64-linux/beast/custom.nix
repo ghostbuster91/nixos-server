@@ -66,6 +66,10 @@
       OLLAMA_BASE_URL = "http://localhost:${toString config.services.ollama.port}";
       TRANSFORMERS_CACHE = "/var/lib/open-webui/.cache/huggingface";
 
+      ENABLE_IMAGE_GENERATION = "True";
+      IMAGE_GENERATION_ENGINE = "comfyui";
+      COMFYUI_BASE_URL = "http://127.0.0.1:${toString config.services.comfyui.port}";
+
       WEBUI_AUTH = "False";
       ENABLE_SIGNUP = "False";
       WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "X-Email";
@@ -73,40 +77,58 @@
     };
   };
 
-  services.nginx =
-    let
-      roleName = "chat";
-    in
-    {
-      upstreams.open-webui = {
-        servers."127.0.0.1:${toString config.services.open-webui.port}" = { };
-        extraConfig = ''
-          zone open-webui 64k;
-          keepalive 2;
-        '';
-        # monitoring = {
-        #   enable = true;
-        #   expectedBodyRegex = "Open WebUI";
-        # };
+  services.nginx = {
+    upstreams.open-webui = {
+      servers."127.0.0.1:${toString config.services.open-webui.port}" = { };
+      extraConfig = ''
+        zone open-webui 64k;
+        keepalive 2;
+      '';
+      # monitoring = {
+      #   enable = true;
+      #   expectedBodyRegex = "Open WebUI";
+      # };
+    };
+    upstreams.comfyui = {
+      servers."127.0.0.1:${toString config.services.comfyui.port}" = { };
+      extraConfig = ''
+        zone comfyui 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts."chat.${config.homelab.ext-domain}" = {
+      forceSSL = true;
+      useACMEHost = config.homelab.ext-domain;
+      oauth2 = {
+        enable = true;
+        allowedGroups = [ "access_openwebui" ];
+        X-Email = "\${upstream_http_x_auth_request_preferred_username}@${config.homelab.ext-domain}";
       };
-      virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
-        forceSSL = true;
-        useACMEHost = config.homelab.ext-domain;
-        oauth2 = {
-          enable = true;
-          allowedGroups = [ "access_openwebui" ];
-          X-Email = "\${upstream_http_x_auth_request_preferred_username}@${config.homelab.ext-domain}";
-        };
-        extraConfig = ''
-          client_max_body_size 128M;
-        '';
-        locations."/" = {
-          proxyPass = "http://open-webui";
-          proxyWebsockets = true;
-          # X-Frame-Options = "SAMEORIGIN";
-        };
+      extraConfig = ''
+        client_max_body_size 128M;
+      '';
+      locations."/" = {
+        proxyPass = "http://open-webui";
+        proxyWebsockets = true;
+        # X-Frame-Options = "SAMEORIGIN";
       };
     };
+    virtualHosts."comfyui.${config.homelab.ext-domain}" = {
+      forceSSL = true;
+      useACMEHost = config.homelab.ext-domain;
+      oauth2 = {
+        enable = true;
+        allowedGroups = [ "access_openwebui" ];
+      };
+      extraConfig = ''
+        client_max_body_size 128M;
+      '';
+      locations."/" = {
+        proxyPass = "http://comfyui";
+        proxyWebsockets = true;
+      };
+    };
+  };
 
   system.stateVersion = "25.11";
 }
