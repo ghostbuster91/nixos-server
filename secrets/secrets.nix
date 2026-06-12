@@ -35,15 +35,15 @@ in
   "kanidm-oauth2-proxy.age".publicKeys = [ kghost thunder beast ];
 
   "kanidm-oauth2-grafana.age".publicKeys = [ kghost thunder deckard ];
-  "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder deckard ];
+  "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder beast ];
   "kanidm-oauth2-actual.age".publicKeys = [ kghost thunder malina5 ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast ];
 
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
-  "postgres-linkwarden-password.age".publicKeys = [ kghost deckard ];
-  "nextauth-linkwarden-secret.age".publicKeys = [ kghost deckard ];
+  "postgres-linkwarden-password.age".publicKeys = [ kghost beast ];
+  "nextauth-linkwarden-secret.age".publicKeys = [ kghost beast ];
 
   "beast-tailscale-key.age".publicKeys = [ kghost beast ];
   "mailna-tailscale-key.age".publicKeys = [ kghost malina5 ];
