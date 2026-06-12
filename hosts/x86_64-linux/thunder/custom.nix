@@ -18,7 +18,6 @@
     authKeyFile = config.age.secrets.thunder-tailscale-key.path;
     extraUpFlags = [ "--advertise-tags=tag:auth" "--login-server=https://headscale.${config.homelab.sec-domain}" ];
   };
-  age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
   users.users.${username} = {
     shell = pkgs.zsh;
