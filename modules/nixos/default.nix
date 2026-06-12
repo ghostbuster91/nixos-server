@@ -23,6 +23,8 @@
     system-user = ./system-user.nix;
     attic-watch-store = ./attic-watch-store.nix;
     nix-remote-builder = ./nix-remote-builder.nix;
+    nixbuild = ./nixbuild.nix;
+    rpi-builder = ./rpi-builder.nix;
   };
 
 }

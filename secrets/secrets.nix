@@ -4,6 +4,7 @@ let
   thunder = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHBzMDaORL8CemRY6V3B2Ziif1wwU5O2j9sXc0O7dvgn";
   malina5 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBa0PJR7s0hD8Ht+obNNGavut8WlNNlX+Kax0bq83Xu1";
   beast = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwcg1+0/b3eIKQUBwSNMHpo8dNIFCZmEWCEsmS3v6R3";
+  surfer = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBkM0hU+Zrb1bOaMcwGO1DeM7u/jXIuCS9n7RqPYkYqH";
 in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
@@ -52,5 +53,11 @@ in
   "atticd-env.age".publicKeys = [ kghost malina5 ];
   "attic-pusher-config.age".publicKeys = [ kghost malina5 beast ];
 
+  "wifiPassword.age".publicKeys = [ kghost surfer ];
+  "legacyWifiPassword.age".publicKeys = [ kghost surfer ];
+  "legacyWifiPassword2.age".publicKeys = [ kghost surfer ];
+  "wlan00bssid.age".publicKeys = [ kghost surfer ];
+  "wlan01bssid.age".publicKeys = [ kghost surfer ];
+  "wlan10bssid.age".publicKeys = [ kghost surfer ];
 }
 

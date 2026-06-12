@@ -25,6 +25,10 @@ let
       builder = inputs.nixos-raspberrypi.lib.nixosSystemFull;
       specialArgs = { inherit (inputs) nixos-raspberrypi; };
     };
+    surfer = {
+      builder = inputs.nixos-sbc.inputs.nixpkgs.lib.nixosSystem;
+      specialArgs = { };
+    };
   };
 
   host = perHost.${name} or perHost.default;

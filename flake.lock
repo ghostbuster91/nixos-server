@@ -515,6 +515,25 @@
         "type": "github"
       }
     },
+    "nixos-sbc": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_7"
+      },
+      "locked": {
+        "lastModified": 1779187731,
+        "narHash": "sha256-6WvGjaxZmHCP3tjGXP3MB9C7qRiN6EgX4yGj4KpXHlI=",
+        "owner": "ghostbuster91",
+        "repo": "nixos-sbc",
+        "rev": "83dca2a75afb1bb68d6aebc4bb81da39c9289d7d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ghostbuster91",
+        "ref": "main",
+        "repo": "nixos-sbc",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1766902085,
@@ -672,6 +691,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_7": {
+      "locked": {
+        "lastModified": 1780952837,
+        "narHash": "sha256-Fwd1+spDtQ0hDyBwme6ufG3n4mY0UrjjFdYHv+G/Hds=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "e820eb4a444b46a19b2e03e8dfd2359439ff30fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "paper-mod": {
       "flake": false,
       "locked": {
@@ -705,6 +740,7 @@
         "nixos-facter-modules": "nixos-facter-modules",
         "nixos-generators": "nixos-generators",
         "nixos-raspberrypi": "nixos-raspberrypi",
+        "nixos-sbc": "nixos-sbc",
         "nixpkgs": [
           "nixpkgs-stable"
         ],
