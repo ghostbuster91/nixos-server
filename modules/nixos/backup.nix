@@ -3,12 +3,13 @@ let
   inherit (lib) mkOption types getExe;
   zfs = getExe pkgs.zfs;
   snapName = "borgBackup";
+  snapPath = "/persist/.zfs/snapshot/${snapName}";
   # ta funkcja robi dokładnie Twojego joba, tylko parametryzowanego
   mkBackupJob =
     { name
     , repository
     , dataset ? "rpool1/safe/persist"
-    , paths ? [ "/persist/.zfs/snapshot/${snapName}" ]
+    , paths ? [ snapPath ]
     , startAt ? "daily"
     , compression ? "auto,lzma"
     , pruneKeep ? { daily = 3; weekly = 2; monthly = 3; }
@@ -29,6 +30,8 @@ let
 
         environment.BORG_RSH = "ssh -i ${config.age.secrets.${sshKeySecret}.path}";
 
+        extraCreateArgs = "--stats";
+
         prune.keep = pruneKeep;
 
         preHook = ''
@@ -37,6 +40,11 @@ let
             ${zfs} destroy ${dataset}@${snapName}
           fi
           ${zfs} snapshot ${dataset}@${snapName}
+          # Force ZFS to auto-mount the snapshot before borg traverses it.
+          # Without this, borg's stat→readdir sees the inode change from
+          # the lazy mount, flags it as a race, and skips the entire path
+          # — producing a silent 0-file archive.
+          ls ${snapPath} > /dev/null
         '';
 
         postHook = ''
