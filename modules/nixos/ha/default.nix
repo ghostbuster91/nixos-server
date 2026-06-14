@@ -51,6 +51,7 @@ in
         "tedee"
         "wyoming"
         "ollama"
+        "satel_integra"
       ];
       config = {
         # Includes dependencies for a basic setup
