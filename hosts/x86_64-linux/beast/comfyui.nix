@@ -11,8 +11,8 @@
   };
 
   # Models live under dataDir and are large (~5-15GB per checkpoint) but
-  # reproducibly redownloadable, so /state (not backed up) is the right tank.
-  environment.persistence."/state".directories = [
+  # reproducibly redownloadable, so /data/local (not backed up) is the right tank.
+  environment.persistence."/data/local".directories = [
     {
       directory = "/var/lib/comfyui";
       mode = "0750";

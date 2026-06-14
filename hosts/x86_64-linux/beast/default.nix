@@ -10,7 +10,7 @@
       ./comfyui.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
-        disks = [ "/dev/nvme0n1" ];
+        disks = [ "/dev/nvme0n1" "/dev/nvme1n1" ];
       })
       ./impermanence.nix
       ./nvidia.nix
