@@ -63,6 +63,7 @@
       ENABLE_COMMUNITY_SHARING = "False";
       ENABLE_ADMIN_EXPORT = "False";
 
+      HOME = "/var/lib/open-webui";
       OLLAMA_BASE_URL = "http://localhost:${toString config.services.ollama.port}";
       TRANSFORMERS_CACHE = "/var/lib/open-webui/.cache/huggingface";
 
