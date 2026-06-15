@@ -55,7 +55,6 @@ in
 
   "wifiPassword.age".publicKeys = [ kghost surfer ];
   "legacyWifiPassword.age".publicKeys = [ kghost surfer ];
-  "legacyWifiPassword2.age".publicKeys = [ kghost surfer ];
   "wlan00bssid.age".publicKeys = [ kghost surfer ];
   "wlan01bssid.age".publicKeys = [ kghost surfer ];
   "wlan10bssid.age".publicKeys = [ kghost surfer ];

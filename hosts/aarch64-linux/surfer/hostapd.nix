@@ -12,7 +12,11 @@
         # use 'iw phy#1 info' to determine your VHT capabilities
         wifi4 = {
           enable = true;
-          capabilities = [ "HT40+" "LDPC" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1" "MAX-AMSDU-7935" ];
+          capabilities = [ "HT40+" "HT40-" "LDPC" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1" "MAX-AMSDU-7935" ];
+        };
+        wifi6 = {
+          enable = true;
+          operatingChannelWidth = "20";
         };
         networks = {
           wlan0 = {
@@ -117,6 +121,8 @@
           # these two are mandatory for wifi 5 & 6 to work
           vht_oper_centr_freq_seg0_idx = 50;
           he_oper_centr_freq_seg0_idx = 50;
+          # constrain ACS to the 36-64 block so the hardcoded center (50) is always valid
+          chanlist = "36 40 44 48 52 56 60 64";
 
           # The "tx_queue_data2_burst" parameter in Linux refers to the burst size for 
           # transmitting data packets from the second data queue of a network interface. 

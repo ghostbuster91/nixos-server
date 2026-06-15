@@ -3,7 +3,6 @@ let
   hostapdSecrets = {
     wifiPassword = ../../../secrets/wifiPassword.age;
     legacyWifiPassword = ../../../secrets/legacyWifiPassword.age;
-    legacyWifiPassword2 = ../../../secrets/legacyWifiPassword2.age;
     wlan00bssid = ../../../secrets/wlan00bssid.age;
     wlan01bssid = ../../../secrets/wlan01bssid.age;
     wlan10bssid = ../../../secrets/wlan10bssid.age;
