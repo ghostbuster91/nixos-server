@@ -12,7 +12,7 @@
         # use 'iw phy#1 info' to determine your VHT capabilities
         wifi4 = {
           enable = true;
-          capabilities = [ "HT40+" "HT40-" "LDPC" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1" "MAX-AMSDU-7935" ];
+          capabilities = [ "HT40+" "LDPC" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1" "MAX-AMSDU-7935" ];
         };
         wifi6 = {
           enable = true;
