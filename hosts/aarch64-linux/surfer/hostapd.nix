@@ -16,7 +16,7 @@
         };
         wifi6 = {
           enable = true;
-          operatingChannelWidth = "20";
+          operatingChannelWidth = "20or40";
         };
         networks = {
           wlan0 = {
