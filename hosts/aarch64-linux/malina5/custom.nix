@@ -41,12 +41,22 @@
   # Mirrors nixpkgs commit b9c75a3094f0 — psycopg's `slow`-marked tests have
   # timing-sensitive SIGALRM assertions that race on slower aarch64 builders
   # (upstream psycopg#883). Remove once nixpkgs is bumped past that commit.
+  #
+  # django's test_crafted_xml_performance asserts a serialization speedup factor
+  # ≤ 2 but gets ~3 on loaded aarch64 builders. Same class of flaky timing test.
+  # Remove once nixpkgs skips this test upstream.
   nixpkgs.overlays = [
     (_final: prev: {
       python313 = prev.python313.override {
         packageOverrides = _pyfinal: pyprev: {
           psycopg = pyprev.psycopg.overridePythonAttrs (old: {
             disabledTestMarks = (old.disabledTestMarks or [ ]) ++ [ "slow" ];
+          });
+          django = pyprev.django.overrideAttrs (old: {
+            postPatch = (old.postPatch or "") + ''
+              substituteInPlace tests/serializers/test_xml.py \
+                --replace-fail "test_crafted_xml_performance" "dont_test_crafted_xml_performance"
+            '';
           });
         };
       };
