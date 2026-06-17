@@ -25,7 +25,7 @@
   # DynamicUser=true on the unit means the model cache lands under
   # /var/lib/private/wyoming/faster-whisper; persisting that path avoids
   # re-downloading the ~1.6 GB turbo model after every impermanence rollback.
-  environment.persistence."/state".directories = [
+  environment.persistence."/data/local".directories = [
     {
       directory = "/var/lib/private/wyoming/faster-whisper";
       mode = "0700";

@@ -73,10 +73,14 @@
     comfyui-nix = {
       url = "github:utensils/comfyui-nix";
     };
+
+    nixos-sbc = {
+      url = "github:ghostbuster91/nixos-sbc/main";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
+      systems = [ "x86_64-linux" "aarch64-linux" ];
       imports = [
         ./nix
         ./modules
