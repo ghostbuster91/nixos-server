@@ -1,15 +1,34 @@
 { lib, pkgs, config, ... }:
 let
-  inherit (lib) mkOption types getExe;
+  inherit (lib) mkOption types getExe concatMapStrings;
   zfs = getExe pkgs.zfs;
+  mount = "${pkgs.util-linux}/bin/mount";
+  umount = "${pkgs.util-linux}/bin/umount";
   snapName = "borgBackup";
-  snapPath = "/persist/.zfs/snapshot/${snapName}";
-  # ta funkcja robi dokładnie Twojego joba, tylko parametryzowanego
+  primaryDataset = { dataset = "rpool1/safe/persist"; mountpoint = "/persist"; };
+  # Stable explicit mount path inside the service's private /tmp.
+  # Using .zfs/snapshot/ automount is unreliable: ZFS auto-unmounts it on
+  # last-close (when ls finishes), leaving borg a stale dentry → 0 files.
+  snapMount = ds: "/tmp/borg-snap-${builtins.replaceStrings ["/"] ["-"] (lib.strings.removePrefix "/" ds.mountpoint)}";
+  mkSnapHook = ds: ''
+    snaps="$(${zfs} list -H -o name -t snapshot -r ${ds.dataset})"
+    if printf '%s\n' "$snaps" | grep -qx "${ds.dataset}@${snapName}"; then
+      ${zfs} destroy ${ds.dataset}@${snapName}
+    fi
+    ${zfs} snapshot ${ds.dataset}@${snapName}
+    mkdir -p ${snapMount ds}
+    ${mount} -t zfs ${ds.dataset}@${snapName} ${snapMount ds}
+  '';
+  mkDestroyHook = ds: ''
+    ${umount} ${snapMount ds} || true
+    rmdir ${snapMount ds} || true
+    ${zfs} destroy ${ds.dataset}@${snapName} || true
+  '';
   mkBackupJob =
     { name
     , repository
-    , dataset ? "rpool1/safe/persist"
-    , paths ? [ snapPath ]
+    , datasets ? [ primaryDataset ]
+    , paths ? map snapMount datasets
     , startAt ? "daily"
     , compression ? "auto,lzma"
     , pruneKeep ? { daily = 3; weekly = 2; monthly = 3; }
@@ -34,22 +53,9 @@ let
 
         prune.keep = pruneKeep;
 
-        preHook = ''
-          snaps="$(${zfs} list -H -o name -t snapshot -r ${dataset})"
-          if printf '%s\n' "$snaps" | grep -qx "${dataset}@${snapName}"; then
-            ${zfs} destroy ${dataset}@${snapName}
-          fi
-          ${zfs} snapshot ${dataset}@${snapName}
-          # Force ZFS to auto-mount the snapshot before borg traverses it.
-          # Without this, borg's stat→readdir sees the inode change from
-          # the lazy mount, flags it as a race, and skips the entire path
-          # — producing a silent 0-file archive.
-          ls ${snapPath} > /dev/null
-        '';
+        preHook = concatMapStrings mkSnapHook datasets;
 
-        postHook = ''
-          ${zfs} destroy ${dataset}@${snapName}
-        '';
+        postHook = concatMapStrings mkDestroyHook datasets;
       };
     };
   hostname = "${config.backup.repoId}.repo.borgbase.com";
@@ -61,6 +67,16 @@ in
   options.backup.repoId = mkOption {
     type = types.str;
   };
+  options.backup.extraDatasets = mkOption {
+    type = types.listOf (types.submodule {
+      options = {
+        dataset = mkOption { type = types.str; description = "ZFS dataset name (e.g. dpool/safe/persist)"; };
+        mountpoint = mkOption { type = types.str; description = "Dataset mount point (e.g. /data/persist)"; };
+      };
+    });
+    default = [ ];
+    description = "Additional ZFS datasets to include in the backup alongside the primary rpool1/safe/persist.";
+  };
 
   config = {
     age.secrets.borgEncPass.file = ../../secrets/borgEncPass.age;
@@ -70,6 +86,7 @@ in
       mkBackupJob {
         name = config.backup.name;
         repository = "${config.backup.repoId}@${hostname}:repo";
+        datasets = [ primaryDataset ] ++ config.backup.extraDatasets;
       };
 
     programs.ssh.knownHosts = {
