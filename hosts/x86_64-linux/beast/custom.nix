@@ -8,6 +8,8 @@
     efiInstallAsRemovable = true;
   };
 
+  time.timeZone = "Europe/Warsaw";
+
   networking = {
     hostName = "beast"; # Define your hostname.
     hostId = "11fb3862";

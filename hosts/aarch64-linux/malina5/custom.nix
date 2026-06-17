@@ -6,7 +6,7 @@
   boot.zfs = {
     devNodes = "/dev/disk/by-id";
   };
-  time.timeZone = "UTC";
+  time.timeZone = "Europe/Warsaw";
   networking.hostId = "8821e309"; # NOTE: for zfs, must be unique
 
   services.udev.extraRules = ''
