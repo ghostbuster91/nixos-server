@@ -94,9 +94,6 @@ in
               return = "307 https://${cfg.portalDomain}/oauth2/start?rd=$scheme://$host$request_uri";
               extraConfig = ''
                 auth_request off;
-                # Clear the stale session cookie so oauth2-proxy starts a fresh
-                # OIDC flow instead of seeing an expired session and looping back.
-                add_header Set-Cookie "_oauth2_proxy=; Max-Age=0; Domain=.${cfg.cookieDomain}; Path=/; Secure; HttpOnly" always;
               '';
             };
 
