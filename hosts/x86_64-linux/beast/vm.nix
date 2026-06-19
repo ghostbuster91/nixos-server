@@ -1,13 +1,12 @@
 { pkgs, username, ... }:
 {
-  environment.systemPackages = [ pkgs.qemu_kvm ];
+  environment.systemPackages = [ pkgs.qemu_kvm pkgs.virt-manager pkgs.passt ];
 
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
       package = pkgs.qemu_kvm;
       runAsRoot = false;
-      ovmf.enable = true;
       swtpm.enable = true;
     };
   };
