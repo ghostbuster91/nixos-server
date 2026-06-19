@@ -65,6 +65,7 @@ in
         prometheus = { };
         automation = [
           {
+            id = "lock_front_door_at_23";
             alias = "Lock front door at 23:00";
             trigger = [{
               platform = "time";
@@ -76,6 +77,7 @@ in
             }];
           }
           {
+            id = "relock_front_door_at_night";
             alias = "Re-lock front door if left unlocked at night";
             trigger = [{
               platform = "state";
@@ -91,6 +93,58 @@ in
             action = [{
               service = "lock.lock";
               target.entity_id = "lock.drzwi_glowne";
+            }];
+          }
+          {
+            id = "m5dial_to_light";
+            alias = "M5Dial -> light";
+            trigger = [{
+              platform = "mqtt";
+              topic = "room/light/m5dial/set";
+            }];
+            action = [{
+              choose = [
+                {
+                  conditions = [{
+                    condition = "template";
+                    value_template = "{{ trigger.payload_json.state == 'ON' }}";
+                  }];
+                  sequence = [{
+                    service = "light.turn_on";
+                    target.entity_id = "light.boneio_dr_8ch_03_39835c_light_k";
+                    data = {
+                      brightness = "{{ trigger.payload_json.brightness | int }}";
+                      color_temp = "{{ trigger.payload_json.color_temp | int }}";
+                    };
+                  }];
+                }
+                {
+                  conditions = [{
+                    condition = "template";
+                    value_template = "{{ trigger.payload_json.state == 'OFF' }}";
+                  }];
+                  sequence = [{
+                    service = "light.turn_off";
+                    target.entity_id = "light.boneio_dr_8ch_03_39835c_light_k";
+                  }];
+                }
+              ];
+            }];
+          }
+          {
+            id = "light_to_m5dial";
+            alias = "light -> M5Dial";
+            trigger = [{
+              platform = "state";
+              entity_id = "light.boneio_dr_8ch_03_39835c_light_k";
+            }];
+            action = [{
+              service = "mqtt.publish";
+              data = {
+                topic = "room/light/m5dial/state";
+                retain = true;
+                payload = ''{{ {"state": trigger.to_state.state | upper, "brightness": trigger.to_state.attributes.brightness | default(128, true) | int, "color_temp": trigger.to_state.attributes.color_temp | default(370, true) | int} | tojson }}'';
+              };
             }];
           }
         ];
