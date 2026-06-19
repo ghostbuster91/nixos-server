@@ -92,8 +92,7 @@
       };
       wlan1 = {
         band = "5g";
-        # channels with 160 MHz width in Poland: 36, 52, 100 i 116
-        channel = 0; # ACS
+        channel = 36; # non-DFS primary; seg1 (100-112) is DFS but secondary only
         countryCode = "PL";
 
         # use 'iw phy#1 info' to determine your VHT capabilities
@@ -118,11 +117,9 @@
           ieee80211w = "2";
           ap_max_inactivity = 600;
           disassoc_low_ack = 0;
-          # these two are mandatory for wifi 5 & 6 to work
+          # ch36, 160 MHz — spans 36-64, upper half (52-64) is DFS but low radar activity
           vht_oper_centr_freq_seg0_idx = 50;
           he_oper_centr_freq_seg0_idx = 50;
-          # constrain ACS to the 36-64 block so the hardcoded center (50) is always valid
-          chanlist = "36 40 44 48 52 56 60 64";
 
           # The "tx_queue_data2_burst" parameter in Linux refers to the burst size for 
           # transmitting data packets from the second data queue of a network interface. 
