@@ -12,6 +12,7 @@ All workflows assume you're inside the devshell (`nix develop`, or via `direnv` 
 - Deploy via deploy-rs: `deploy .#<host>` (configured in `nix/deployment.nix`; `autoRollback` and `magicRollback` are on).
 - Build the installer ISO: `nix build .#live-iso`. Flash it to USB (interactive fzf disk picker): `flash-deckard-iso` (devshell command). Boot the USB, then run `sudo install-system` to format with disko and `nixos-install`. The installer is currently wired to deckard's `disko-config.nix`.
 - Edit secrets: `agenix -e <file>.age` from `secrets/`. Recipient keys are listed per file in `secrets/secrets.nix`; rekey after changing them.
+- Browse a host's backup: `explore-backup-<host>` (devshell command, available for deckard, malina5, thunder, beast) — mounts the BorgBase repo and drops into a subshell.
 - Render network topology: `nix build .#topology.x86_64-linux.config.output` (defined in `topology.nix` via `nix-topology`).
 
 ## Architecture
@@ -35,7 +36,8 @@ All workflows assume you're inside the devshell (`nix develop`, or via `direnv` 
 `nix/hosts.nix` walks `hosts/`. Each top-level directory is a `system` (e.g. `x86_64-linux`, `aarch64-linux`); each subdirectory under it is a host. The per-system `hosts/<arch>/default.nix` is the host *factory* — it returns `{ name }:` that builds the right kind of system:
 
 - x86_64: `inputs.nixpkgs.lib.nixosSystem` with `pkgs-stable`/`pkgs-unstable` passed as `specialArgs`.
-- aarch64: `inputs.nixos-raspberrypi.lib.nixosSystemFull` (provides the Pi kernel & firmware).
+- aarch64 (malina5): `inputs.nixos-raspberrypi.lib.nixosSystemFull` (provides the Pi kernel & firmware).
+- aarch64 (surfer): `inputs.nixos-sbc.inputs.nixpkgs.lib.nixosSystem` (Banana Pi R3 SBC board via nixos-sbc).
 
 Both factories pass `nodes = config.nixosConfigurations` so any host can refer to siblings via `nodes.<other-host>`. To add a new host, create `hosts/<arch>/<name>/default.nix` — it's discovered automatically and gets a corresponding `deploy.nodes.<name>` entry.
 
@@ -47,7 +49,7 @@ A host `default.nix` (see `hosts/x86_64-linux/deckard/default.nix` for the canon
 2. Imports host-local files (`hardware-configuration.nix`, `disko-config.nix`, `impermanence.nix`, `topology.nix`, plus any host-specific service files like `linkwarden.nix`, `headscale.nix`, `mattermost.nix`).
 3. Sets `config.homelab.hostname = "<name>"` and wires home-manager for the `kghost` user from `inputs.self.homeModules.*`.
 
-Hosts in service today: `deckard` (main x86_64 homelab — Grafana/Prometheus/Loki, kanidm, linkwarden, ESPHome), `thunder` (VPS — headscale, blog, mattermost, DNS, cloudflare tunnel), `beast` (workstation x86_64 with nvidia), and `malina5` (Raspberry Pi 5 — Home Assistant, Zigbee2MQTT, Mosquitto).
+Hosts in service today: `deckard` (main x86_64 homelab — Grafana/Prometheus/Loki, kanidm, linkwarden, ESPHome), `thunder` (VPS — headscale, blog, mattermost, DNS, cloudflare tunnel), `beast` (workstation x86_64 with nvidia), `malina5` (Raspberry Pi 5 — Home Assistant, Zigbee2MQTT, Mosquitto, atticd binary cache), and `surfer` (Banana Pi R3 — hostapd WiFi AP, monitoring).
 
 ### Secrets and `homelab.*` options
 
@@ -65,6 +67,10 @@ Most hosts use `nixos-server`'s impermanence pattern (`modules/nixos/impermanenc
 - `zfs-diff` is installed as a system command to surface files that survived a reboot but aren't declared in `environment.persistence`.
 
 `modules/nixos/backup.nix` snapshots `rpool1/safe/persist` to a BorgBase repo on a schedule (defaults: daily, keep 3 daily / 2 weekly / 3 monthly). Hosts set `backup.name` and `backup.repoId`.
+
+### Binary cache (attic)
+
+`malina5` runs `atticd` (served at `attic.<ext-domain>`) as the homelab's Nix binary cache. Both `malina5` and `beast` run the `attic-watch-store` module which auto-pushes new store paths to the `malina5:system` cache. The atticd data lives on `/state` (not backed up — losing it means re-pushing NARs and rotating the pubkey in `flake.nix`). The `nix-remote-builder` module on `malina5` also accepts aarch64 remote builds from `root@focus` over SSH, letting x86_64 hosts cross-compile for aarch64.
 
 ### nixpkgs channels
 
