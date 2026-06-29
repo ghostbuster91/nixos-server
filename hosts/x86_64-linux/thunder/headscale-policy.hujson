@@ -1,4 +1,8 @@
 {
+  "hosts": {
+    "3d-printer": "192.168.1.112/32"
+  },
+
   "groups": {
     "group:admins": ["kghost@"],
     "group:family": ["kamil@", "kornel@"]
@@ -25,7 +29,7 @@
         "tag:ai:443",
         "tag:ai:80",
         "tag:auth:*",
-        "192.168.1.112:*"
+        "3d-printer:*"
       ]
     }
   ]
