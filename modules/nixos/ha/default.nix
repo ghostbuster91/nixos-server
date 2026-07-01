@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   roleName = "ha";
 in
@@ -37,6 +37,9 @@ in
     in
     {
       enable = true;
+      customComponents = [
+        (pkgs.callPackage ./hon.nix { })
+      ];
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
         "mqtt"
