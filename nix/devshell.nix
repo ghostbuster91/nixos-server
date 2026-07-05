@@ -30,6 +30,18 @@
           export _NIXOS_REBUILD_REEXEC=1
           exec ${base}/bin/nixos-rebuild "$@"
         '';
+
+      # agenix ships its own Nix (2.34.7) to evaluate the pure `secrets.nix`
+      # rules file. That eval never needs our `extraBuiltins`, but the devshell
+      # exports NIX_CONFIG with `plugin-files` pointing at a nix-plugins built
+      # for Nix 2.31 — which 2.34.7 refuses to load (ABI mismatch), aborting
+      # every agenix invocation. Wrap agenix to drop the plugin settings from
+      # NIX_CONFIG; flake.nix eval still gets them via the shell's own Nix 2.31.
+      agenixPkg = inputs.agenix.outputs.packages.${system}.agenix;
+      agenix = pkgs.writeShellScriptBin "agenix" ''
+        export NIX_CONFIG="$(printf '%s\n' "''${NIX_CONFIG:-}" | grep -vE '^[[:space:]]*(plugin-files|extra-builtins-file)[[:space:]]*=' || true)"
+        exec ${agenixPkg}/bin/agenix "$@"
+      '';
     in
     {
       # Add all the nixos configurations to the checks
@@ -43,7 +55,7 @@
       };
       devshells.default = {
         packages = [
-          inputs.agenix.outputs.packages.${system}.agenix
+          agenix
           pkgs.deploy-rs
           pkgs.age
           # The default `pkgs.nix-plugins` (16.0.1) is built against Nix 2.30's
@@ -81,7 +93,6 @@
               '';
             explore-backup = host:
               let
-                agenix = inputs.agenix.outputs.packages.${system}.agenix;
                 borg = "${pkgs.borgbackup}/bin/borg";
               in
               pkgs.writeShellScriptBin "explore-backup-${host}" ''
