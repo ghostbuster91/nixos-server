@@ -43,13 +43,13 @@ Both factories pass `nodes = config.nixosConfigurations` so any host can refer t
 
 ### How a host is composed
 
-A host `default.nix` (see `hosts/x86_64-linux/deckard/default.nix` for the canonical example) does three things:
+A host `default.nix` (see `hosts/x86_64-linux/deckard/default.nix` for the canonical example — note deckard is decommissioned but its config is kept for reference) does three things:
 
 1. Imports `inputs.self.nixosModules.<feature>` for the features it wants from `modules/nixos/`.
 2. Imports host-local files (`hardware-configuration.nix`, `disko-config.nix`, `impermanence.nix`, `topology.nix`, plus any host-specific service files like `linkwarden.nix`, `headscale.nix`, `mattermost.nix`).
 3. Sets `config.homelab.hostname = "<name>"` and wires home-manager for the `kghost` user from `inputs.self.homeModules.*`.
 
-Hosts in service today: `deckard` (main x86_64 homelab — Grafana/Prometheus/Loki, kanidm, linkwarden, ESPHome), `thunder` (VPS — headscale, blog, mattermost, DNS, cloudflare tunnel), `beast` (workstation x86_64 with nvidia), `malina5` (Raspberry Pi 5 — Home Assistant, Zigbee2MQTT, Mosquitto, atticd binary cache), and `surfer` (Banana Pi R3 — hostapd WiFi AP, monitoring).
+Hosts in service today: `thunder` (VPS — headscale, blog, mattermost, DNS, cloudflare tunnel, kanidm), `beast` (workstation x86_64 with nvidia), `malina5` (Raspberry Pi 5 — Home Assistant, Zigbee2MQTT, Mosquitto, atticd binary cache), and `surfer` (Banana Pi R3 — hostapd WiFi AP, monitoring). `deckard` (formerly the main x86_64 homelab — Grafana/Prometheus/Loki, kanidm, linkwarden, ESPHome) is **decommissioned**; its `hosts/x86_64-linux/deckard/` config is retained only as a reference example and is not deployed.
 
 ### Secrets and `homelab.*` options
 
