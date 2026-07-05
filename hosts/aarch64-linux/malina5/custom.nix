@@ -78,6 +78,18 @@
           });
         };
       };
+      # Home Assistant is on python 3.14 here. aiobotocore's test suite pulls
+      # moto -> cfn-lint -> aws-sam-translator, which nixpkgs marks unsupported
+      # on 3.14, breaking eval of the aws_s3 component. We don't run these tests,
+      # so drop the check inputs. Remove once the closure supports 3.14.
+      python314 = prev.python314.override {
+        packageOverrides = _pyfinal: pyprev: {
+          aiobotocore = pyprev.aiobotocore.overridePythonAttrs (_old: {
+            doCheck = false;
+            nativeCheckInputs = [ ];
+          });
+        };
+      };
     })
   ];
 }

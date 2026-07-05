@@ -38,7 +38,12 @@ in
     {
       enable = true;
       customComponents = [
-        (pkgs.callPackage ./hon.nix { })
+        # Build against Home Assistant's own Python set (26.05 -> 3.14) so the
+        # component and its deps match; the default pkgs.python3Packages is 3.13
+        # and trips the module's python-version-match assertion.
+        (pkgs.callPackage ./hon.nix {
+          python3Packages = config.services.home-assistant.package.python3Packages;
+        })
       ];
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
