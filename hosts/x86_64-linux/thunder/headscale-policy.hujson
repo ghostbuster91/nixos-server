@@ -31,6 +31,16 @@
         "tag:auth:*",
         "3d-printer:*"
       ]
+    },
+    {
+      // DNS is infrastructure every node needs. Tagged nodes (tag:ai,
+      // tag:media, tag:monitoring, …) lose their user identity for ACL `src`
+      // matching, so without this they can't reach thunder's DNS — which
+      // MagicDNS forwards all queries to — and name resolution breaks on them.
+      // Allow any node to reach the DNS port on tag:auth.
+      "action": "accept",
+      "src": ["*"],
+      "dst": ["tag:auth:53"]
     }
   ]
 }
