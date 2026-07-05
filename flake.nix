@@ -67,7 +67,7 @@
     };
 
     nixos-raspberrypi = {
-      url = "github:nvmd/nixos-raspberrypi/main";
+      url = "github:nvmd/nixos-raspberrypi/nixos-26.05";
     };
 
     comfyui-nix = {
