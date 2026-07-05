@@ -48,7 +48,13 @@ in
       tls_chain = config.age.secrets."kanidm-selfsigned.cert".path;
       tls_key = config.age.secrets."kanidm-selfsigned.key".path;
       bindaddress = "127.0.0.1:${toString kanidmPort}";
-      trust_x_forward_for = true;
+      # kanidm config v2 replaced the `trust_x_forward_for` boolean with the
+      # `http_client_address_info` enum. kanidm binds loopback and is only
+      # reached by the local nginx reverse proxy, so trust X-Forwarded-For from
+      # 127.0.0.1 (the proxy) to keep seeing the real client IP.
+      http_client_address_info = {
+        "x-forward-for" = [ "127.0.0.1/32" ];
+      };
     };
 
     enableClient = true;

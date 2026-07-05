@@ -13,6 +13,7 @@
     inputs.self.nixosModules.ssh
     inputs.self.nixosModules.system-user
     inputs.self.nixosModules.rpi-builder
+    inputs.self.nixosModules.logs-alloy
     inputs.home-manager.nixosModules.home-manager
     inputs.nix-index-database.nixosModules.nix-index
 

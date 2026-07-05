@@ -17,7 +17,11 @@
           inputs.agenix.outputs.packages.${system}.agenix
           pkgs.deploy-rs
           pkgs.age
-          pkgs.nix
+          # nix-plugins 16.0.1 only builds against Nix 2.31's C++ API, and the
+          # plugin must be loaded by the exact same Nix version. Pin the devshell
+          # nix so the loader matches the plugin (default pkgs.nix is 2.34, which
+          # both fails to build nix-plugins and is ABI-incompatible with it).
+          pkgs.nixVersions.nix_2_31
           pkgs.cloudflared
           pkgs.borgbackup
         ];

@@ -20,6 +20,7 @@
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.logs-alloy
       inputs.self.nixosModules.attic-watch-store
       inputs.self.nixosModules.nix-remote-builder
       {

@@ -5,7 +5,6 @@
 let
   inherit (lib)
     concatStringsSep
-    mkDefault
     mkEnableOption
     mkIf
     mkOption
@@ -131,9 +130,10 @@ in
       # reuses refresh tokens but kanidm forbids that. Not sure though.
       #cookie.refresh = "5m";
       cookie.expire = "30m";
-      cookie.secret = mkDefault null;
-
-      clientSecret = mkDefault null;
+      # cookie.secret and clientSecret are supplied at runtime via the
+      # OAUTH2_PROXY_COOKIE_SECRET / OAUTH2_PROXY_CLIENT_SECRET env vars from the
+      # EnvironmentFile set in oauth2.nix. The old nixpkgs options that took the
+      # secret inline were removed in 26.05 (made the secret world-readable).
       reverseProxy = true;
       httpAddress = "unix:///run/oauth2-proxy/oauth2-proxy.sock";
       redirectURL = "https://${cfg.portalDomain}/oauth2/callback";

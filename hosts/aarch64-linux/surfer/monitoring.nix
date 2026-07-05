@@ -1,4 +1,4 @@
-{ config, ... }: {
+{ ... }: {
   services.prometheus = {
     exporters = {
       node = {
@@ -30,29 +30,7 @@
       };
     };
   };
-  services.promtail = {
-    enable = true;
-    configuration = {
-      server = {
-        disable = true;
-      };
-      clients = [{
-        url = "https://loki.typesafebrew.dev/loki/api/v1/push"; ##TODO
-      }];
-      scrape_configs = [{
-        job_name = "journal";
-        journal = {
-          max_age = "12h";
-          labels = {
-            job = "systemd-journal";
-            host = config.networking.hostName;
-          };
-        };
-        relabel_configs = [{
-          source_labels = [ "__journal__systemd_unit" ];
-          target_label = "unit";
-        }];
-      }];
-    };
-  };
+  # Journal->Loki shipping comes from the shared logs-alloy module; surfer has no
+  # `meta`/homelab.ext-domain, so point it at the Loki endpoint directly.
+  homelab.logs.lokiPushUrl = "https://loki.typesafebrew.dev/loki/api/v1/push"; ##TODO
 }

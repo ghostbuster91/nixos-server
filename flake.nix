@@ -16,10 +16,10 @@
   };
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs.follows = "nixpkgs-stable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     disko = {
@@ -76,6 +76,7 @@
 
     nixos-sbc = {
       url = "github:ghostbuster91/nixos-sbc/main";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
   outputs = inputs@{ flake-parts, ... }:

@@ -2,7 +2,10 @@
   # This file was populated at runtime with the networking
   # details gathered from the active system.
   networking = {
-    defaultGateway = "172.31.1.1";
+    defaultGateway = {
+      address = "172.31.1.1";
+      interface = "eth0";
+    };
     defaultGateway6 = {
       address = "fe80::1";
       interface = "eth0";

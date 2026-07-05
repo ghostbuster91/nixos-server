@@ -16,7 +16,7 @@
       inputs.self.nixosModules.prometheus-server
       inputs.self.nixosModules.prometheus-client
       inputs.self.nixosModules.logs-loki
-      inputs.self.nixosModules.logs-promtail
+      inputs.self.nixosModules.logs-alloy
       inputs.self.nixosModules.esphome
       inputs.self.nixosModules.avahi
       inputs.self.nixosModules.proxy
@@ -50,7 +50,6 @@
         inputs.self.homeModules.nvim
         inputs.self.homeModules.zsh
         inputs.self.homeModules.git
-        inputs.impermanence.homeManagerModules.impermanence
       ];
     };
     extraSpecialArgs = { inherit username; };

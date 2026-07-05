@@ -26,7 +26,7 @@
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.meta
       inputs.self.nixosModules.backup
-      inputs.self.nixosModules.logs-promtail
+      inputs.self.nixosModules.logs-alloy
       inputs.self.nixosModules.prometheus-client
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
