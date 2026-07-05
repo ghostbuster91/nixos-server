@@ -24,6 +24,7 @@ in
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
   age.secrets.kanidm-oauth2-actual = mkSecret ../../secrets/kanidm-oauth2-actual.age;
+  age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -69,7 +70,7 @@ in
       persons = {
         "kasper" = {
           mailAddresses = [ "kasper.noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" ];
+          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" ];
           displayName = "Kasper";
         };
         "kamil" = {
@@ -160,6 +161,34 @@ in
           "email"
           "profile"
         ];
+      };
+      # Mealie
+      groups."mealie.access" = { };
+      groups."mealie.admins" = { };
+      systems.oauth2.mealie = {
+        displayName = "Mealie";
+        # Mealie's OIDC redirect URI is the frontend login route.
+        originUrl = [
+          "https://mealie.${config.homelab.ext-domain}/login"
+          "https://mealie.${config.homelab.ext-domain}/"
+        ];
+        originLanding = "https://mealie.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-mealie.path;
+        preferShortUsername = true;
+        enableLegacyCrypto = true;
+        scopeMaps."mealie.access" = [
+          "openid"
+          "email"
+          "profile"
+          "groups"
+        ];
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup = {
+            "mealie.access" = [ "mealie-users" ];
+            "mealie.admins" = [ "mealie-admins" ];
+          };
+        };
       };
     };
   };
