@@ -42,10 +42,8 @@
             throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
       }
       inputs.self.nixosModules.backup
-      {
-        config.homelab.hostname = "beast";
-      }
       inputs.self.nixosModules.meta
+      inputs.self.nixosModules.attic-cache
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.oauth2
       inputs.self.nixosModules.oauth2-proxy

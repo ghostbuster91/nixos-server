@@ -38,10 +38,6 @@ in
       (ageImportEncrypted masterIdentities ../../secrets/meta.nix.age)
     ];
 
-  options.homelab.hostname = mkOption {
-    type = types.str;
-  };
-
   options.homelab.ext-domain = mkOption {
     type = types.str;
   };

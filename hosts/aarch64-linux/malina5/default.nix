@@ -23,6 +23,7 @@
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.backup
       inputs.self.nixosModules.nix
+      inputs.self.nixosModules.attic-cache
       inputs.self.nixosModules.attic-watch-store
       inputs.self.nixosModules.nix-remote-builder
       {

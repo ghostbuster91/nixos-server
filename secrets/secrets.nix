@@ -59,5 +59,6 @@ in
   "wlan00bssid.age".publicKeys = [ kghost surfer ];
   "wlan01bssid.age".publicKeys = [ kghost surfer ];
   "wlan10bssid.age".publicKeys = [ kghost surfer ];
+  "surferFtKey.age".publicKeys = [ kghost surfer ];
 }
 
