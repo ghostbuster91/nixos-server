@@ -5,8 +5,13 @@ in
 {
   boot = {
     tmp.useTmpfs = true;
-    loader.raspberryPi.firmwarePackage = kernelBundle.raspberrypifw;
-    loader.raspberryPi.bootloader = "kernel";
+    # nixos-raspberrypi reimplements the (now-removed upstream) raspberryPi
+    # loader options under the hyphenated `boot.loader.raspberry-pi` namespace.
+    # We only override the firmware to keep it matched to the pinned v6_6_31
+    # kernel below; the bootloader type is left at the board default
+    # (`kernelboot`, from raspberry-pi-5.base) so a switch doesn't change how
+    # this live Pi boots.
+    loader.raspberry-pi.firmwarePackage = kernelBundle.raspberrypifw;
     kernelPackages = kernelBundle.linuxPackages_rpi5;
   };
 
