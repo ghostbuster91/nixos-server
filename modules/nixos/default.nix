@@ -22,6 +22,7 @@
     impermanence = ./impermanence.nix;
     system-user = ./system-user.nix;
     attic-watch-store = ./attic-watch-store.nix;
+    attic-cache = ./attic-cache.nix;
     nix-remote-builder = ./nix-remote-builder.nix;
     rpi-builder = ./rpi-builder.nix;
   };

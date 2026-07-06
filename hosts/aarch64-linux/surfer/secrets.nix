@@ -6,6 +6,7 @@ let
     wlan00bssid = ../../../secrets/wlan00bssid.age;
     wlan01bssid = ../../../secrets/wlan01bssid.age;
     wlan10bssid = ../../../secrets/wlan10bssid.age;
+    surferFtKey = ../../../secrets/surferFtKey.age;
   };
 in
 {

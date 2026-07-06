@@ -10,6 +10,8 @@
     ./hostapd.nix
     ./monitoring.nix
     inputs.self.nixosModules.nix
+    inputs.self.nixosModules.meta
+    inputs.self.nixosModules.attic-cache
     inputs.self.nixosModules.ssh
     inputs.self.nixosModules.system-user
     inputs.self.nixosModules.rpi-builder

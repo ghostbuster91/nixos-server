@@ -24,9 +24,6 @@
       inputs.self.nixosModules.kanidm
       inputs.home-manager.nixosModules.home-manager
       inputs.nix-index-database.nixosModules.nix-index
-      {
-        config.homelab.hostname = "deckard";
-      }
       inputs.self.nixosModules.meta
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.zfs
