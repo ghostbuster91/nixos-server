@@ -6,6 +6,24 @@
   boot.zfs = {
     devNodes = "/dev/disk/by-id";
   };
+
+  # Memory headroom so heavy aarch64 compiles don't get OOM-killed — this box is
+  # the homelab's only aarch64 remote builder (see nix-remote-builder above) yet
+  # only has 8 GB and also runs Home Assistant, atticd, etc. Two levers:
+  #  - Cap ZFS ARC. By default it grows toward all-but-1GB (~6.85 GiB here),
+  #    expanding into the RAM that parallel cc1plus needs, and it doesn't shrink
+  #    fast enough under an allocation spike, so the OOM killer fires first (it
+  #    killed a dart build on 2026-07-07). Pin it to 2 GiB for deterministic
+  #    headroom.
+  #  - zram. Compressed (zstd) RAM swap as a cushion for the remaining spikes;
+  #    far faster than disk swap and avoids swap-on-ZFS deadlocks.
+  boot.kernelParams = [ "zfs.zfs_arc_max=2147483648" ]; # 2 GiB
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 100;
+  };
+
   time.timeZone = "Europe/Warsaw";
   networking.hostId = "8821e309"; # NOTE: for zfs, must be unique
 
