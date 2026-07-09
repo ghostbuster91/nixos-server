@@ -56,15 +56,25 @@
 
   services.tailscale.enable = true;
 
-  # Mirrors nixpkgs commit b9c75a3094f0 — psycopg's `slow`-marked tests have
-  # timing-sensitive SIGALRM assertions that race on slower aarch64 builders
-  # (upstream psycopg#883). Remove once nixpkgs is bumped past that commit.
-  #
-  # django's test_crafted_xml_performance asserts a serialization speedup factor
-  # ≤ 2 but gets ~3 on loaded aarch64 builders. Same class of flaky timing test.
-  # Remove once nixpkgs skips this test upstream.
   nixpkgs.overlays = [
     (_final: prev: {
+      # buf is only a build-time tool here (pulled in by the mealie closure), and
+      # this exact aarch64 output isn't on cache.nixos.org, so it compiles on the
+      # Pi. Its checkPhase runs bufcheck tests that instantiate WASM plugins under
+      # a context deadline; on this slow builder the module never instantiates in
+      # time ("module closed with context deadline exceeded" in
+      # TestRunBreakingPolicyLocal), failing the build. We don't ship buf's tests,
+      # so drop the check. Remove once a cached aarch64 buf is available.
+      buf = prev.buf.overrideAttrs (_old: {
+        doCheck = false;
+      });
+      # Mirrors nixpkgs commit b9c75a3094f0 — psycopg's `slow`-marked tests have
+      # timing-sensitive SIGALRM assertions that race on slower aarch64 builders
+      # (upstream psycopg#883). Remove once nixpkgs is bumped past that commit.
+      #
+      # django's test_crafted_xml_performance asserts a serialization speedup factor
+      # ≤ 2 but gets ~3 on loaded aarch64 builders. Same class of flaky timing test.
+      # Remove once nixpkgs skips this test upstream.
       python313 = prev.python313.override {
         packageOverrides = _pyfinal: pyprev: {
           psycopg = pyprev.psycopg.overridePythonAttrs (old: {
