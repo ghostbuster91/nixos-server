@@ -14,6 +14,16 @@ in {
     }];
   };
 
+  # headscale fetches Tailscale's DERP map from controlplane.tailscale.com at
+  # startup and hard-crashes if the lookup fails. thunder resolves via local
+  # unbound (127.0.0.1), so a deploy that restarts both units concurrently can
+  # start headscale before unbound answers -> "no such host" -> deploy-rs
+  # rolls back. Order headscale after unbound so DNS is up first.
+  systemd.services.headscale = {
+    after = [ "unbound.service" ];
+    wants = [ "unbound.service" ];
+  };
+
   services = {
     headscale = {
       enable = true;

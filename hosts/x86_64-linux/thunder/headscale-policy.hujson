@@ -13,7 +13,9 @@
     "tag:monitoring": ["group:admins"],
     "tag:infra": ["group:admins"],
     "tag:ai": ["group:admins"],
-    "tag:auth": ["group:admins"]
+    "tag:auth": ["group:admins"],
+    "tag:nix-builder": ["group:admins"],
+    "tag:nix-cache": ["group:admins"]
   },
 
   "acls": [
@@ -41,6 +43,11 @@
       "action": "accept",
       "src": ["*"],
       "dst": ["tag:auth:53"]
+    },
+    {
+      "action": "accept",
+      "src": ["tag:nix-builder"],
+      "dst": ["tag:nix-cache:*"]
     }
   ]
 }
