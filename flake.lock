@@ -526,16 +526,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1783460971,
-        "narHash": "sha256-jORGvBH+uTyVirtfpcA22QiUrJnIQcHo6zs1qS5aDSs=",
+        "lastModified": 1783462460,
+        "narHash": "sha256-H0oxvOHMul2gxbozOvoEBi2GL9GnK8w5y0nPIctufZo=",
         "owner": "nvmd",
         "repo": "nixos-raspberrypi",
-        "rev": "16e7150a4aea0578871ed6ffeb6a5c121bcee441",
+        "rev": "9977789f7d9b98c2825b423bd4e811078baec6a0",
         "type": "github"
       },
       "original": {
         "owner": "nvmd",
-        "ref": "nixos-26.05",
+        "ref": "develop",
         "repo": "nixos-raspberrypi",
         "type": "github"
       }

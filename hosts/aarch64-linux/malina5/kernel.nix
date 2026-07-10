@@ -1,16 +1,21 @@
 { pkgs, lib, ... }:
 let
-  kernelBundle = pkgs.linuxAndFirmware.v6_6_31;
+  kernelBundle = pkgs.linuxAndFirmware.v6_12_87;
 in
 {
   boot = {
     tmp.useTmpfs = true;
     # nixos-raspberrypi reimplements the (now-removed upstream) raspberryPi
     # loader options under the hyphenated `boot.loader.raspberry-pi` namespace.
-    # We only override the firmware to keep it matched to the pinned v6_6_31
-    # kernel below; the bootloader type is left at the board default
-    # (`kernelboot`, from raspberry-pi-5.base) so a switch doesn't change how
-    # this live Pi boots.
+    # We override the firmware to keep it matched to the pinned v6_6_31 kernel
+    # below.
+    #
+    # Bootloader is the new generational `kernel` (was the legacy `kernelboot`,
+    # now deprecated by nixos-raspberrypi). Each generation gets its own
+    # kernel/initrd/DTBs under /boot/firmware/nixos/<gen>/ and config.txt is
+    # given an os_prefix pointing at the active one; DTBs come from the
+    # generation's kernel (useGenerationDeviceTree defaults to true here).
+    loader.raspberry-pi.bootloader = "kernel";
     loader.raspberry-pi.firmwarePackage = kernelBundle.raspberrypifw;
     kernelPackages = kernelBundle.linuxPackages_rpi5;
   };
