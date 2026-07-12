@@ -68,6 +68,19 @@
       buf = prev.buf.overrideAttrs (_old: {
         doCheck = false;
       });
+      # deno (a runtime dep of mealie) isn't on cache.nixos.org for this aarch64
+      # rev, so it compiles on the Pi. Its Cargo release profile forces
+      # `lto = true` + `codegen-units = 1`, and with 4 build cores that runs
+      # several whole-crate LTO rustc jobs at once, blowing past the Pi's 8 GB
+      # (zram swap is RAM-backed, so it can't rescue this) — rustc gets
+      # OOM-killed ("terminated by a deadly signal") compiling denort. cargo
+      # honours these env vars over the Cargo.toml profile: turning LTO off and
+      # splitting codegen units slashes peak memory. The binary is a bit larger/
+      # slower, which is fine here. Remove once a cached aarch64 deno exists.
+      deno = prev.deno.overrideAttrs (_old: {
+        CARGO_PROFILE_RELEASE_LTO = "false";
+        CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
+      });
       # Mirrors nixpkgs commit b9c75a3094f0 — psycopg's `slow`-marked tests have
       # timing-sensitive SIGALRM assertions that race on slower aarch64 builders
       # (upstream psycopg#883). Remove once nixpkgs is bumped past that commit.
@@ -97,6 +110,27 @@
           aiobotocore = pyprev.aiobotocore.overridePythonAttrs (_old: {
             doCheck = false;
             nativeCheckInputs = [ ];
+          });
+          # moto's stepfunctions idempotency test races on this slow aarch64
+          # builder: the second create_state_machine call is expected to be a
+          # no-op but the first execution hasn't settled, so it raises
+          # ExecutionAlreadyExists. moto is a check input in the HA python 3.14
+          # closure (via pycognito -> hass-nabucasa). Remove once nixpkgs skips
+          # it upstream.
+          moto = pyprev.moto.overridePythonAttrs (old: {
+            disabledTests = (old.disabledTests or [ ]) ++ [
+              "test_create_state_machine_twice_after_success"
+            ];
+          });
+          # Same flaky test_crafted_xml_performance as the python313 django above,
+          # but Home Assistant is on python 3.14 here so that override never hits
+          # this django. In django 5.2.15 the test moved to test_deserialization.py.
+          # Remove once nixpkgs skips this test upstream.
+          django = pyprev.django.overrideAttrs (old: {
+            postPatch = (old.postPatch or "") + ''
+              substituteInPlace tests/serializers/test_deserialization.py \
+                --replace-fail "test_crafted_xml_performance" "dont_test_crafted_xml_performance"
+            '';
           });
         };
       };
