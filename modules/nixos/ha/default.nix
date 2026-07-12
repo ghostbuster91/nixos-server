@@ -44,6 +44,10 @@ in
         (pkgs.callPackage ./hon.nix {
           python3Packages = config.services.home-assistant.package.python3Packages;
         })
+        # OIDC/SSO auth provider (kanidm). Same python-set reasoning as above.
+        (pkgs.callPackage ./oidc-auth.nix {
+          python3Packages = config.services.home-assistant.package.python3Packages;
+        })
       ];
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
@@ -65,10 +69,29 @@ in
         # Includes dependencies for a basic setup
         # https://www.home-assistant.io/integrations/default_config/
         default_config = { };
+        # Disable the built-in username/password login provider — only OIDC
+        # (auth_oidc, injected by the custom component) remains. NOTE: if kanidm
+        # is unreachable this locks everyone out; recovery is to revert this line
+        # and redeploy. https://github.com/christiaangoossens/hass-oidc-auth/discussions/67
+        homeassistant.auth_providers = [ ];
         http = {
           server_host = [ "::1" ];
           trusted_proxies = [ "::1" ];
           use_x_forwarded_for = true;
+        };
+        # OIDC/SSO login via kanidm (auth_oidc custom component). Public PKCE
+        # client — no secret. Kanidm signs id_tokens with ES256. Roles map the
+        # raw kanidm group SPNs from the "groups" claim: members of ha.access get
+        # the "user" role, ha.admins get "admin". The kanidm oauth2 client
+        # `homeassistant` is provisioned on thunder (modules/nixos/kanidm.nix).
+        auth_oidc = {
+          client_id = "homeassistant";
+          discovery_url = "https://auth.${config.homelab.ext-domain}/oauth2/openid/homeassistant/.well-known/openid-configuration";
+          id_token_signing_alg = "ES256";
+          roles = {
+            admin = "ha.admins@${config.homelab.ext-domain}";
+            user = "ha.access@${config.homelab.ext-domain}";
+          };
         };
         prometheus = { };
         automation = import ./automations.nix;

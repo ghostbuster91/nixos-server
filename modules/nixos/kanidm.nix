@@ -69,12 +69,12 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "mealie.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "mealie.access" "ha.access" ];
         in
         {
           "kasper" = {
             mailAddresses = [ "kasper.noreply@example.com" ];
-            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" ];
+            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" ];
             displayName = "Kasper";
           };
           "kamil" = {
@@ -204,6 +204,27 @@ in
             "mealie.admins" = [ "mealie-admins" ];
           };
         };
+      };
+      # Home Assistant (hass-oidc-auth custom component)
+      groups."ha.access" = { };
+      groups."ha.admins" = { };
+      systems.oauth2.homeassistant = {
+        displayName = "Home Assistant";
+        # Public PKCE client — the component holds no secret. hass-oidc-auth
+        # completes the flow at /auth/oidc/callback and lands the user on
+        # /auth/oidc/welcome.
+        public = true;
+        originUrl = "https://ha.${config.homelab.ext-domain}/auth/oidc/callback";
+        originLanding = "https://ha.${config.homelab.ext-domain}/auth/oidc/welcome";
+        preferShortUsername = true;
+        # The component reads roles from the built-in "groups" claim (raw group
+        # SPNs like ha.access@<domain>); grant it alongside the standard scopes.
+        scopeMaps."ha.access" = [
+          "openid"
+          "email"
+          "profile"
+          "groups"
+        ];
       };
     };
   };
