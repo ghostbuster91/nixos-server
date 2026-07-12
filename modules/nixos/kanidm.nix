@@ -67,23 +67,27 @@ in
 
     provision = {
       enable = true;
-      persons = {
-        "kasper" = {
-          mailAddresses = [ "kasper.noreply@example.com" ];
-          groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" ];
-          displayName = "Kasper";
+      persons =
+        let
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "mealie.access" ];
+        in
+        {
+          "kasper" = {
+            mailAddresses = [ "kasper.noreply@example.com" ];
+            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" ];
+            displayName = "Kasper";
+          };
+          "kamil" = {
+            mailAddresses = [ "kamil.noreply@example.com" ];
+            groups = familyGroups;
+            displayName = "Kamil";
+          };
+          "kornel" = {
+            mailAddresses = [ "kornel.noreply@example.com" ];
+            groups = familyGroups;
+            displayName = "Kornel";
+          };
         };
-        "kamil" = {
-          mailAddresses = [ "kamil.noreply@example.com" ];
-          groups = [ "web-sentinel.access" "web-sentinel.openwebui" ];
-          displayName = "Kasper";
-        };
-        "kornel" = {
-          mailAddresses = [ "kornel.noreply@example.com" ];
-          groups = [ "web-sentinel.access" "web-sentinel.openwebui" ];
-          displayName = "Kasper";
-        };
-      };
       # Grafana
       groups."grafana.access" = { };
       groups."grafana.editors" = { };
@@ -180,9 +184,15 @@ in
           "openid"
           "email"
           "profile"
-          "groups"
+          # Mealie requests a scope named after its OIDC_GROUPS_CLAIM
+          # (mealie_roles). Grant that here and expose the readable role values
+          # via the matching claim map below. Do NOT grant "groups": kanidm's
+          # built-in groups claim would then be emitted as raw group SPNs
+          # (mealie.access@<domain>, …) and clobber this claim map, leaving
+          # Mealie unable to match against mealie-users / mealie-admins.
+          "mealie_roles"
         ];
-        claimMaps.groups = {
+        claimMaps.mealie_roles = {
           joinType = "array";
           valuesByGroup = {
             "mealie.access" = [ "mealie-users" ];
