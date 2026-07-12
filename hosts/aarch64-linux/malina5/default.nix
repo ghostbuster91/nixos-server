@@ -17,7 +17,7 @@
       ./nice-looking-console.nix
       ./backup.nix
       ./attic.nix
-      # ./mealie.nix
+      ./mealie.nix
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.zfs
       inputs.self.nixosModules.system-user

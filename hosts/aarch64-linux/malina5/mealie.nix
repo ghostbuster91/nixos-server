@@ -32,6 +32,7 @@ in
       BASE_URL = "https://${domain}";
 
       ALLOW_SIGNUP = "false";
+      ALLOW_PASSWORD_LOGIN = "false";
 
       OIDC_AUTH_ENABLED = "true";
       OIDC_PROVIDER_NAME = "Kanidm";
@@ -39,10 +40,14 @@ in
       OIDC_CONFIGURATION_URL = "https://auth.${config.homelab.ext-domain}/oauth2/openid/${clientId}/.well-known/openid-configuration";
       # Auto-provision accounts for kanidm users who carry the group claim.
       OIDC_SIGNUP_ENABLED = "true";
+      # Read roles from kanidm's custom claim map (mealie_roles), not the
+      # built-in "groups" claim which returns raw group SPNs. Mealie also
+      # requests a scope of this same name, which kanidm grants via its scopeMap.
+      OIDC_GROUPS_CLAIM = "mealie_roles";
       OIDC_USER_GROUP = "mealie-users";
       OIDC_ADMIN_GROUP = "mealie-admins";
       # Keep the manual login page reachable; flip to "true" once OIDC is proven.
-      OIDC_AUTO_REDIRECT = "false";
+      OIDC_AUTO_REDIRECT = "true";
     };
   };
 
