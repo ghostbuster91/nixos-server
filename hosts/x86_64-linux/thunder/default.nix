@@ -13,6 +13,7 @@
       ./blog.nix
       ./mattermost.nix
       ./cloudflare-tunnel.nix
+      ./homepage.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];
@@ -34,6 +35,14 @@
       inputs.self.nixosModules.system-user
       inputs.nix-index-database.nixosModules.nix-index
       inputs.self.nixosModules.kanidm
+      # oauth2-proxy runs locally so nginx's auth_request for the protected
+      # homepage vhost hits a local socket. thunder also hosts the oauth2.<domain>
+      # login portal (see dns.nix) — co-located with kanidm, so the full login
+      # flow is beast-independent. Shares the cookie secret + web-sentinel client
+      # with beast (secrets.nix recipients); the cookie is scoped to .ext-domain
+      # so a single login works across every host.
+      inputs.self.nixosModules.oauth2
+      inputs.self.nixosModules.oauth2-proxy
     ];
 
   home-manager = {

@@ -27,6 +27,18 @@ in
       type = types.str;
       description = "A domain on which to setup the oauth2 callback.";
     };
+
+    servePortal = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Whether this host serves the public portal vhost (login UI + OIDC
+        callback) at portalDomain. Exactly one host — the one portalDomain
+        resolves to in DNS — should serve it. Other hosts still run the
+        oauth2-proxy daemon for local auth_request validation of their own
+        protected vhosts, but must not serve a dormant duplicate portal.
+      '';
+    };
   };
 
   options.services.nginx.virtualHosts = mkOption {
@@ -160,16 +172,18 @@ in
 
     users.groups.oauth2-proxy.members = [ "nginx" ];
 
-    services.nginx = {
-      upstreams.oauth2-proxy = {
-        servers."unix:/run/oauth2-proxy/oauth2-proxy.sock" = { };
-        extraConfig = ''
-          zone oauth2-proxy 64k;
-          keepalive 2;
-        '';
-      };
+    services.nginx.upstreams.oauth2-proxy = {
+      servers."unix:/run/oauth2-proxy/oauth2-proxy.sock" = { };
+      extraConfig = ''
+        zone oauth2-proxy 64k;
+        keepalive 2;
+      '';
+    };
 
-      virtualHosts.${cfg.portalDomain} = {
+    # Only the host that portalDomain resolves to serves the login/callback
+    # vhost; elsewhere it would be a dormant duplicate (see servePortal).
+    services.nginx.virtualHosts = mkIf cfg.servePortal {
+      ${cfg.portalDomain} = {
         forceSSL = true;
         useACMEHost = config.homelab.ext-domain;
         locations."/".proxyPass = "http://oauth2-proxy";

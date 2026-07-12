@@ -50,6 +50,11 @@
       inputs.self.nixosModules.oauth2-proxy
     ];
 
+  # The oauth2 login portal is hosted on thunder (oauth2.<domain> resolves
+  # there). beast still runs oauth2-proxy to validate its own protected vhosts
+  # (comfyui, chat) via local auth_request, but must not serve a dormant portal.
+  meta.oauth2-proxy.servePortal = false;
+
   home-manager = {
     useUserPackages = true;
     useGlobalPkgs = true;

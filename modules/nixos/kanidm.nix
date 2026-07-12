@@ -69,12 +69,12 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "mealie.access" "ha.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" "ha.access" ];
         in
         {
           "kasper" = {
             mailAddresses = [ "kasper.noreply@example.com" ];
-            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" ];
+            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "linkwarden.access" "actual.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" ];
             displayName = "Kasper";
           };
           "kamil" = {
@@ -122,6 +122,7 @@ in
       groups."web-sentinel.access" = { };
       groups."web-sentinel.adguardhome" = { };
       groups."web-sentinel.openwebui" = { };
+      groups."web-sentinel.homepage" = { };
       groups."web-sentinel.analytics" = { };
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
@@ -137,6 +138,7 @@ in
           joinType = "array";
           valuesByGroup."web-sentinel.adguardhome" = [ "access_adguardhome" ];
           valuesByGroup."web-sentinel.openwebui" = [ "access_openwebui" ];
+          valuesByGroup."web-sentinel.homepage" = [ "access_homepage" ];
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
         };
       };

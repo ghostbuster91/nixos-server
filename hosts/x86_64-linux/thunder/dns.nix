@@ -30,7 +30,12 @@ in
           ''"loki.${ext-domain}.        IN A ${deckardIp}"''
           ''"grafana.${ext-domain}.     IN A ${deckardIp}"''
           ''"auth.${ext-domain}.        IN A ${thunderIp}"''
-          ''"oauth2.${ext-domain}.      IN A ${beastIp}"''
+          ''"home.${ext-domain}.        IN A ${thunderIp}"''
+          # Portal lives on thunder (always-on, co-located with kanidm) so fresh
+          # logins never depend on the beast workstation. beast still runs its
+          # own oauth2-proxy to validate its local services; its oauth2.<domain>
+          # vhost is dormant since this record points here.
+          ''"oauth2.${ext-domain}.      IN A ${thunderIp}"''
           ''"esphome.${ext-domain}.     IN A ${deckardIp}"''
           ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
           ''"chat.${ext-domain}.        IN A ${beastIp}"''
