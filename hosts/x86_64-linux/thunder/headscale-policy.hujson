@@ -9,6 +9,7 @@
   },
 
   "tagOwners": {
+    "tag:dns": ["group:admins"],
     "tag:media": ["group:admins"],
     "tag:monitoring": ["group:admins"],
     "tag:infra": ["group:admins"],
@@ -31,18 +32,21 @@
         "tag:ai:443",
         "tag:ai:80",
         "tag:auth:*",
-        "3d-printer:*"
+        "3d-printer:*",
+        "tag:media:*"
       ]
     },
     {
-      // DNS is infrastructure every node needs. Tagged nodes (tag:ai,
-      // tag:media, tag:monitoring, …) lose their user identity for ACL `src`
-      // matching, so without this they can't reach thunder's DNS — which
-      // MagicDNS forwards all queries to — and name resolution breaks on them.
-      // Allow any node to reach the DNS port on tag:auth.
+      // DNS and OIDC are infrastructure every node needs. Tagged nodes
+      // (tag:ai, tag:media, tag:monitoring, …) lose their user identity for
+      // ACL `src` matching, so without this they can't reach thunder's DNS —
+      // which MagicDNS forwards all queries to — and name resolution breaks on
+      // them. Port 443 is kanidm: any node running an OIDC client (e.g. mealie
+      // on malina5/tag:media) must reach the auth server to fetch OIDC metadata
+      // and exchange tokens. Allow any node to reach both ports on tag:auth.
       "action": "accept",
       "src": ["*"],
-      "dst": ["tag:auth:53"]
+      "dst": ["tag:dns:53", "tag:auth:443"]
     },
     {
       "action": "accept",
