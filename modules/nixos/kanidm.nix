@@ -87,6 +87,11 @@ in
             groups = familyGroups;
             displayName = "Kornel";
           };
+          "marta" = {
+            mailAddresses = [ "marta.noreply@example.com" ];
+            groups = familyGroups;
+            displayName = "Marta";
+          };
         };
       # Grafana
       groups."grafana.access" = { };

@@ -5,7 +5,7 @@
 
   "groups": {
     "group:admins": ["kghost@"],
-    "group:family": ["kamil@", "kornel@"]
+    "group:family": ["kamil@", "kornel@", "marta@"]
   },
 
   "tagOwners": {
