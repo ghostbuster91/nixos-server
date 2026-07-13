@@ -30,7 +30,7 @@ in
           ''"loki.${ext-domain}.        IN A ${deckardIp}"''
           ''"grafana.${ext-domain}.     IN A ${deckardIp}"''
           ''"auth.${ext-domain}.        IN A ${thunderIp}"''
-          ''"home.${ext-domain}.        IN A ${thunderIp}"''
+          ''"apps.${ext-domain}.        IN A ${thunderIp}"''
           # Portal lives on thunder (always-on, co-located with kanidm) so fresh
           # logins never depend on the beast workstation. beast still runs its
           # own oauth2-proxy to validate its local services; its oauth2.<domain>

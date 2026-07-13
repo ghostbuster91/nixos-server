@@ -42,8 +42,8 @@ in
   "kanidm-oauth2-mealie.age".publicKeys = [ kghost thunder ];
   "mealie-oidc-env.age".publicKeys = [ kghost malina5 ];
 
-  "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast ];
-  "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast ];
+  "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
+  "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];
 
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
   "postgres-linkwarden-password.age".publicKeys = [ kghost beast ];

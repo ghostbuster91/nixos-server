@@ -1,7 +1,7 @@
 { config, ... }:
 let
   port = 8082;
-  domain = "home.${config.homelab.ext-domain}";
+  domain = "apps.${config.homelab.ext-domain}";
 in
 {
   services.homepage-dashboard = {
@@ -17,35 +17,43 @@ in
       headerStyle = "clean";
     };
 
-    # Starter content — expand as services come online.
-    services = [
-      {
-        "AI" = [
-          {
-            "ComfyUI" = {
-              href = "https://comfyui.${config.homelab.ext-domain}/";
-              description = "Image generation";
-            };
-          }
-        ];
-      }
-      {
-        "Infra" = [
-          {
-            "Grafana" = {
-              href = "https://grafana.${config.homelab.ext-domain}/";
-              description = "Metrics & logs";
-            };
-          }
-          {
-            "Kanidm" = {
-              href = "https://auth.${config.homelab.ext-domain}/";
-              description = "Identity provider";
-            };
-          }
-        ];
-      }
-    ];
+    # Only hosts actually serving a vhost today. No siteMonitor: homepage probes
+    # server-side from thunder, but headscale ACLs only let this (tagged) VPS
+    # reach kanidm + DNS — not tag:ai/tag:media — so probes to the other hosts
+    # would just error. Not worth widening the internet-facing VPS's reach for a
+    # status dot.
+    services =
+      let
+        svc = sub: attrs: {
+          href = "https://${sub}.${config.homelab.ext-domain}/";
+        } // attrs;
+      in
+      [
+        {
+          "Smart Home" = [
+            { "Home Assistant" = svc "ha" { description = "Home automation hub"; icon = "home-assistant"; }; }
+            { "Zigbee2MQTT" = svc "zigbee" { description = "Zigbee device bridge"; icon = "zigbee2mqtt"; }; }
+          ];
+        }
+        {
+          "AI" = [
+            { "Open WebUI" = svc "chat" { description = "LLM chat"; icon = "open-webui"; }; }
+            { "ComfyUI" = svc "comfyui" { description = "Image generation"; icon = "comfyui"; }; }
+          ];
+        }
+        {
+          "Apps" = [
+            { "Mealie" = svc "mealie" { description = "Recipes & meal planning"; icon = "mealie"; }; }
+            { "Mattermost" = svc "mattermost" { description = "Team chat"; icon = "mattermost"; }; }
+          ];
+        }
+        {
+          "Infrastructure" = [
+            { "Kanidm" = svc "auth" { description = "Identity provider"; icon = "kanidm"; }; }
+            { "Attic" = svc "attic" { description = "Nix binary cache"; icon = "nixos"; }; }
+          ];
+        }
+      ];
   };
 
   # oauth2-proxy performs OIDC discovery against auth.<domain> at startup. On

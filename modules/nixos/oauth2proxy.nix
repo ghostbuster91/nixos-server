@@ -174,8 +174,12 @@ in
 
     services.nginx.upstreams.oauth2-proxy = {
       servers."unix:/run/oauth2-proxy/oauth2-proxy.sock" = { };
+      # 1m (not 64k): nginx sizes the upstream zone in pages, and aarch64 RPi
+      # kernels use 16K/64K pages where 64k is only 1 page — too small for the
+      # slab, so nginx fails its config test ("zone too small") on malina5. 1m is
+      # ample at any page size and negligible on x86.
       extraConfig = ''
-        zone oauth2-proxy 64k;
+        zone oauth2-proxy 1m;
         keepalive 2;
       '';
     };

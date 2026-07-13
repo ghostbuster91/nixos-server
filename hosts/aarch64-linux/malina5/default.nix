@@ -41,5 +41,8 @@
       inputs.self.nixosModules.ha
       inputs.self.nixosModules.mosquitto
       inputs.self.nixosModules.meta
+      inputs.self.nixosModules.oauth2
+      inputs.self.nixosModules.oauth2-proxy
+      ./zigbee-oauth.nix
     ];
 }
