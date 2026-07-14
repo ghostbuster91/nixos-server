@@ -19,6 +19,12 @@
     "tag:nix-cache": ["group:admins"]
   },
 
+  // Auto-approve thunder's (tag:auth) exit-node advertisement so the 0.0.0.0/0
+  // + ::/0 routes go live without a manual `headscale nodes approve-routes`.
+  "autoApprovers": {
+    "exitNode": ["tag:auth"]
+  },
+
   "acls": [
     {
       "action": "accept",

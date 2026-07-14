@@ -16,7 +16,14 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.thunder-tailscale-key.path;
-    extraUpFlags = [ "--advertise-tags=tag:auth" "--login-server=https://headscale.${config.homelab.sec-domain}" ];
+    # "server" enables net.ipv4.ip_forward + IPv6 forwarding sysctls, required
+    # to route traffic as an exit node.
+    useRoutingFeatures = "server";
+    extraUpFlags = [
+      "--advertise-tags=tag:auth"
+      "--advertise-exit-node"
+      "--login-server=https://headscale.${config.homelab.sec-domain}"
+    ];
   };
 
   users.users.${username} = {
