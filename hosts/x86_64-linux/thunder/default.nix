@@ -13,7 +13,7 @@
       ./blog.nix
       ./mattermost.nix
       ./cloudflare-tunnel.nix
-      ./homepage.nix
+      ./dashy.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];

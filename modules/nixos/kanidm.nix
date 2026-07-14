@@ -144,6 +144,35 @@ in
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
         };
       };
+      # Dashy dashboard (apps.<domain>). Public PKCE client — oidc-client-ts runs
+      # the auth-code + PKCE flow in the browser and holds no secret.
+      systems.oauth2.dashy = {
+        displayName = "Dashy";
+        public = true;
+        # oidc-client-ts uses redirect_uri = window.location.origin (the bare
+        # apps.<domain> origin, no path). Register both slash forms to be safe.
+        originUrl = [
+          "https://apps.${config.homelab.ext-domain}"
+          "https://apps.${config.homelab.ext-domain}/"
+        ];
+        originLanding = "https://apps.${config.homelab.ext-domain}/";
+        preferShortUsername = true;
+        # web-sentinel.homepage already means "may see the dashboard" (it gated
+        # the old homepage vhost). Reuse it so no membership changes are needed.
+        scopeMaps."web-sentinel.homepage" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        # dashy reads user.profile.groups. Emit clean values via a claim map
+        # (NOT the built-in `groups` scope, which would emit raw group SPNs and
+        # clobber this map — see the Mealie note below). Only grafana.access
+        # members get "grafana", which unhides the Grafana tile client-side.
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup."grafana.access" = [ "grafana" ];
+        };
+      };
       # Linkwarden
       groups."linkwarden.access" = { };
       # TODO for now linkwarden doesn't read groups from oidc anyway..

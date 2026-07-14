@@ -102,6 +102,15 @@ in
     trustedInterfaces = [ "tailscale0" ];
   };
 
+  # oauth2-proxy performs OIDC discovery against auth.<domain> at startup. On
+  # thunder that name is served by the local unbound resolver, so if the daemon
+  # starts before unbound is answering it dies with
+  # "lookup auth.<domain>: no such host" and — with RestartSec=60 — fails the
+  # whole deploy. unbound is Type=notify, so ordering After it waits until it is
+  # genuinely ready to resolve. (oauth2-proxy still runs here for the login
+  # portal even though the dashboard no longer sits behind it.)
+  systemd.services.oauth2-proxy.after = [ "unbound.service" ];
+
   services.prometheus.exporters.unbound = {
     enable = true;
     unbound.host = "unix:///run/unbound/unbound.ctl";
