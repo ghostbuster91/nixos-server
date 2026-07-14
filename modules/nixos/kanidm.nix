@@ -24,6 +24,7 @@ in
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
   age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
+  age.secrets.kanidm-oauth2-stirling = mkSecret ../../secrets/kanidm-oauth2-stirling.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -68,13 +69,13 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" "stirling.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
         in
         {
           "kasper" = {
             mailAddresses = [ "kasper.noreply@example.com" ];
-            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.zigbee" "linkwarden.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" ];
+            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.zigbee" "linkwarden.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" "stirling.access" ];
             displayName = "Kasper";
           };
           "kamil" = {
@@ -179,6 +180,7 @@ in
             "web-sentinel.zigbee" = [ "zigbee" ];
             "web-sentinel.openwebui" = [ "openwebui" ];
             "mealie.access" = [ "mealie" ];
+            "stirling.access" = [ "stirling" ];
           };
         };
       };
@@ -231,6 +233,23 @@ in
             "mealie.admins" = [ "mealie-admins" ];
           };
         };
+      };
+      # Stirling PDF (native Spring Security OIDC login)
+      groups."stirling.access" = { };
+      systems.oauth2.stirling = {
+        displayName = "Stirling PDF";
+        # Spring Security's callback route. The slug must match
+        # SECURITY_OAUTH2_PROVIDER on malina5 ("kanidm").
+        originUrl = "https://pdf.${config.homelab.ext-domain}/login/oauth2/code/kanidm";
+        originLanding = "https://pdf.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-stirling.path;
+        preferShortUsername = true;
+        enableLegacyCrypto = true;
+        scopeMaps."stirling.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };
