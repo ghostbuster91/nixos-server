@@ -14,6 +14,7 @@
       ./mattermost.nix
       ./cloudflare-tunnel.nix
       ./dashy.nix
+      ./vaultwarden.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/sda" ];

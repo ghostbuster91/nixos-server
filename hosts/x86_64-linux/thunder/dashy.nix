@@ -62,6 +62,8 @@ in
           items = [
             ({ title = "Mealie"; url = svc "mealie"; description = "Recipes & meal planning"; icon = "hl-mealie"; } // gate "mealie")
             { title = "Mattermost"; url = svc "mattermost"; description = "Team chat"; icon = "hl-mattermost"; }
+            # Own accounts (kept independent of OIDC), so shown to everyone.
+            { title = "Vaultwarden"; url = svc "vault"; description = "Password manager"; icon = "hl-vaultwarden"; }
           ];
         }
         {

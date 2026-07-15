@@ -42,6 +42,7 @@ in
           ''"comfyui.${ext-domain}.     IN A ${beastIp}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
           ''"mealie.${ext-domain}.      IN A ${malina5Ip}"''
+          ''"vault.${ext-domain}.       IN A ${thunderIp}"''
           ''"attic.${ext-domain}.       IN A ${malina5Ip}"''
           ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
         ];

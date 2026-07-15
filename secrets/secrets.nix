@@ -45,6 +45,7 @@ in
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];
 
   "cloudflared-tunnel.age".publicKeys = [ kghost thunder ];
+  "vaultwarden-admin-token.age".publicKeys = [ kghost thunder ];
   "postgres-linkwarden-password.age".publicKeys = [ kghost beast ];
   "nextauth-linkwarden-secret.age".publicKeys = [ kghost beast ];
 
