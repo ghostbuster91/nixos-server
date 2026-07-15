@@ -32,7 +32,12 @@ in
           oidc = {
             clientId = "dashy";
             endpoint = "https://auth.${ext}/oauth2/openid/dashy";
-            scope = "openid email profile groups";
+            # Do NOT request the `groups` scope: kanidm denies authorization for
+            # any scope the client isn't granted, and the dashy client's
+            # scopeMaps grant only openid/email/profile. The groups *claim* is
+            # still delivered via kanidm's claimMaps.groups regardless of scope
+            # (same as the web-sentinel client), landing at user.profile.groups.
+            scope = "openid email profile";
           };
         };
       };
