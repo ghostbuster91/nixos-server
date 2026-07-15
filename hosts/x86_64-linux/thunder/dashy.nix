@@ -3,17 +3,12 @@ let
   ext = config.homelab.ext-domain;
   domain = "apps.${ext}";
   svc = sub: "https://${sub}.${ext}/";
+  # Render a tile only for users whose OIDC token carries `group` (emitted by
+  # kanidm's dashy claimMaps.groups for members of the service's access group).
+  # Merged onto a tile with //. Tiles without a gate are shown to everyone.
+  gate = group: { displayData.showForKeycloakUsers.groups = [ group ]; };
 in
 {
-  # Dashy replaces homepage-dashboard. Unlike homepage, dashy renders per-user
-  # from the OIDC token itself, so the whole board no longer needs an
-  # oauth2-proxy group gate in front — dashy runs the OIDC flow client-side
-  # (oidc-client-ts, auth-code + PKCE) and hides tiles the user's groups don't
-  # grant. See the Grafana tile below.
-  #
-  # nixpkgs ships dashy as a *static* SPA (no node backend): server-side status
-  # checks and UI config-writes are unavailable, but client-side OIDC login and
-  # group-based visibility work fine — that's all this needs.
   services.dashy = {
     enable = true;
     settings = {
@@ -42,25 +37,30 @@ in
         };
       };
 
+      # Each tile is gated by the kanidm group that actually grants access to the
+      # underlying service, so the board mirrors what a user can really reach.
+      # This is cosmetic (URLs live in the static bundle); every service stays
+      # gated by its own auth. Mattermost (own accounts), Kanidm (the IdP) and
+      # Attic (token auth) have no kanidm group and are shown to everyone.
       sections = [
         {
           name = "Smart Home";
           items = [
-            { title = "Home Assistant"; url = svc "ha"; description = "Home automation hub"; icon = "hl-home-assistant"; }
-            { title = "Zigbee2MQTT"; url = svc "zigbee"; description = "Zigbee device bridge"; icon = "hl-zigbee2mqtt"; }
+            ({ title = "Home Assistant"; url = svc "ha"; description = "Home automation hub"; icon = "hl-home-assistant"; } // gate "ha")
+            ({ title = "Zigbee2MQTT"; url = svc "zigbee"; description = "Zigbee device bridge"; icon = "hl-zigbee2mqtt"; } // gate "zigbee")
           ];
         }
         {
           name = "AI";
           items = [
-            { title = "Open WebUI"; url = svc "chat"; description = "LLM chat"; icon = "hl-open-webui"; }
-            { title = "ComfyUI"; url = svc "comfyui"; description = "Image generation"; icon = "hl-comfyui"; }
+            ({ title = "Open WebUI"; url = svc "chat"; description = "LLM chat"; icon = "hl-open-webui"; } // gate "openwebui")
+            ({ title = "ComfyUI"; url = svc "comfyui"; description = "Image generation"; icon = "hl-comfyui"; } // gate "openwebui")
           ];
         }
         {
           name = "Apps";
           items = [
-            { title = "Mealie"; url = svc "mealie"; description = "Recipes & meal planning"; icon = "hl-mealie"; }
+            ({ title = "Mealie"; url = svc "mealie"; description = "Recipes & meal planning"; icon = "hl-mealie"; } // gate "mealie")
             { title = "Mattermost"; url = svc "mattermost"; description = "Team chat"; icon = "hl-mattermost"; }
           ];
         }
@@ -69,17 +69,7 @@ in
           items = [
             { title = "Kanidm"; url = svc "auth"; description = "Identity provider"; icon = "hl-authelia"; }
             { title = "Attic"; url = svc "attic"; description = "Nix binary cache"; icon = "hl-nixos"; }
-            # Rendered only for users whose OIDC token carries the "grafana" group
-            # value — kanidm emits it for grafana.access members (kanidm.nix). For
-            # everyone else the tile is filtered out client-side and never shown.
-            # This is cosmetic: Grafana itself stays gated by its own OIDC.
-            {
-              title = "Grafana";
-              url = svc "grafana";
-              description = "Dashboards & metrics";
-              icon = "hl-grafana";
-              displayData.showForKeycloakUsers.groups = [ "grafana" ];
-            }
+            ({ title = "Grafana"; url = svc "grafana"; description = "Dashboards & metrics"; icon = "hl-grafana"; } // gate "grafana")
           ];
         }
       ];

@@ -69,7 +69,8 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" "ha.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" ];
+          martaGroups = familyGroups ++ [ "ha.access" ];
         in
         {
           "kasper" = {
@@ -89,7 +90,7 @@ in
           };
           "marta" = {
             mailAddresses = [ "marta.noreply@example.com" ];
-            groups = familyGroups;
+            groups = martaGroups;
             displayName = "Marta";
           };
         };
@@ -164,13 +165,22 @@ in
           "email"
           "profile"
         ];
-        # dashy reads user.profile.groups. Emit clean values via a claim map
-        # (NOT the built-in `groups` scope, which would emit raw group SPNs and
-        # clobber this map — see the Mealie note below). Only grafana.access
-        # members get "grafana", which unhides the Grafana tile client-side.
+        # dashy reads user.profile.groups. Emit clean per-service values via a
+        # claim map (NOT the built-in `groups` scope, which would emit raw group
+        # SPNs and clobber this map — see the Mealie note below). Each value
+        # unhides the matching dashboard tile client-side (showForKeycloakUsers
+        # in dashy.nix); a user only receives values for the groups they are in.
+        # Services with no kanidm gate (Mattermost/Kanidm/Attic) have no value
+        # here and their tiles are shown to everyone.
         claimMaps.groups = {
           joinType = "array";
-          valuesByGroup."grafana.access" = [ "grafana" ];
+          valuesByGroup = {
+            "grafana.access" = [ "grafana" ];
+            "ha.access" = [ "ha" ];
+            "web-sentinel.zigbee" = [ "zigbee" ];
+            "web-sentinel.openwebui" = [ "openwebui" ];
+            "mealie.access" = [ "mealie" ];
+          };
         };
       };
       # Linkwarden
