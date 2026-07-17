@@ -24,6 +24,7 @@ in
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
   age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
+  age.secrets.kanidm-oauth2-paperless = mkSecret ../../secrets/kanidm-oauth2-paperless.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -72,7 +73,7 @@ in
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.access" "mealie.admins" "linkwarden.access" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.access" "mealie.admins" "linkwarden.access" "paperless.access" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {
@@ -178,6 +179,7 @@ in
             "web-sentinel.openwebui" = [ "openwebui" ];
             "mealie.access" = [ "mealie" ];
             "web-sentinel.stirling" = [ "stirling" ];
+            "paperless.access" = [ "paperless" ];
           };
         };
       };
@@ -236,6 +238,29 @@ in
       # admin login. Instead it runs behind oauth2-proxy on beast, gated by the
       # web-sentinel client's `access_stirling` claim (see web-sentinel.stirling
       # in the group + claimMap wiring above).
+
+      # Paperless-ngx (native OIDC via django-allauth, runs on beast). Membership
+      # in paperless.access is what actually lets a user complete the flow:
+      # kanidm refuses to authorize any scope the client's scopeMap doesn't grant
+      # the user, so a non-member can't obtain a token. allauth auto-provisions
+      # the paperless account on first login (PAPERLESS_SOCIAL_AUTO_SIGNUP).
+      groups."paperless.access" = { };
+      systems.oauth2.paperless = {
+        displayName = "Paperless";
+        # allauth's openid_connect callback: /accounts/oidc/<provider_id>/login/callback/
+        # (provider_id is "kanidm", set in PAPERLESS_SOCIALACCOUNT_PROVIDERS).
+        originUrl = "https://paperless.${config.homelab.ext-domain}/accounts/oidc/kanidm/login/callback/";
+        originLanding = "https://paperless.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
+        preferShortUsername = true;
+        # allauth requests exactly these scopes; no group/role mapping is wired
+        # into paperless, so the standard OIDC scopes are all that's needed.
+        scopeMaps."paperless.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+      };
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };
       groups."ha.admins" = { };

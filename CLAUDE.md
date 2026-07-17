@@ -51,6 +51,29 @@ A host `default.nix` (see `hosts/x86_64-linux/deckard/default.nix` for the canon
 
 Hosts in service today: `thunder` (VPS — headscale, blog, mattermost, DNS, cloudflare tunnel, kanidm), `beast` (workstation x86_64 with nvidia), `malina5` (Raspberry Pi 5 — Home Assistant, Zigbee2MQTT, Mosquitto, atticd binary cache), and `surfer` (Banana Pi R3 — hostapd WiFi AP, monitoring). `deckard` (formerly the main x86_64 homelab — Grafana/Prometheus/Loki, kanidm, linkwarden, ESPHome) is **decommissioned**; its `hosts/x86_64-linux/deckard/` config is retained only as a reference example and is not deployed.
 
+### Adding a new web service (runbook)
+
+Most new services follow the same shape. Copy the closest existing example rather than starting blank — the three canonical templates are:
+
+- **Native OIDC client** (app speaks OIDC itself): `hosts/aarch64-linux/malina5/mealie.nix` + its `systems.oauth2.mealie` block in `modules/nixos/kanidm.nix`. Also: `paperless.nix` (beast), grafana, linkwarden.
+- **oauth2-proxy gated** (app has no/weak auth): `hosts/x86_64-linux/beast/comfyui.nix` — sets `services.nginx.virtualHosts.<d>.oauth2 = { enable = true; allowedGroups = [ ... ]; };`.
+- **Own auth, VPN-only** (kept independent of the IdP): `hosts/x86_64-linux/thunder/vaultwarden.nix`.
+
+Steps (a service on host H reachable at `svc.<ext-domain>`):
+
+1. **Service file** — create `hosts/<arch>/<H>/<svc>.nix` and add it to that host's `default.nix` `imports`. Bind the app to loopback (`127.0.0.1:<port>`).
+2. **nginx vhost** (in the service file): `forceSSL = true; useACMEHost = config.homelab.ext-domain;` (wildcard cert comes from `modules/nixos/proxy.nix`), a loopback `proxyPass` with `recommendedProxySettings`, `proxyWebsockets = true` if it needs live updates, and `client_max_body_size` if it takes uploads.
+3. **DNS** — add `''"svc.${ext-domain}. IN A ${<H>Ip}"''` to `hosts/x86_64-linux/thunder/dns.nix` (`<H>Ip` from `config.homelab.<H>.vlan.ip`). All homelab DNS is VPN-only via thunder's unbound; there is no public record, so a beast/malina5 vhost needs no extra allow/deny block (thunder's public-facing vhosts like vaultwarden add one as defense-in-depth).
+4. **Auth**:
+   - *Native OIDC*: in `modules/nixos/kanidm.nix` add `groups."<svc>.access" = { }` and `systems.oauth2.<svc>` with `basicSecretFile`, `scopeMaps."<svc>.access" = [ "openid" "email" "profile" ]`, `originUrl` = the app's **exact** callback path, `preferShortUsername = true`. Grant access by adding `<svc>.access` to the relevant `persons`. Some clients need `enableLegacyCrypto = true` (RS256) — Mealie/Linkwarden do, Grafana doesn't; symptom is a token signature/alg error on first login.
+   - *oauth2-proxy gate*: the `allowedGroups` values are the **claim values** emitted by the `web-sentinel` client's `claimMaps.groups` in `kanidm.nix` — add a `web-sentinel.<svc>` group and a `valuesByGroup."web-sentinel.<svc>" = [ "access_<svc>" ]` there, then reference `access_<svc>` in the vhost. The login portal lives on thunder; other hosts run oauth2-proxy only for local validation (`meta.oauth2-proxy.servePortal = false`).
+5. **Secrets** (see the Secrets section below for mechanics):
+   - A kanidm OIDC client secret must be decryptable on **both** the kanidm host (thunder) *and* the app host. Either one age file listing both host pubkeys, or — when the app needs it in a different shape — two files holding the same value (the Mealie/Paperless pattern: `kanidm-oauth2-<svc>.age` on thunder + a host-shaped file on H). Register in `secrets/secrets.nix` and create with `age -r <pubkey> -o <file>.age` (host pubkeys are the `let` bindings at the top of `secrets.nix`).
+   - **Never put a secret in a module's `settings`/`environment`** — most NixOS service modules bake those into the world-readable Nix store. Prefer the module's own secret option (`environmentFile`, `credentialsFile`, `passwordFile`); if there is none, render an `EnvironmentFile` at runtime from a oneshot (see `paperless.nix`). Always check the module source for how `settings` reach the unit before trusting it.
+6. **Storage & backup** — persist the app's data dir with `environment.persistence."/persist".directories = [ { directory = "/var/lib/<svc>"; user/group/mode; } ]` (use standard `/var/lib` paths + impermanence, not raw `/persist/...`). That dataset (`rpool1/safe/persist`; on beast also `/data/persist` = `dpool/safe/persist`) is snapshotted and borg'd by `modules/nixos/backup.nix` — **do not add a per-app backup job**. Reproducible caches go on `/state` or (beast) `/data/local`, which are not backed up.
+7. **Dashy tile** — add an item to `hosts/x86_64-linux/thunder/dashy.nix`; gate visibility with `// gate "<value>"` and add `"<svc>.access" = [ "<value>" ]` to the **dashy** client's `claimMaps.groups.valuesByGroup` in `kanidm.nix` (not the `groups` scope).
+8. **Verify** — `git add` new files first (flakes only see git-tracked files), `nix fmt`, then eval without a full build: `nix eval .#nixosConfigurations.<H>.config.system.build.toplevel.drvPath`. Eval both the app host and thunder if you touched kanidm/dns/dashy. Deploy thunder before H so DNS/kanidm land first.
+
 ### Secrets and `homelab.*` options
 
 `modules/nixos/meta.nix` declares the `homelab.*` option tree (hostname, `ext-domain`, `sec-domain`, `vpnCidr`, per-host VLAN IPs, VPS interfaces). The *values* live in `secrets/meta.nix.age` and are read at flake-eval time via the custom `extraBuiltins.ageImportEncrypted` from `nix/extra-builtins.nix` (which calls `nix/age-decrypt-and-cache.sh`). This is why the devshell is required — outside it, the builtin is missing and `meta.nix` throws.

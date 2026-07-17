@@ -40,6 +40,10 @@ in
   "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder beast ];
   "kanidm-oauth2-mealie.age".publicKeys = [ kghost thunder ];
   "mealie-oidc-env.age".publicKeys = [ kghost malina5 ];
+  # Same raw OIDC client secret in both files: kanidm's basicSecretFile lives on
+  # thunder, paperless reads it on beast. Keep the two in sync when rekeying.
+  "kanidm-oauth2-paperless.age".publicKeys = [ kghost thunder ];
+  "paperless-oidc-secret.age".publicKeys = [ kghost beast ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];

@@ -40,6 +40,7 @@ in
           ''"linkwarden.${ext-domain}.  IN A ${deckardIp}"''
           ''"chat.${ext-domain}.        IN A ${beastIp}"''
           ''"comfyui.${ext-domain}.     IN A ${beastIp}"''
+          ''"paperless.${ext-domain}.   IN A ${beastIp}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
           ''"mealie.${ext-domain}.      IN A ${malina5Ip}"''
           ''"vault.${ext-domain}.       IN A ${thunderIp}"''
