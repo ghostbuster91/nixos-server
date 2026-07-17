@@ -24,7 +24,6 @@ in
   age.secrets.kanidm-oauth2-proxy = mkSecret ../../secrets/kanidm-oauth2-proxy.age;
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
   age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
-  age.secrets.kanidm-oauth2-stirling = mkSecret ../../secrets/kanidm-oauth2-stirling.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -69,7 +68,7 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" "stirling.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "mealie.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
@@ -129,6 +128,7 @@ in
       groups."web-sentinel.homepage" = { };
       groups."web-sentinel.zigbee" = { };
       groups."web-sentinel.analytics" = { };
+      groups."web-sentinel.stirling" = { };
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${config.homelab.ext-domain}/oauth2/callback";
@@ -146,6 +146,7 @@ in
           valuesByGroup."web-sentinel.homepage" = [ "access_homepage" ];
           valuesByGroup."web-sentinel.zigbee" = [ "access_zigbee" ];
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
+          valuesByGroup."web-sentinel.stirling" = [ "access_stirling" ];
         };
       };
       # Dashy dashboard (apps.<domain>). Public PKCE client — oidc-client-ts runs
@@ -183,7 +184,7 @@ in
             "web-sentinel.zigbee" = [ "zigbee" ];
             "web-sentinel.openwebui" = [ "openwebui" ];
             "mealie.access" = [ "mealie" ];
-            "stirling.access" = [ "stirling" ];
+            "web-sentinel.stirling" = [ "stirling" ];
           };
         };
       };
@@ -237,23 +238,11 @@ in
           };
         };
       };
-      # Stirling PDF (native Spring Security OIDC login)
-      groups."stirling.access" = { };
-      systems.oauth2.stirling = {
-        displayName = "Stirling PDF";
-        # Spring Security's callback route. The slug must match
-        # SECURITY_OAUTH2_PROVIDER on malina5 ("kanidm").
-        originUrl = "https://pdf.${config.homelab.ext-domain}/login/oauth2/code/kanidm";
-        originLanding = "https://pdf.${config.homelab.ext-domain}/";
-        basicSecretFile = config.age.secrets.kanidm-oauth2-stirling.path;
-        preferShortUsername = true;
-        enableLegacyCrypto = true;
-        scopeMaps."stirling.access" = [
-          "openid"
-          "email"
-          "profile"
-        ];
-      };
+      # Stirling PDF is not an OIDC client of its own — free-tier Stirling
+      # paywalls OAuth user auto-provisioning and can't disable its built-in
+      # admin login. Instead it runs behind oauth2-proxy on beast, gated by the
+      # web-sentinel client's `access_stirling` claim (see web-sentinel.stirling
+      # in the group + claimMap wiring above).
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };
       groups."ha.admins" = { };
