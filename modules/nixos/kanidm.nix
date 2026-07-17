@@ -71,11 +71,14 @@ in
         let
           familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "mealie.access" "stirling.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
+          grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
+          smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.access" "mealie.admins" "linkwarden.access" ];
         in
         {
           "kasper" = {
             mailAddresses = [ "kasper.noreply@example.com" ];
-            groups = [ "grafana.admins" "grafana.server-admins" "grafana.access" "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.zigbee" "linkwarden.access" "mealie.access" "mealie.admins" "ha.access" "ha.admins" "stirling.access" ];
+            groups = adminGroups;
             displayName = "Kasper";
           };
           "kamil" = {
