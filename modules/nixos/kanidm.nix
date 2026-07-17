@@ -69,11 +69,11 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "mealie.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "mealie.access" "paperless.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.access" "mealie.admins" "linkwarden.access" "paperless.access" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.admins" "linkwarden.access" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {

@@ -38,14 +38,25 @@ in
   # survives the root rollback and is captured by the ZFS-snapshot borg backup
   # (modules/nixos/backup.nix) — no paperless-specific export job is needed, the
   # same convention as kanidm/vaultwarden/mealie.
-  environment.persistence."/persist".directories = [
-    {
-      directory = dataDir;
-      user = "paperless";
-      group = "paperless";
-      mode = "0700";
-    }
-  ];
+  #
+  # media and consume are persisted as their *own* directories (not just as
+  # subdirs of the persisted dataDir). The paperless module otherwise relies on
+  # a systemd-tmpfiles `d` rule to create them, but on a fresh persist the
+  # dataDir bind mount is empty and — depending on whether tmpfiles runs before
+  # or after the mount (boot vs. live `switch`) — the units' preStart Django
+  # check can fire before the dirs exist and hard-fail. Persisting them makes
+  # impermanence bind-mount each one (so it always exists), and the module's
+  # `RequiresMountsFor` on media/consume then gates the units on those mounts —
+  # no dependency on tmpfiles timing.
+  environment.persistence."/persist".directories =
+    let
+      dir = directory: { inherit directory; user = "paperless"; group = "paperless"; mode = "0700"; };
+    in
+    [
+      (dir dataDir)
+      (dir "${dataDir}/media")
+      (dir "${dataDir}/consume")
+    ];
 
   services.paperless = {
     enable = true;
