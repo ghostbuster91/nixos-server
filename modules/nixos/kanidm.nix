@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 let
   kanidmDomainExt = "auth.${config.homelab.ext-domain}";
   kanidmPort = 8300;
@@ -73,28 +73,21 @@ in
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
           adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.access" "mealie.admins" "linkwarden.access" ];
+          # Family members only differ by their group set; the mail address and
+          # display name derive mechanically from the username (attr key).
+          mkPerson = name: groups: {
+            mailAddresses = [ "${name}.noreply@example.com" ];
+            displayName = lib.toUpper (builtins.substring 0 1 name) + builtins.substring 1 (-1) name;
+            inherit groups;
+          };
         in
-        {
-          "kasper" = {
-            mailAddresses = [ "kasper.noreply@example.com" ];
-            groups = adminGroups;
-            displayName = "Kasper";
-          };
-          "kamil" = {
-            mailAddresses = [ "kamil.noreply@example.com" ];
-            groups = familyGroups;
-            displayName = "Kamil";
-          };
-          "kornel" = {
-            mailAddresses = [ "kornel.noreply@example.com" ];
-            groups = familyGroups;
-            displayName = "Kornel";
-          };
-          "marta" = {
-            mailAddresses = [ "marta.noreply@example.com" ];
-            groups = martaGroups;
-            displayName = "Marta";
-          };
+        lib.mapAttrs mkPerson {
+          kasper = adminGroups;
+          kamil = familyGroups;
+          kornel = familyGroups;
+          mirek = familyGroups;
+          aga = familyGroups;
+          marta = martaGroups;
         };
       # Grafana
       groups."grafana.access" = { };
