@@ -54,22 +54,13 @@
       inputs.self.nixosModules.proxy
       inputs.self.nixosModules.oauth2
       inputs.self.nixosModules.oauth2-proxy
+      inputs.self.nixosModules.zfs
     ];
 
   # The oauth2 login portal is hosted on thunder (oauth2.<domain> resolves
   # there). beast still runs oauth2-proxy to validate its own protected vhosts
   # (comfyui, chat) via local auth_request, but must not serve a dormant portal.
   meta.oauth2-proxy.servePortal = false;
-
-  # beast is the monitoring host (prometheus-server scrapes a `zfs` job against
-  # itself). The full zfs module isn't imported here because its rollback-root
-  # initrd service would change beast's boot behaviour, so enable just the
-  # exporter that the scrape job needs.
-  services.prometheus.exporters.zfs = {
-    enable = true;
-    port = 9004;
-    openFirewall = true;
-  };
 
   home-manager = {
     useUserPackages = true;
