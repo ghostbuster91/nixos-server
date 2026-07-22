@@ -51,6 +51,23 @@
     host = "0.0.0.0";
   };
 
+  # ollama probes for GPUs once at startup and caches the result for the whole
+  # process lifetime. If it starts before the nvidia driver is ready (e.g. during
+  # a nixos-rebuild switch) it silently falls back to CPU forever. Block startup
+  # until nvidia-smi succeeds so the CUDA backend is always picked up.
+  systemd.services.ollama.serviceConfig.ExecStartPre =
+    let
+      wait-for-gpu = pkgs.writeShellScript "wait-for-nvidia-gpu" ''
+        for i in $(seq 1 60); do
+          ${config.hardware.nvidia.package.bin}/bin/nvidia-smi >/dev/null 2>&1 && exit 0
+          sleep 1
+        done
+        echo "nvidia-smi never became ready; starting ollama anyway (CPU fallback likely)" >&2
+        exit 0
+      '';
+    in
+    "${wait-for-gpu}";
+
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ config.services.ollama.port ];
 
   services.open-webui = {
