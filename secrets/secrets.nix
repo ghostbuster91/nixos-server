@@ -10,9 +10,9 @@ in
 {
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
-  "prometheus-hass-token.age".publicKeys = [ kghost deckard malina5 ];
-  "alertmanager.age".publicKeys = [ kghost deckard ];
-  "grafana-secret-key.age".publicKeys = [ kghost deckard ];
+  "prometheus-hass-token.age".publicKeys = [ kghost beast malina5 ];
+  "alertmanager.age".publicKeys = [ kghost beast ];
+  "grafana-secret-key.age".publicKeys = [ kghost beast ];
 
   "zigbee2mqtt-network-key.age".publicKeys = [ kghost malina5 ];
   "mosquitto-pw-zigbee2mqtt.yaml.age".publicKeys = [ kghost malina5 ];
@@ -36,7 +36,7 @@ in
   "kanidm-idm-admin-password.age".publicKeys = [ kghost thunder ];
   "kanidm-oauth2-proxy.age".publicKeys = [ kghost thunder beast ];
 
-  "kanidm-oauth2-grafana.age".publicKeys = [ kghost thunder deckard ];
+  "kanidm-oauth2-grafana.age".publicKeys = [ kghost thunder beast ];
   "kanidm-oauth2-linkwarden.age".publicKeys = [ kghost thunder beast ];
   "kanidm-oauth2-mealie.age".publicKeys = [ kghost thunder ];
   "mealie-oidc-env.age".publicKeys = [ kghost malina5 ];

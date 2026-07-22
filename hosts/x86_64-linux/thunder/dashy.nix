@@ -74,6 +74,7 @@ in
             { title = "Kanidm"; url = svc "auth"; description = "Identity provider"; icon = "hl-authelia"; }
             { title = "Attic"; url = svc "attic"; description = "Nix binary cache"; icon = "hl-nixos"; }
             ({ title = "Grafana"; url = svc "grafana"; description = "Dashboards & metrics"; icon = "hl-grafana"; } // gate "grafana")
+            ({ title = "Prometheus"; url = svc "prometheus"; description = "Metrics database"; icon = "hl-prometheus"; } // gate "prometheus")
           ];
         }
       ];

@@ -15,9 +15,11 @@ in
 
   environment.persistence."/state".directories = [
     {
+      # alertmanager runs with DynamicUser=true, so there is no static
+      # alertmanager user/group for impermanence to chown the bind-mount
+      # source to. Leave ownership to systemd, which chowns the state dir
+      # to the dynamic UID at service start (same pattern as esphome/whisper).
       directory = "/var/lib/private/alertmanager";
-      user = "alertmanager";
-      group = "alertmanager";
       mode = "0700";
     }
   ];
@@ -119,7 +121,7 @@ in
           inherit scrape_interval;
           static_configs = [{
             targets = [
-              "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
+              "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
               "surfer.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
               "malina5.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
               "thunder.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
@@ -140,14 +142,14 @@ in
           job_name = "zfs";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
+            targets = [ "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
           }];
         }
         {
           job_name = "systemd";
           inherit scrape_interval;
           static_configs = [{
-            targets = [ "deckard.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
+            targets = [ "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
           }];
         }
         {
@@ -163,6 +165,14 @@ in
     nginx.virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
       useACMEHost = config.homelab.ext-domain;
       forceSSL = true;
+
+      # Prometheus has no auth of its own, so gate the UI/API behind
+      # oauth2-proxy. Grafana queries this datasource over loopback
+      # (see grafana/default.nix), bypassing this proxy.
+      oauth2 = {
+        enable = true;
+        allowedGroups = [ "access_prometheus" ];
+      };
 
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString cfg.port}";

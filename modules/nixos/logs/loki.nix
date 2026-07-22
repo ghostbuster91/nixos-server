@@ -30,9 +30,10 @@ in
         auth_enabled = false;
 
         common = {
-          instance_interface_names = [
-            "enp3s0"
-          ];
+          # Single-instance inmemory ring; advertise loopback directly instead of
+          # probing a host-specific interface ("no usable address found on
+          # interface" on hosts whose NIC isn't enp3s0).
+          instance_addr = "127.0.0.1";
           ring.kvstore.store = "inmemory";
           path_prefix = "/var/lib/loki";
         };

@@ -26,9 +26,9 @@ in
         local-data = [
           ''"zigbee.${ext-domain}.      IN A ${malina5Ip}"''
           ''"ha.${ext-domain}.          IN A ${malina5Ip}"''
-          ''"prometheus.${ext-domain}.  IN A ${deckardIp}"''
-          ''"loki.${ext-domain}.        IN A ${deckardIp}"''
-          ''"grafana.${ext-domain}.     IN A ${deckardIp}"''
+          ''"prometheus.${ext-domain}.  IN A ${beastIp}"''
+          ''"loki.${ext-domain}.        IN A ${beastIp}"''
+          ''"grafana.${ext-domain}.     IN A ${beastIp}"''
           ''"auth.${ext-domain}.        IN A ${thunderIp}"''
           ''"apps.${ext-domain}.        IN A ${thunderIp}"''
           # Portal lives on thunder (always-on, co-located with kanidm) so fresh
@@ -46,10 +46,12 @@ in
           ''"vault.${ext-domain}.       IN A ${thunderIp}"''
           ''"pdf.${ext-domain}.         IN A ${beastIp}"''
           ''"attic.${ext-domain}.       IN A ${malina5Ip}"''
-          ''"deckard.tail.${ext-domain} IN A ${deckardIp}"''
+          # Prometheus scrapes node/zfs/systemd exporters over the tailnet by
+          # `<host>.tail.<domain>`; beast (the monitoring host) self-scrapes.
+          ''"beast.tail.${ext-domain}   IN A ${beastIp}"''
         ];
 
-        local-data-ptr = [ ''"${deckardIp} deckard.tail.${ext-domain}."'' ];
+        local-data-ptr = [ ''"${beastIp} beast.tail.${ext-domain}."'' ];
 
         private-domain = [ ''${ext-domain}'' ];
         private-address = [ ''${vpnCidr}'' ];

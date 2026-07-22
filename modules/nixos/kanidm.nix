@@ -71,7 +71,7 @@ in
         let
           familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "mealie.access" "paperless.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
-          grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" ];
+          grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
           adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.admins" "linkwarden.access" ];
           # Family members only differ by their group set; the mail address and
@@ -95,6 +95,8 @@ in
       groups."grafana.editors" = { };
       groups."grafana.admins" = { };
       groups."grafana.server-admins" = { };
+      # Gates the (auth-less) Prometheus UI/API via oauth2-proxy on beast.
+      groups."prometheus.access" = { };
       systems.oauth2.grafana = {
         displayName = "Grafana";
         originUrl = "https://grafana.${config.homelab.ext-domain}/login/generic_oauth";
@@ -141,6 +143,7 @@ in
           valuesByGroup."web-sentinel.zigbee" = [ "access_zigbee" ];
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
           valuesByGroup."web-sentinel.stirling" = [ "access_stirling" ];
+          valuesByGroup."prometheus.access" = [ "access_prometheus" ];
         };
       };
       # Dashy dashboard (apps.<domain>). Public PKCE client — oidc-client-ts runs
@@ -174,6 +177,7 @@ in
           joinType = "array";
           valuesByGroup = {
             "grafana.access" = [ "grafana" ];
+            "prometheus.access" = [ "prometheus" ];
             "ha.access" = [ "ha" ];
             "web-sentinel.zigbee" = [ "zigbee" ];
             "web-sentinel.openwebui" = [ "openwebui" ];

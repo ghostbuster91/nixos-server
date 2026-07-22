@@ -17,9 +17,13 @@ in
     group = "grafana";
   };
 
-  # Mirror the original oauth2 secret
+  # The kanidm OIDC client secret. Declared directly (not borrowed from
+  # kanidm.nix's `age.secrets.kanidm-oauth2-grafana`) so grafana can live on a
+  # host that doesn't import the kanidm module — the same .age file is decrypted
+  # on both the kanidm host (thunder) and the grafana host (see secrets.nix
+  # recipients).
   age.secrets.grafana-oauth2-client-secret = {
-    inherit (config.age.secrets.kanidm-oauth2-grafana) file;
+    file = ../../../secrets/kanidm-oauth2-grafana.age;
     mode = "440";
     group = "grafana";
   };
@@ -85,7 +89,9 @@ in
             name = "Prometheus";
             type = "prometheus";
             access = "proxy";
-            url = "https://prometheus.${config.homelab.ext-domain}";
+            # Query over loopback so Grafana bypasses the oauth2-proxy that now
+            # gates the public prometheus.<domain> vhost (see prometheus/server.nix).
+            url = "http://127.0.0.1:${toString config.services.prometheus.port}";
             ## https://github.com/rfmoz/grafana-dashboards/issues/169
             jsonData = {
               timeInterval = (builtins.elemAt config.services.prometheus.scrapeConfigs 0).scrape_interval;

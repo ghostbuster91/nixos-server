@@ -23,6 +23,10 @@
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
       inputs.self.nixosModules.logs-alloy
+      inputs.self.nixosModules.logs-loki
+      inputs.self.nixosModules.grafana
+      inputs.self.nixosModules.prometheus-server
+      inputs.self.nixosModules.prometheus-client
       inputs.self.nixosModules.attic-watch-store
       inputs.self.nixosModules.nix-remote-builder
       {
@@ -56,6 +60,16 @@
   # there). beast still runs oauth2-proxy to validate its own protected vhosts
   # (comfyui, chat) via local auth_request, but must not serve a dormant portal.
   meta.oauth2-proxy.servePortal = false;
+
+  # beast is the monitoring host (prometheus-server scrapes a `zfs` job against
+  # itself). The full zfs module isn't imported here because its rollback-root
+  # initrd service would change beast's boot behaviour, so enable just the
+  # exporter that the scrape job needs.
+  services.prometheus.exporters.zfs = {
+    enable = true;
+    port = 9004;
+    openFirewall = true;
+  };
 
   home-manager = {
     useUserPackages = true;
