@@ -1,8 +1,8 @@
 <domain type="kvm">
   <name>ubuntu-vpn</name>
   <uuid>7f9d2e10-8c4b-4a6e-9f2a-1c2d3e4f5a6b</uuid>
-  <memory unit="GiB">16</memory>
-  <currentMemory unit="GiB">16</currentMemory>
+  <memory unit="GiB">32</memory>
+  <currentMemory unit="GiB">32</currentMemory>
   <vcpu placement="static">4</vcpu>
   <os firmware="efi">
     <type arch="x86_64" machine="q35">hvm</type>
