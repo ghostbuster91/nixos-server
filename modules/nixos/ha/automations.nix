@@ -132,6 +132,18 @@
     }];
   }
   {
+    id = "close_bedroom_curtains_at_23";
+    alias = "Close bedroom curtains at 23:00";
+    trigger = [{
+      platform = "time";
+      at = "23:00:00";
+    }];
+    action = [{
+      service = "button.press";
+      target.entity_id = "button.boneio_24_sw_07_737d50_sypialnia_zaslony_zamknij";
+    }];
+  }
+  {
     id = "study_curtains_to_mqtt";
     alias = "study curtains -> MQTT";
     trigger = [{
