@@ -54,6 +54,11 @@
     <channel type="unix">
       <target type="virtio" name="org.qemu.guest_agent.0"/>
     </channel>
+    <!-- SPICE agent channel: lets spice-vdagent in the guest negotiate
+         display auto-resize + clipboard sharing with virt-viewer. -->
+    <channel type="spicevmc">
+      <target type="virtio" name="com.redhat.spice.0"/>
+    </channel>
     <input type="tablet" bus="usb"/>
     <input type="keyboard" bus="ps2"/>
     <input type="mouse" bus="ps2"/>
@@ -63,8 +68,11 @@
     <graphics type="spice" autoport="yes">
       <listen type="address"/>
     </graphics>
+    <!-- QXL rather than virtio-gpu: on UEFI boot simpledrm claims card0 and
+         virtio-gpu lands on card1, which breaks spice-vdagent's display
+         matching (no auto-resize). QXL uses SPICE's direct resize path. -->
     <video>
-      <model type="virtio" heads="1"/>
+      <model type="qxl" ram="65536" vram="65536" vgamem="16384" heads="1" primary="yes"/>
     </video>
     <memballoon model="virtio"/>
     <rng model="virtio">
