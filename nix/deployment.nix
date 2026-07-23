@@ -28,7 +28,18 @@
           # See the earlier section about Magic Rollback for more information.
           # This defaults to `true`
           magicRollback = true;
-          # remoteBuild = system == "aarch64-linux";
+
+          # Build the closure on the target host itself instead of on the
+          # machine running `deploy` (focusM2). Opt in only for hosts that are
+          # capable build machines: beast (x86) and malina5 (Pi 5) build and
+          # cache their own closure in place, so attic-watch-store captures the
+          # outputs and focusM2 never accumulates the closure (nothing there for
+          # gc to reap and re-pull). Deliberately NOT keyed on
+          # `system == "aarch64-linux"`: that would also flip surfer (a weak
+          # Banana Pi R3 with no build offload), forcing it to compile its whole
+          # closure locally. surfer and thunder stay false and keep building via
+          # focusM2's distributed builders (aarch64 → malina5).
+          remoteBuild = builtins.elem name [ "beast" "malina5" ];
         };
 
       systems =
