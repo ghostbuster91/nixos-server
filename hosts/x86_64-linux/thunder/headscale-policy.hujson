@@ -58,6 +58,11 @@
       "action": "accept",
       "src": ["tag:nix-builder"],
       "dst": ["tag:nix-cache:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["tag:media"],
+      "dst": ["tag:ai:10300"]
     }
   ]
 }
