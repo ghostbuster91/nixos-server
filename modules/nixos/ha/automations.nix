@@ -148,6 +148,48 @@
     }];
   }
   {
+    id = "pralnia_door_light";
+    alias = "Pralnia door -> light";
+    trigger = [
+      {
+        platform = "state";
+        entity_id = "binary_sensor.pralnia_drzwi";
+        to = "on";
+      }
+      {
+        platform = "state";
+        entity_id = "binary_sensor.pralnia_drzwi";
+        to = "off";
+      }
+    ];
+    action = [{
+      choose = [
+        {
+          conditions = [{
+            condition = "state";
+            entity_id = "binary_sensor.pralnia_drzwi";
+            state = "on";
+          }];
+          sequence = [{
+            service = "light.turn_on";
+            target.entity_id = "light.boneio_dr_8ch_03_4023d4_light_n";
+          }];
+        }
+        {
+          conditions = [{
+            condition = "state";
+            entity_id = "binary_sensor.pralnia_drzwi";
+            state = "off";
+          }];
+          sequence = [{
+            service = "light.turn_off";
+            target.entity_id = "light.boneio_dr_8ch_03_4023d4_light_n";
+          }];
+        }
+      ];
+    }];
+  }
+  {
     id = "light_to_m5dial";
     alias = "light -> M5Dial";
     trigger = [{
