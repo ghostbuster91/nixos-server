@@ -49,7 +49,7 @@
             target.entity_id = "light.boneio_dr_8ch_03_39835c_light_k";
             data = {
               brightness = "{{ trigger.payload_json.brightness | int }}";
-              color_temp = "{{ trigger.payload_json.color_temp | int }}";
+              color_temp_kelvin = "{{ (1000000 / (trigger.payload_json.color_temp | int)) | int }}";
             };
           }];
         }
