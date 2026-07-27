@@ -122,4 +122,16 @@ in
     listenAddress = config.homelab.thunder.vlan.ip;
     openFirewall = false; # We do this manually to limit opened interfaces
   };
+
+  # The exporter binds to thunder's tailscale IP, which is only assigned once
+  # tailscaled has come up. Without ordering it races tailscale on a
+  # deploy/reboot and dies with "bind: cannot assign requested address". Order
+  # it after tailscaled; the wider start-limit window is a cushion for the brief
+  # residual gap between tailscaled going active and the address landing, so a
+  # late address can't exhaust the restart limit (Restart=always).
+  systemd.services.prometheus-unbound-exporter = {
+    after = [ "tailscaled.service" ];
+    startLimitIntervalSec = 60;
+    startLimitBurst = 20;
+  };
 }
