@@ -69,7 +69,7 @@ in
       enable = true;
       persons =
         let
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "mealie.access" "paperless.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
@@ -125,6 +125,7 @@ in
       groups."web-sentinel.zigbee" = { };
       groups."web-sentinel.analytics" = { };
       groups."web-sentinel.stirling" = { };
+      groups."web-sentinel.calibre" = { };
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${config.homelab.ext-domain}/oauth2/callback";
@@ -134,6 +135,12 @@ in
         scopeMaps."web-sentinel.access" = [
           "openid"
           "email"
+          # profile carries the preferred_username claim (short name, since
+          # preferShortUsername = true). oauth2-proxy surfaces it as the X-User
+          # header, which beast's calibre-web trusts for header SSO
+          # (hosts/x86_64-linux/beast/calibre.nix). Without profile the claim is
+          # absent and X-User would be empty.
+          "profile"
         ];
         claimMaps.groups = {
           joinType = "array";
@@ -143,6 +150,7 @@ in
           valuesByGroup."web-sentinel.zigbee" = [ "access_zigbee" ];
           valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
           valuesByGroup."web-sentinel.stirling" = [ "access_stirling" ];
+          valuesByGroup."web-sentinel.calibre" = [ "access_calibre" ];
           valuesByGroup."prometheus.access" = [ "access_prometheus" ];
         };
       };
@@ -183,6 +191,7 @@ in
             "web-sentinel.openwebui" = [ "openwebui" ];
             "mealie.access" = [ "mealie" ];
             "web-sentinel.stirling" = [ "stirling" ];
+            "web-sentinel.calibre" = [ "calibre" ];
             "paperless.access" = [ "paperless" ];
           };
         };
