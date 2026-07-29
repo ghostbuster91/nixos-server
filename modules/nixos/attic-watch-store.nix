@@ -1,6 +1,19 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.services.attic-watch-store;
+
+  # Optional gate: block startup until the cache endpoint resolves. The attic
+  # endpoint is served over thunder's VPN-only MagicDNS, which can be briefly
+  # unavailable during a deploy while networking reconverges. attic exits
+  # non-zero on a transient lookup miss (it queries cache-config once before
+  # watching), which would mark the unit failed and trip deploy-rs autoRollback.
+  waitForDns = import ./lib/wait-for-dns.nix { inherit pkgs lib; };
+
+  setup = pkgs.writeShellScript "attic-watch-store-setup" ''
+    set -euo pipefail
+    install -d -m 700 "$RUNTIME_DIRECTORY/attic"
+    install -m 600 "$CREDENTIALS_DIRECTORY/config.toml" "$RUNTIME_DIRECTORY/attic/config.toml"
+  '';
 in
 {
   options.services.attic-watch-store = {
@@ -10,6 +23,18 @@ in
       type = lib.types.str;
       example = "malina5:system";
       description = "Target cache in the form <server>:<cache>.";
+    };
+
+    waitForHost = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "attic.example.com";
+      description = ''
+        Optional hostname to wait for (DNS resolution) before starting. Set this
+        to the cache endpoint host when it is served over a VPN-only resolver
+        that may lag behind a deploy, so a transient lookup miss cannot fail
+        activation.
+      '';
     };
 
     credentialsFile = lib.mkOption {
@@ -24,7 +49,9 @@ in
   config = lib.mkIf cfg.enable {
     systemd.services.attic-watch-store = {
       description = "Push new store paths to attic cache";
-      after = [ "network-online.target" "nix-daemon.service" ];
+      # tailscaled brings up the tailnet that MagicDNS resolves through; order
+      # after it so the DNS gate isn't fighting the daemon's own startup.
+      after = [ "network-online.target" "nix-daemon.service" "tailscaled.service" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
@@ -37,11 +64,9 @@ in
         RuntimeDirectory = "attic-watch-store";
         LoadCredential = "config.toml:${cfg.credentialsFile}";
 
-        ExecStartPre = pkgs.writeShellScript "attic-watch-store-setup" ''
-          set -euo pipefail
-          install -d -m 700 "$RUNTIME_DIRECTORY/attic"
-          install -m 600 "$CREDENTIALS_DIRECTORY/config.toml" "$RUNTIME_DIRECTORY/attic/config.toml"
-        '';
+        ExecStartPre =
+          lib.optional (cfg.waitForHost != null) (waitForDns cfg.waitForHost)
+          ++ [ setup ];
 
         ExecStart = "${pkgs.attic-client}/bin/attic watch-store ${lib.escapeShellArg cfg.cache}";
 

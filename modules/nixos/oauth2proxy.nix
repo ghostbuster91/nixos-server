@@ -1,5 +1,6 @@
 { lib
 , config
+, pkgs
 , ...
 }:
 let
@@ -13,6 +14,12 @@ let
     ;
 
   cfg = config.meta.oauth2-proxy;
+
+  # The kanidm/OIDC issuer host this proxy contacts once at startup (OIDC
+  # discovery). It resolves via thunder's VPN-only MagicDNS, which can be
+  # briefly unavailable during a deploy while networking reconverges.
+  authHost = "auth.${config.homelab.ext-domain}";
+  waitForDns = import ./lib/wait-for-dns.nix { inherit pkgs lib; };
 in
 {
   options.meta.oauth2-proxy = {
@@ -163,11 +170,19 @@ in
       };
     };
 
-    systemd.services.oauth2-proxy.serviceConfig = {
-      RuntimeDirectory = "oauth2-proxy";
-      RuntimeDirectoryMode = "0750";
-      UMask = "007"; # TODO remove once https://github.com/oauth2-proxy/oauth2-proxy/issues/2141 is fixed
-      RestartSec = "60"; # Retry every minute
+    systemd.services.oauth2-proxy = {
+      # tailscaled brings up the tailnet that MagicDNS resolves through; order
+      # after it so the DNS gate below isn't fighting the daemon's own startup.
+      after = [ "tailscaled.service" ];
+      serviceConfig = {
+        RuntimeDirectory = "oauth2-proxy";
+        RuntimeDirectoryMode = "0750";
+        UMask = "007"; # TODO remove once https://github.com/oauth2-proxy/oauth2-proxy/issues/2141 is fixed
+        RestartSec = "60"; # Retry every minute
+        # Block startup until the OIDC issuer resolves so a transient MagicDNS
+        # miss during a deploy can't fail activation and trigger a rollback.
+        ExecStartPre = waitForDns authHost;
+      };
     };
 
     users.groups.oauth2-proxy.members = [ "nginx" ];
