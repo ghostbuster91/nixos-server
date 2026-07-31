@@ -12,6 +12,7 @@
       ./stirling.nix
       ./paperless.nix
       ./calibre.nix
+      ./forgejo.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         disks = [ "/dev/nvme0n1" "/dev/nvme1n1" ];

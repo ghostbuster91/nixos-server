@@ -72,7 +72,7 @@ Steps (a service on host H reachable at `svc.<ext-domain>`):
    - **Never put a secret in a module's `settings`/`environment`** — most NixOS service modules bake those into the world-readable Nix store. Prefer the module's own secret option (`environmentFile`, `credentialsFile`, `passwordFile`); if there is none, render an `EnvironmentFile` at runtime from a oneshot (see `paperless.nix`). Always check the module source for how `settings` reach the unit before trusting it.
 6. **Storage & backup** — persist the app's data dir with `environment.persistence."/persist".directories = [ { directory = "/var/lib/<svc>"; user/group/mode; } ]` (use standard `/var/lib` paths + impermanence, not raw `/persist/...`). That dataset (`rpool1/safe/persist`; on beast also `/data/persist` = `dpool/safe/persist`) is snapshotted and borg'd by `modules/nixos/backup.nix` — **do not add a per-app backup job**. Reproducible caches go on `/state` or (beast) `/data/local`, which are not backed up.
 7. **Dashy tile** — add an item to `hosts/x86_64-linux/thunder/dashy.nix`; gate visibility with `// gate "<value>"` and add `"<svc>.access" = [ "<value>" ]` to the **dashy** client's `claimMaps.groups.valuesByGroup` in `kanidm.nix` (not the `groups` scope).
-8. **Verify** — `git add` new files first (flakes only see git-tracked files), `nix fmt`, then eval without a full build: `nix eval .#nixosConfigurations.<H>.config.system.build.toplevel.drvPath`. Eval both the app host and thunder if you touched kanidm/dns/dashy. Deploy thunder before H so DNS/kanidm land first.
+8. **Verify** — `git add` new files first (flakes only see git-tracked files), `nix fmt`, then eval without a full build: `nix eval .#nixosConfigurations.<H>.config.system.build.toplevel.drvPath`. Eval both the app host and thunder if you touched kanidm/dns/dashy. Deploy thunder before H so DNS/kanidm land first. If this service added a new `/persist` directory (step 6), H's **first** activation needs a reboot — see "First deploy of a new persisted directory" below; a plain `deploy .#<H>` will fail and roll back.
 
 ### Secrets and `homelab.*` options
 
@@ -90,6 +90,27 @@ Most hosts use `nixos-server`'s impermanence pattern (`modules/nixos/impermanenc
 - `zfs-diff` is installed as a system command to surface files that survived a reboot but aren't declared in `environment.persistence`.
 
 `modules/nixos/backup.nix` snapshots `rpool1/safe/persist` to a BorgBase repo on a schedule (defaults: daily, keep 3 daily / 2 weekly / 3 monthly). Hosts set `backup.name` and `backup.repoId`.
+
+#### First deploy of a *new* persisted directory needs a reboot (not a live switch)
+
+Adding a new `environment.persistence."/persist".directories` entry creates a new bind mount (e.g. `var-lib-<svc>.mount`, `/persist/var/lib/<svc>` → `/var/lib/<svc>`). That mount only establishes cleanly at **boot** — impermanence mounts it `Before=local-fs.target` (before `systemd-tmpfiles-setup` and before the service), so tmpfiles creates the service's subdirs *inside* the mount and the unit starts against a populated `/persist`.
+
+On a **live `nixos-rebuild switch` / `deploy`**, the brand-new mount races: systemd starts the service before the mount has finished mounting, and `RequiresMountsFor` does **not** gate it (when `/var/lib/<svc>` isn't yet a mountpoint the dependency resolves to `/`, not the new bind mount). tmpfiles then writes the skeleton to the ephemeral root fs, and any unit that sandboxes on the new path (`ReadWritePaths=`, `StateDirectory=`) dies at namespace setup with `226/NAMESPACE … No such file or directory`. This is the "boot vs. live switch" race already documented in `hosts/x86_64-linux/beast/paperless.nix`.
+
+With **deploy-rs this is fatal**: `autoRollback`/`magicRollback` see the failed unit and roll the whole generation back, so the mount is torn down before you can reboot — the deploy can never converge. Two ways through, for the first activation only:
+
+- **Preferred — stage then boot** (no live switch runs at all):
+  ```
+  nixos-rebuild boot --flake .#<H> --target-host <H> --use-remote-sudo
+  ssh <H> sudo reboot
+  ```
+- **Or — live switch then reboot** (leaves the new unit failed until the reboot; use plain `nixos-rebuild`, *not* `deploy`, so nothing auto-rolls-back):
+  ```
+  nixos-rebuild switch --flake .#<H> --target-host <H> --use-remote-sudo   # new unit fails this round — expected
+  ssh <H> sudo reboot
+  ```
+
+After that one boot the mount persists across subsequent live switches, so ordinary `deploy .#<H>` works from then on — the reboot is a one-time cost of introducing the persist dir, not a per-change requirement. No config change fixes this; it's inherent to adding the mount. (A stray skeleton left on the root fs by a failed switch is harmless — it vanishes on the next boot's root rollback.)
 
 ### Binary cache (attic)
 

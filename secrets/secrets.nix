@@ -44,6 +44,10 @@ in
   # thunder, paperless reads it on beast. Keep the two in sync when rekeying.
   "kanidm-oauth2-paperless.age".publicKeys = [ kghost thunder ];
   "paperless-oidc-secret.age".publicKeys = [ kghost beast ];
+  # Single raw OIDC client secret shared by kanidm (basicSecretFile on thunder)
+  # and forgejo (fed to `forgejo admin auth …-oauth` on beast). Both need the
+  # bare value, so one file with both host keys — keep in sync when rekeying.
+  "kanidm-oauth2-forgejo.age".publicKeys = [ kghost thunder beast ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];
