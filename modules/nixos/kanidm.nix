@@ -25,6 +25,7 @@ in
   age.secrets.kanidm-oauth2-linkwarden = mkSecret ../../secrets/kanidm-oauth2-linkwarden.age;
   age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
   age.secrets.kanidm-oauth2-paperless = mkSecret ../../secrets/kanidm-oauth2-paperless.age;
+  age.secrets.kanidm-oauth2-forgejo = mkSecret ../../secrets/kanidm-oauth2-forgejo.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -69,11 +70,12 @@ in
       enable = true;
       persons =
         let
+          forgejoAccess = [ "forgejo.access" ];
           familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ [ "mealie.admins" "linkwarden.access" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {
@@ -84,8 +86,8 @@ in
         in
         lib.mapAttrs mkPerson {
           kasper = adminGroups;
-          kamil = familyGroups;
-          kornel = familyGroups;
+          kamil = familyGroups ++ forgejoAccess;
+          kornel = familyGroups ++ forgejoAccess;
           mirek = familyGroups;
           aga = familyGroups;
           marta = martaGroups;
@@ -193,6 +195,7 @@ in
             "web-sentinel.stirling" = [ "stirling" ];
             "web-sentinel.calibre" = [ "calibre" ];
             "paperless.access" = [ "paperless" ];
+            "forgejo.access" = [ "forgejo" ];
           };
         };
       };
@@ -273,6 +276,42 @@ in
           "email"
           "profile"
         ];
+      };
+      # Forgejo (native OIDC login source, runs on beast). The auth source is
+      # registered against this client by a oneshot on beast
+      # (hosts/x86_64-linux/beast/forgejo.nix); forgejo auto-provisions the
+      # account on first login. Membership in forgejo.access is the real gate:
+      # kanidm won't authorize a scope the user's scopeMap doesn't grant, so a
+      # non-member can't obtain a token.
+      groups."forgejo.access" = { };
+      groups."forgejo.admins" = { };
+      systems.oauth2.forgejo = {
+        displayName = "Forgejo";
+        # forgejo's OIDC callback is /user/oauth2/<source-name>/callback, where
+        # the source name is "kanidm" (authName in forgejo.nix).
+        originUrl = "https://git.${config.homelab.ext-domain}/user/oauth2/kanidm/callback";
+        originLanding = "https://git.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
+        preferShortUsername = true;
+        # forgejo's OIDC client rejects kanidm's default ES256 id_token; RS256
+        # (legacy crypto) is what it verifies, same as Mealie/Linkwarden.
+        enableLegacyCrypto = true;
+        scopeMaps."forgejo.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        # forgejo maps admin rights off a group claim (--group-claim-name
+        # forgejo_roles / --admin-group forgejo-admins in forgejo.nix). Emit
+        # readable role values via a claim map rather than the built-in "groups"
+        # claim (which would be raw SPNs); it is delivered regardless of the
+        # requested scopes, same as the web-sentinel/dashy groups claim. Members
+        # of forgejo.admins get promoted to site admin on each login; everyone
+        # else has no forgejo_roles value and stays a regular user.
+        claimMaps.forgejo_roles = {
+          joinType = "array";
+          valuesByGroup."forgejo.admins" = [ "forgejo-admins" ];
+        };
       };
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };
