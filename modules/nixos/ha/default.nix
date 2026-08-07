@@ -64,6 +64,7 @@ in
         "wyoming"
         "ollama"
         "satel_integra"
+        "bthome"
       ];
       config = {
         # Includes dependencies for a basic setup
