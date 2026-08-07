@@ -9,6 +9,9 @@ in
   services.attic-watch-store = {
     enable = true;
     cache = "malina5:system";
+    # The cache is reverse-proxied by this host's own nginx; order after it so a
+    # mid-switch nginx restart can't refuse the local connection and roll back.
+    afterLocalNginx = true;
     credentialsFile = config.age.secrets.attic-pusher-config.path;
   };
 

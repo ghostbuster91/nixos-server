@@ -37,6 +37,19 @@ in
       '';
     };
 
+    afterLocalNginx = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Order this unit after nginx.service. Set this when the cache endpoint is
+        reverse-proxied by *this host's own* nginx: a switch-to-configuration
+        restarts nginx, and if attic-watch-store is (re)started into that window
+        the local connection is refused (TCP), the unit fails, and deploy-rs
+        autoRollback reverts the generation. Ordering after nginx closes that
+        window. Leave false when the cache is served by another host.
+      '';
+    };
+
     credentialsFile = lib.mkOption {
       type = lib.types.path;
       description = ''
@@ -51,7 +64,8 @@ in
       description = "Push new store paths to attic cache";
       # tailscaled brings up the tailnet that MagicDNS resolves through; order
       # after it so the DNS gate isn't fighting the daemon's own startup.
-      after = [ "network-online.target" "nix-daemon.service" "tailscaled.service" ];
+      after = [ "network-online.target" "nix-daemon.service" "tailscaled.service" ]
+        ++ lib.optional cfg.afterLocalNginx "nginx.service";
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
