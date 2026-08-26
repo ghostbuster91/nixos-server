@@ -32,4 +32,14 @@
   environment.persistence."/local".directories = [
     "/var/lib/libvirt"
   ];
+
+  # libvirt autostarts the SPICE-enabled guest at boot. QEMU's SPICE listen
+  # uses getaddrinfo() with AI_ADDRCONFIG, which returns EAI_ADDRFAMILY until a
+  # routable IPv4 exists (loopback doesn't count) — so the guest fails to launch
+  # if libvirtd starts before NetworkManager has configured the NIC. Gate it.
+  systemd.services.libvirtd = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
+
 }
