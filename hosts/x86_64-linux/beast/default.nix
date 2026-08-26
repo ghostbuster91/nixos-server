@@ -5,6 +5,7 @@
     [
       ./backup.nix
       ./custom.nix
+      ./desktop.nix
       ./vm.nix
       ./attic-pusher.nix
       ./whisper.nix
