@@ -35,6 +35,8 @@
     # System-tray icons for the chat apps under GNOME; enable once in
     # GNOME "Extensions" after first login.
     gnomeExtensions.appindicator
+    firefox
+    claude-code
   ];
 
   # Persistent home, reboot-only (NOT backed up — real work lives in git). The

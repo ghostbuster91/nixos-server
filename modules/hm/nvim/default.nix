@@ -1,21 +1,53 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   leaderKey = "\\<Space>";
 in
 {
+  # Vendored lua config, sourced from the store (immutable). Editing requires a
+  # rebuild — this diverges from dot-files' out-of-store symlink on purpose.
+  xdg.configFile."nvim/lua".source = ./lua;
+
   programs.neovim = {
     enable = true;
+    package = pkgs.neovim-unwrapped;
     viAlias = true;
     vimAlias = true;
+    # EDITOR is already set to nvim in modules/hm/base.nix; leave defaultEditor
+    # off so the two don't clash on home.sessionVariables.EDITOR.
+    defaultEditor = false;
     extraConfig = ''
       	let mapleader = "${leaderKey}"
     '' +
     "${builtins.readFile ./init.vim}" +
     ''
       lua << EOF
+        local binaries = {
+          tsserver_path = "${pkgs.typescript-language-server}/bin/typescript-language-server",
+          lua_language_server = "${pkgs.lua-language-server}/bin/lua-language-server",
+          nodejs = "${lib.getExe pkgs.nodejs}", -- required for copilot
+          nix_fmt = "${lib.getExe pkgs.nixpkgs-fmt}",
+          nix = "${lib.getExe pkgs.nix}"
+        }
+
         ${builtins.readFile ./init.lua}
       EOF
     '';
+    extraPackages = with pkgs; [
+      bash-language-server
+      vim-language-server
+      yaml-language-server
+      nil
+      lua-language-server
+      stylua
+      shfmt
+      eslint
+      prettier
+      cspell
+      rust-analyzer
+      rustfmt
+      gopls
+      go # for gopls
+    ];
     plugins = with pkgs.vimPlugins; [
       rec {
         plugin = kanagawa-nvim;
@@ -24,83 +56,122 @@ in
           colorscheme kanagawa
         '';
       }
-      {
-        plugin = telescope-nvim;
-        config = ''
-          "It has to be set in the first plugin's config as plugins get sourced before any other configuration and the leader customization doesn't work otherwise
-          let mapleader = "${leaderKey}" 
-          nnoremap <Leader>tf <cmd>Telescope find_files<cr>
-          nnoremap <Leader>th <cmd>Telescope buffers<cr>
-          nnoremap <Leader>gh <cmd>lua require('telescope.builtin').git_commits()<cr>
-
-          lua << EOF
-              vim.keymap.set("n", "<leader>hc", function()
-                require("telescope.builtin").git_bcommits()
-              end, { desc = "Buffer commites"})
-              vim.keymap.set("n", "<leader>tg", function()
-                require("telescope.builtin").live_grep({ layout_strategy = "vertical" })
-              end, { desc = "Live grep"})
-          EOF
-        '';
-      }
+      telescope-nvim
       telescope-fzf-native-nvim
       which-key-nvim
       nvim-autopairs
-      {
-        plugin = vim-sandwich;
-        #config = ''
-        #  runtime macros/sandwich/keymap/surround.vim
-        #'';
-      }
+      vim-sandwich
       gitsigns-nvim
       plenary-nvim
 
       # completions
       nvim-cmp
+      cmp-nvim-lsp
       cmp-buffer
       cmp-path
+      cmp_luasnip
 
-      (nvim-treesitter.withPlugins (
+      # lsp stuff
+      nvim-lspconfig
+
+      (nvim-treesitter-legacy.withPlugins (
         # https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/development/tools/parsing/tree-sitter/grammars
         plugins:
           with plugins; [
             tree-sitter-lua
             tree-sitter-vim
+            tree-sitter-vimdoc
             tree-sitter-html
             tree-sitter-yaml
             tree-sitter-json
             tree-sitter-markdown
+            tree-sitter-markdown-inline
             tree-sitter-comment
             tree-sitter-bash
             tree-sitter-javascript
             tree-sitter-nix
             tree-sitter-typescript
+            tree-sitter-tsx
             tree-sitter-c
             tree-sitter-java
+            tree-sitter-kotlin
+            tree-sitter-query # for the tree-sitter itself
             tree-sitter-python
             tree-sitter-go
+            tree-sitter-hocon
             tree-sitter-sql
             tree-sitter-graphql
             tree-sitter-dockerfile
+            tree-sitter-scheme
             tree-sitter-rust
           ]
       ))
-      nvim-treesitter-textobjects
+      nvim-treesitter-textobjects-legacy
+      nvim-treesitter-refactor
 
       nvim-web-devicons
       lualine-nvim
+      nvim-navic
       comment-nvim
+
+      # snippets
+      luasnip
+      lspkind-nvim
+      friendly-snippets
 
       nvim-neoclip-lua
       indent-blankline-nvim
       nvim-tree-lua
+      vim-tmux-clipboard
       telescope-ui-select-nvim
       noice-nvim
       nui-nvim
+      fidget-nvim
+      nvim-lightbulb
       neoscroll-nvim
       neogit
       undotree
-      vim-repeat # needed for leap
+      diffview-nvim
+      goto-preview
+      nvim-dap
+      {
+        plugin = nvim-dap-ui;
+        config = ''
+          lua << EOF
+            require("dapui").setup()
+            local dap, dapui = require("dap"), require("dapui")
+            dap.listeners.before.event_terminated["dapui_config"] = function()
+              dapui.close()
+            end
+            dap.listeners.before.event_exited["dapui_config"] = function()
+              dapui.close()
+            end
+          EOF
+        '';
+      }
+      telescope-dap-nvim
+      trouble-nvim
+      vim-repeat
+      flash-nvim
+      gitlinker-nvim
+      actions-preview-nvim
+      {
+        plugin = nvim-dap-virtual-text;
+        config = ''
+          lua <<EOF
+            require("nvim-dap-virtual-text").setup()
+          EOF
+        '';
+      }
+      telescope-undo-nvim
+      dial-nvim
+      smart-splits-nvim
+      neodev-nvim
+      hydra-nvim
+      substitute-nvim
+      baleia-nvim
+      hover-nvim
+      ssr-nvim
     ];
   };
 }

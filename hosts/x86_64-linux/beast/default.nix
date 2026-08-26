@@ -1,4 +1,4 @@
-{ inputs, username, ... }:
+{ inputs, username, pkgs-unstable, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
@@ -73,8 +73,11 @@
         inputs.self.homeModules.base
         inputs.self.homeModules.zsh
         inputs.self.homeModules.git
+        inputs.self.homeModules.nvim
+        inputs.self.homeModules.tmux
+        inputs.self.homeModules.alacritty
       ];
     };
-    extraSpecialArgs = { inherit username; };
+    extraSpecialArgs = { inherit username inputs pkgs-unstable; };
   };
 }

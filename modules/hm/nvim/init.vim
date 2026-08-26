@@ -2,11 +2,15 @@ set mouse=a
       	
 syntax on
 
-set relativenumber
 set number
 set wildcharm=<C-Z>
 
 set termguicolors
+
+cnoremap <expr> <Up>    pumvisible() ? "\<Left>"  : "\<Up>"
+cnoremap <expr> <Down>  pumvisible() ? "\<Right>" : "\<Down>"
+cnoremap <expr> <Left>  pumvisible() ? "\<Up>"    : "\<Left>"
+cnoremap <expr> <Right> pumvisible() ? "\<Down>"  : "\<Right>"
 
 "This unsets the "last search pattern" register by hitting return
 nnoremap <silent> <ESC> :noh<ESC>
@@ -33,7 +37,19 @@ autocmd VimEnter * :clearjumps
 "and it has not been changed inside of Vim, automatically read it again.
 :set autoread
 
-nnoremap <silent> <A-up> :wincmd k<CR>
-nnoremap <silent> <A-down> :wincmd j<CR>
-nnoremap <silent> <A-left> :wincmd h<CR>
-nnoremap <silent> <A-right> :wincmd l<CR>
+
+let g:sandwich_no_default_key_mappings = 1
+
+" add
+nmap sa <Plug>(sandwich-add)
+xmap sa <Plug>(sandwich-add)
+
+" delete
+nmap sd <Plug>(sandwich-delete)
+xmap sd <Plug>(sandwich-delete)
+nmap sdb <Plug>(sandwich-delete-auto)
+
+" replace
+nmap sr <Plug>(sandwich-replace)
+xmap sr <Plug>(sandwich-replace)
+nmap srb <Plug>(sandwich-replace-auto)
