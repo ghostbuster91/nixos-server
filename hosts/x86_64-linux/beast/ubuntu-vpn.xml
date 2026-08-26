@@ -71,9 +71,14 @@
     </graphics>
     <!-- QXL rather than virtio-gpu: on UEFI boot simpledrm claims card0 and
          virtio-gpu lands on card1, which breaks spice-vdagent's display
-         matching (no auto-resize). QXL uses SPICE's direct resize path. -->
+         matching (no auto-resize). QXL uses SPICE's direct resize path.
+         Pools enlarged from the 64M/64M/16M defaults: the qxl Xorg DDX
+         null-derefs when a QXL_ALLOC fails, and the small surface pool was
+         exhausted by a resize/blit -> Xorg SIGSEGV (session crash). 256M
+         surface memory gives headroom for 4K + many surfaces. See
+         ../../homelab-docs troubleshooting/ubuntu-vpn-qxl-xorg-segfault.md -->
     <video>
-      <model type="qxl" ram="65536" vram="65536" vgamem="16384" heads="1" primary="yes"/>
+      <model type="qxl" ram="262144" vram="262144" vram64="262144" vgamem="65536" heads="1" primary="yes"/>
     </video>
     <memballoon model="virtio"/>
     <rng model="virtio">
