@@ -65,6 +65,9 @@
   # (comfyui, chat) via local auth_request, but must not serve a dormant portal.
   meta.oauth2-proxy.servePortal = false;
 
+  # Opt out of the impermanence-based zsh history persistence on beast (desktop).
+  homelab.impermanence.persistZshHistory = false;
+
   home-manager = {
     useUserPackages = true;
     useGlobalPkgs = true;
