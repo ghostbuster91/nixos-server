@@ -1,4 +1,4 @@
-{ config, pkgs-unstable, ... }:
+{ config, pkgs, ... }:
 let
   roleName = "esphome";
 in
@@ -14,7 +14,7 @@ in
   services.esphome = {
     enable = true;
     enableUnixSocket = true;
-    package = pkgs-unstable.esphome;
+    package = pkgs.esphome;
   };
 
   systemd.services.nginx = {
