@@ -9,6 +9,14 @@
   # up in nvidia.nix). If the Wayland session misbehaves with the proprietary
   # driver, force X11 with: services.displayManager.gdm.wayland = false;
   services.xserver.enable = true;
+
+  # Polish diacritics via AltGr. The `pl` layout is plain US QWERTY for ASCII
+  # plus AltGr dead-key combos (AltGr+a → ą, +e → ę, +s → ś, +l → ł, +z → ż,
+  # +c → ć, +n → ń, +o → ó, +x → ź). GDM/GNOME pick this up as the default
+  # input source. (If GNOME already persisted an input source in this home,
+  # add "Polish" under Settings → Keyboard → Input Sources once.)
+  services.xserver.xkb.layout = "pl";
+
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
   services.displayManager.autoLogin = {
