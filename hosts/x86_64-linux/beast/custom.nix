@@ -10,6 +10,14 @@
 
   time.timeZone = "Europe/Warsaw";
 
+  # Compressed RAM-backed swap. Avoids swap-on-zvol deadlocks (all disks here
+  # are ZFS) while giving OOM headroom for the memory-hungry AI workloads.
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+  };
+
   networking = {
     hostName = "beast"; # Define your hostname.
     hostId = "11fb3862";
@@ -35,7 +43,7 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.beast-tailscale-key.path;
-    extraUpFlags = [ "--advertise-tags=tag:ai" "--login-server=https://headscale.${config.homelab.sec-domain}" ];
+    extraUpFlags = [ "--advertise-tags=tag:ai,tag:workstation" "--login-server=https://headscale.${config.homelab.sec-domain}" ];
   };
 
   environment.persistence."/state".directories = [
