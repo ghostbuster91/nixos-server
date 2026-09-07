@@ -26,6 +26,7 @@ in
   age.secrets.kanidm-oauth2-mealie = mkSecret ../../secrets/kanidm-oauth2-mealie.age;
   age.secrets.kanidm-oauth2-paperless = mkSecret ../../secrets/kanidm-oauth2-paperless.age;
   age.secrets.kanidm-oauth2-forgejo = mkSecret ../../secrets/kanidm-oauth2-forgejo.age;
+  age.secrets.kanidm-oauth2-readeck = mkSecret ../../secrets/kanidm-oauth2-readeck.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -71,11 +72,11 @@ in
       persons =
         let
           forgejoAccess = [ "forgejo.access" ];
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" "readeck.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" "readeck.admins" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {
@@ -196,6 +197,7 @@ in
             "web-sentinel.calibre" = [ "calibre" ];
             "paperless.access" = [ "paperless" ];
             "forgejo.access" = [ "forgejo" ];
+            "readeck.access" = [ "readeck" ];
           };
         };
       };
@@ -311,6 +313,42 @@ in
         claimMaps.forgejo_roles = {
           joinType = "array";
           valuesByGroup."forgejo.admins" = [ "forgejo-admins" ];
+        };
+      };
+      # Readeck (native OIDC, runs on beast). Membership in readeck.access is the
+      # real gate: kanidm won't authorize a scope the user's scopeMap doesn't
+      # grant, so a non-member can't obtain a token. readeck auto-provisions the
+      # account on first login (provisioning = true in readeck.nix). Members of
+      # readeck.admins additionally become readeck admins via the groups claim.
+      groups."readeck.access" = { };
+      groups."readeck.admins" = { };
+      systems.oauth2.readeck = {
+        displayName = "Readeck";
+        # readeck's OIDC callback is always <instance-url>/login/oidc.
+        originUrl = "https://readeck.${config.homelab.ext-domain}/login/oidc";
+        originLanding = "https://readeck.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-readeck.path;
+        preferShortUsername = true;
+        # readeck rejects kanidm's default ES256 id_token; it verifies RS256
+        # (legacy crypto), same as Mealie/Linkwarden/Forgejo.
+        enableLegacyCrypto = true;
+        scopeMaps."readeck.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        # readeck reads roles from the standard `groups` claim and maps them onto
+        # its user/admin roles (see readeck.nix). Emit readable values via a claim
+        # map rather than granting the built-in `groups` scope (which would send
+        # raw group SPNs and clobber this map). Claim-mapped claims are delivered
+        # regardless of the requested scopes, same as the forgejo/dashy pattern,
+        # so readeck never has to request (and be denied) a `groups` scope.
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup = {
+            "readeck.access" = [ "readeck-user" ];
+            "readeck.admins" = [ "readeck-admin" ];
+          };
         };
       };
       # Home Assistant (hass-oidc-auth custom component)

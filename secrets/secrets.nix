@@ -48,6 +48,11 @@ in
   # and forgejo (fed to `forgejo admin auth …-oauth` on beast). Both need the
   # bare value, so one file with both host keys — keep in sync when rekeying.
   "kanidm-oauth2-forgejo.age".publicKeys = [ kghost thunder beast ];
+  # Same raw OIDC client secret in both files: kanidm's basicSecretFile lives on
+  # thunder, readeck reads it (as an env var) on beast. Keep the two in sync when
+  # rekeying. readeck-env.age also carries readeck's READECK_SECRET_KEY.
+  "kanidm-oauth2-readeck.age".publicKeys = [ kghost thunder ];
+  "readeck-env.age".publicKeys = [ kghost beast ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];

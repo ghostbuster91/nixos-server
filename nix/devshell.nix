@@ -69,6 +69,9 @@
           nixos-rebuild
           pkgs.cloudflared
           pkgs.borgbackup
+          # openssl for generating secrets (e.g. `openssl rand -hex 32`) when
+          # creating agenix files.
+          pkgs.openssl
         ];
         commands =
           let
