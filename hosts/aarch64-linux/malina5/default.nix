@@ -18,6 +18,7 @@
       ./backup.nix
       ./attic.nix
       ./mealie.nix
+      ./ntfy.nix
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.zfs
       inputs.self.nixosModules.system-user

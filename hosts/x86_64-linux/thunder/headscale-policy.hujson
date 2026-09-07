@@ -16,7 +16,9 @@
     "tag:ai": ["group:admins"],
     "tag:auth": ["group:admins"],
     "tag:nix-builder": ["group:admins"],
-    "tag:nix-cache": ["group:admins"]
+    "tag:nix-cache": ["group:admins"],
+    "tag:workstation": ["group:admins"],
+    "tag:ntfy": ["group:admins"]
   },
 
   // Auto-approve thunder's (tag:auth) exit-node advertisement so the 0.0.0.0/0
@@ -63,6 +65,11 @@
       "action": "accept",
       "src": ["tag:media"],
       "dst": ["tag:ai:10300"]
+    },
+    {
+      "action": "accept",
+      "src": ["tag:workstation"],
+      "dst": ["*:*"]
     }
   ]
 }

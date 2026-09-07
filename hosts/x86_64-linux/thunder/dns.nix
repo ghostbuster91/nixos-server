@@ -43,6 +43,7 @@ in
           ''"paperless.${ext-domain}.   IN A ${beastIp}"''
           ''"calibre.${ext-domain}.     IN A ${beastIp}"''
           ''"git.${ext-domain}.         IN A ${beastIp}"''
+          ''"ntfy.${ext-domain}.        IN A ${malina5Ip}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
           ''"mealie.${ext-domain}.      IN A ${malina5Ip}"''
           ''"vault.${ext-domain}.       IN A ${thunderIp}"''

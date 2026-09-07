@@ -65,6 +65,7 @@ in
         "ollama"
         "satel_integra"
         "bthome"
+        "rest_command"
       ];
       config = {
         # Includes dependencies for a basic setup
@@ -96,6 +97,22 @@ in
         };
         prometheus = { };
         automation = import ./automations.nix;
+        # ntfy push used by the "notify if front door unlocked at 23:00"
+        # automation. ntfy runs on this same host (malina5), so this POST to
+        # ntfy.<ext-domain> resolves to malina5's own tailscale IP and stays
+        # local (no tailnet hop, no ACL). The wildcard ACME cert on
+        # ntfy.<ext-domain> makes aiohttp's TLS verification pass.
+        rest_command.ntfy_front_door = {
+          url = "https://ntfy.${config.homelab.ext-domain}/homelab";
+          method = "POST";
+          content_type = "text/plain; charset=utf-8";
+          payload = "Front door is still unlocked at 23:00.";
+          headers = {
+            Title = "Lock the front door";
+            Priority = "high";
+            Tags = "lock,house";
+          };
+        };
         mqtt = {
           sensor = import ./mqtt_sensors.nix;
         };

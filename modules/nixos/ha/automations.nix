@@ -1,14 +1,21 @@
 [
   {
-    id = "lock_front_door_at_23";
-    alias = "Lock front door at 23:00";
+    id = "notify_front_door_unlocked_at_23";
+    alias = "Notify if front door still unlocked at 23:00";
     trigger = [{
       platform = "time";
       at = "23:00:00";
     }];
+    # Only remind when the door is actually still unlocked at 23:00. The night
+    # re-lock safety net (relock_front_door_at_night) is intentionally left in
+    # place, so it still auto-locks the door ~10 min later as a fallback.
+    condition = [{
+      condition = "state";
+      entity_id = "lock.drzwi_glowne";
+      state = "unlocked";
+    }];
     action = [{
-      service = "lock.lock";
-      target.entity_id = "lock.drzwi_glowne";
+      service = "rest_command.ntfy_front_door";
     }];
   }
   {
