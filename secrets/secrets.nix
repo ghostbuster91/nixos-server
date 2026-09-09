@@ -53,6 +53,12 @@ in
   # rekeying. readeck-env.age also carries readeck's READECK_SECRET_KEY.
   "kanidm-oauth2-readeck.age".publicKeys = [ kghost thunder ];
   "readeck-env.age".publicKeys = [ kghost beast ];
+  # Same raw OIDC client secret in both files: kanidm's basicSecretFile lives on
+  # thunder, HealthLog reads it (as OIDC_CLIENT_SECRET) on beast. Keep the two in
+  # sync when rekeying. healthlog-env.age also carries POSTGRES_PASSWORD,
+  # ENCRYPTION_KEY, API_TOKEN_HMAC_KEY and the full DATABASE_URL.
+  "kanidm-oauth2-healthlog.age".publicKeys = [ kghost thunder ];
+  "healthlog-env.age".publicKeys = [ kghost beast ];
 
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];

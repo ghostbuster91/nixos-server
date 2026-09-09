@@ -27,6 +27,7 @@ in
   age.secrets.kanidm-oauth2-paperless = mkSecret ../../secrets/kanidm-oauth2-paperless.age;
   age.secrets.kanidm-oauth2-forgejo = mkSecret ../../secrets/kanidm-oauth2-forgejo.age;
   age.secrets.kanidm-oauth2-readeck = mkSecret ../../secrets/kanidm-oauth2-readeck.age;
+  age.secrets.kanidm-oauth2-healthlog = mkSecret ../../secrets/kanidm-oauth2-healthlog.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -72,7 +73,7 @@ in
       persons =
         let
           forgejoAccess = [ "forgejo.access" ];
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" "readeck.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" "readeck.access" "healthlog.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
@@ -198,6 +199,7 @@ in
             "paperless.access" = [ "paperless" ];
             "forgejo.access" = [ "forgejo" ];
             "readeck.access" = [ "readeck" ];
+            "healthlog.access" = [ "healthlog" ];
           };
         };
       };
@@ -350,6 +352,32 @@ in
             "readeck.admins" = [ "readeck-admin" ];
           };
         };
+      };
+      # HealthLog (native OIDC, runs on beast as an oci-container). Membership in
+      # healthlog.access is the real gate: kanidm won't authorize a scope the
+      # user's scopeMap doesn't grant, so a non-member can't obtain a token. The
+      # app runs with OIDC_ONLY=true (healthlog.nix), so SSO is the only way in
+      # and the first member to sign in becomes its admin. Roles aren't driven by
+      # a groups claim here — HealthLog has no group→role env — so only the
+      # standard OIDC scopes are needed.
+      groups."healthlog.access" = { };
+      systems.oauth2.healthlog = {
+        displayName = "HealthLog";
+        # Web callback is <app-url>/api/auth/oidc/callback (byte-exact). The iOS
+        # app's native flow uses the custom scheme healthlog://oidc-callback; add
+        # it as a second originUrl here if/when that client is used.
+        originUrl = "https://healthlog.${config.homelab.ext-domain}/api/auth/oidc/callback";
+        originLanding = "https://healthlog.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-healthlog.path;
+        preferShortUsername = true;
+        # Most Node OIDC clients accept kanidm's default ES256 id_token; if first
+        # login fails with a token signature/alg error, set enableLegacyCrypto =
+        # true (RS256), as readeck/mealie/linkwarden/forgejo need.
+        scopeMaps."healthlog.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };
