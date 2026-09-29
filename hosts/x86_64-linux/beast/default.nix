@@ -8,8 +8,9 @@
       ./desktop.nix
       ./vm.nix
       ./attic-pusher.nix
-      ./whisper.nix
-      ./comfyui.nix
+      # ./whisper.nix
+      # ./comfyui.nix
+      # ./ollama.nix
       ./stirling.nix
       ./paperless.nix
       ./calibre.nix
