@@ -4,6 +4,20 @@ let
   domain = "pdf.${config.homelab.ext-domain}";
 in
 {
+  # OCR language packs. The stirling-pdf module hardcodes `pkgs.tesseract` both in
+  # the unit PATH and in the tessdata bind-mount (${pkgs.tesseract}/share/tessdata →
+  # /usr/share/tessdata). By default that alias bundles *every* language from the
+  # tesseract-ocr/tessdata repo — the "accurate" packs per
+  # https://docs.stirlingpdf.com/Configuration/Operations/OCR/ (i.e. not
+  # tessdata_fast), but a ~1.5 GB closure. Pin it to just English + Polish.
+  # Scoped to the `tesseract` alias only, so paperless (which drives its own
+  # `tesseract5` from PAPERLESS_OCR_LANGUAGE) is unaffected.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      tesseract = prev.tesseract.override { enableLanguages = [ "eng" "pol" ]; };
+    })
+  ];
+
   services.stirling-pdf = {
     enable = true;
     environment = {
@@ -17,6 +31,11 @@ in
       # user auto-provisioning and offers no way to disable its built-in admin
       # login, so the reverse-proxy gate is the clean way to put it behind kanidm.
       SECURITY_ENABLELOGIN = false;
+      # The NixOS module bind-mounts tesseract's tessdata at /usr/share/tessdata,
+      # but Stirling's default lookup path is /usr/share/tesseract-ocr/5/tessdata —
+      # so out of the box its OCR language dropdown scans an empty dir and shows
+      # nothing. Point it at the mounted dir (top-priority `system.tessdataDir`).
+      SYSTEM_TESSDATADIR = "/usr/share/tessdata";
     };
   };
 
