@@ -19,25 +19,6 @@
     }];
   }
   {
-    id = "relock_front_door_at_night";
-    alias = "Re-lock front door if left unlocked at night";
-    trigger = [{
-      platform = "state";
-      entity_id = "lock.drzwi_glowne";
-      to = "unlocked";
-      for = "00:10:00";
-    }];
-    condition = [{
-      condition = "time";
-      after = "23:00:00";
-      before = "06:00:00";
-    }];
-    action = [{
-      service = "lock.lock";
-      target.entity_id = "lock.drzwi_glowne";
-    }];
-  }
-  {
     id = "m5dial_to_light";
     alias = "M5Dial -> light";
     trigger = [{
@@ -203,6 +184,59 @@
           sequence = [{
             service = "light.turn_off";
             target.entity_id = "light.boneio_dr_8ch_03_4023d4_light_n";
+          }];
+        }
+      ];
+    }];
+  }
+  {
+    id = "mata_grzewcza_schedule";
+    alias = "Mata grzewcza - harmonogram";
+    # Drive the ESPHome thermostat (climate) rather than the raw
+    # switch.mata_grzewcza output, so the on/off schedule cooperates with the
+    # thermostat's control loop (temp_mata sensor) instead of fighting it. The
+    # thermostat only has "off"/"heat" modes; "heat" lets it decide when to
+    # actually energize the mat.
+    # Follow the `schedule.mata_grzewcza` helper: heat while a scheduled block
+    # is active, off otherwise. Per-weekday/weekend windows live in the helper
+    # (see ha/default.nix), so this stays two triggers regardless of how many
+    # windows are configured.
+    trigger = [
+      {
+        platform = "state";
+        entity_id = "schedule.mata_grzewcza";
+        to = "on";
+        id = "on";
+      }
+      {
+        platform = "state";
+        entity_id = "schedule.mata_grzewcza";
+        to = "off";
+        id = "off";
+      }
+    ];
+    action = [{
+      choose = [
+        {
+          conditions = [{
+            condition = "trigger";
+            id = "on";
+          }];
+          sequence = [{
+            service = "climate.set_hvac_mode";
+            target.entity_id = "climate.boneio_24_sw_07_737d50_mata_grzewcza_termostat";
+            data.hvac_mode = "heat";
+          }];
+        }
+        {
+          conditions = [{
+            condition = "trigger";
+            id = "off";
+          }];
+          sequence = [{
+            service = "climate.set_hvac_mode";
+            target.entity_id = "climate.boneio_24_sw_07_737d50_mata_grzewcza_termostat";
+            data.hvac_mode = "off";
           }];
         }
       ];
