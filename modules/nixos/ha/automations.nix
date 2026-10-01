@@ -218,10 +218,20 @@
     action = [{
       choose = [
         {
-          conditions = [{
-            condition = "trigger";
-            id = "on";
-          }];
+          conditions = [
+            {
+              condition = "trigger";
+              id = "on";
+            }
+            # Heating season only: September–May. Summer (Jun–Aug) blocks still
+            # fire the "on" trigger, but this gates the heat action, so the mat
+            # stays off. The "off" branch has no such gate, so end-of-block
+            # always switches it off.
+            {
+              condition = "template";
+              value_template = "{{ now().month >= 9 or now().month <= 5 }}";
+            }
+          ];
           sequence = [{
             service = "climate.set_hvac_mode";
             target.entity_id = "climate.boneio_24_sw_07_737d50_mata_grzewcza_termostat";
