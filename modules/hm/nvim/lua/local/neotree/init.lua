@@ -60,8 +60,34 @@ local setup = function()
         map("n", "<leader>ti", treeutils.launch_live_grep, opts("Launch Live Grep"))
         -- map('n', 'ze', api.tree.expand_all, opts("Expand all"))
 
-        -- map("n", "<CR>", wrap_node(f), opts("Expand until not single or collapse"))
-        map("n", "Z", api.tree.expand_all, opts("Expand until not single"))
+        local function has_one_child_folder(node)
+            return #node.nodes == 1 and node.nodes[1].nodes and vim.loop.fs_access(node.nodes[1].absolute_path, "R")
+                or false
+        end
+
+        local function descend_until_non_single(_, node)
+            if node.nodes == nil or not node.parent.open then
+                return false
+            end
+            return has_one_child_folder(node.parent)
+        end
+
+        -- <CR>: open a file, collapse an open directory, or expand a closed
+        -- directory through single-child folder chains using the upstream
+        -- expand_until feature (nvim-tree/nvim-tree.lua#3166).
+        local function edit_or_expand_until()
+            local node = api.tree.get_node_under_cursor()
+            if node and node.nodes ~= nil and not node.open then
+                api.node.expand(node, { expand_until = descend_until_non_single })
+            else
+                api.node.open.edit()
+            end
+        end
+        map("n", "<CR>", edit_or_expand_until, opts("Open / expand until non-single"))
+
+        map("n", "Z", function()
+            api.tree.expand_all(nil, nil)
+        end, opts("Expand all"))
         map("n", "e", toggle_width_adaptive, opts("Toggle adaptive width"))
     end
 
@@ -114,7 +140,11 @@ local setup = function()
         group = vim.api.nvim_create_augroup("git_refresh_nvim-tree", { clear = true }),
         callback = function()
             vim.schedule(function()
-                api.git.reload()
+                -- Use tree.reload() (goes through reload_explorer) instead of
+                -- git.reload() (reload_git): the latter reads git.config.git.enable
+                -- which nvim-tree never populates, so it errors when the tree is
+                -- open. reload_explorer refreshes git status via a safe path.
+                api.tree.reload()
             end)
         end,
     })

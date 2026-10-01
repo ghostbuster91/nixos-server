@@ -118,7 +118,7 @@ local setup = function(hydra, lsp)
                 function()
                     lsp.spell_check.toggle()
                 end,
-                { exit = true, desc = "null_ls spell check" },
+                { exit = true, desc = "spell check" },
             },
             {
                 "w",

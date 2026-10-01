@@ -58,7 +58,6 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
             end
         end,
     })
-    local lspconfig = require("lspconfig")
 
     -- Use an on_attach function to only map the following keys
     -- after the language server attaches to the current buffer
@@ -148,32 +147,28 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
     }
     vim.opt.spell = M.spell_check.enabled
 
-    -- Use a loop to conveniently call 'setup' on multiple servers and
-    -- map buffer local keybindings when the language server attaches
+    -- Servers use Neovim's built-in vim.lsp.config/vim.lsp.enable (Neovim
+    -- 0.11+). nvim-lspconfig only ships the per-server defaults under
+    -- lsp/<name>.lua nowadays; the old require("lspconfig")[name].setup{}
+    -- framework is deprecated. Shared config goes through the "*" pseudo-name;
+    -- capabilities are set per-server so ts_ls can keep its own set below.
     -- local capabilities = vim.lsp.protocol.make_client_capabilities()
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    vim.lsp.config("*", { on_attach = on_attach })
+
     local servers = { "bashls", "vimls", "yamlls", "rust_analyzer", "gopls" }
-    for _, lsp in ipairs(servers) do
-        lspconfig[lsp].setup({
-            on_attach = on_attach,
-            capabilities = capabilities,
-            -- after 150ms of no calls to lsp, send call
-            -- compare with throttling that is done by default in compe
-            -- flags = {
-            --   debounce_text_changes = 150,
-            -- }
-        })
+    for _, name in ipairs(servers) do
+        vim.lsp.config(name, { capabilities = capabilities })
     end
+    vim.lsp.enable(servers)
 
     local capabilities_no_format = lsp.protocol.make_client_capabilities()
-    capabilities_no_format.textDocument.formatting = false
-    capabilities_no_format.textDocument.rangeFormatting = false
-    capabilities_no_format.textDocument.range_formatting = false
+    capabilities_no_format.textDocument.formatting.dynamicRegistration = false
+    capabilities_no_format.textDocument.rangeFormatting.dynamicRegistration = false
 
-    require("lspconfig")["ts_ls"].setup({
+    vim.lsp.config("ts_ls", {
         on_attach = function(client, buffer)
-            client.server_capabilities.document_formatting = false
-            client.server_capabilities.document_range_formatting = false
+            client.server_capabilities.documentFormattingProvider = false
             on_attach(client, buffer)
         end,
         capabilities = capabilities_no_format,
@@ -182,9 +177,10 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
             "--stdio",
         },
     })
+    vim.lsp.enable("ts_ls")
+
     local library = vim.api.nvim_get_runtime_file("*.lua", true)
-    require("lspconfig").lua_ls.setup({
-        on_attach = on_attach,
+    vim.lsp.config("lua_ls", {
         capabilities = capabilities,
         cmd = { binaries.lua_language_server },
         settings = {
@@ -197,7 +193,9 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
             },
         },
     })
-    require("lspconfig").nil_ls.setup({
+    vim.lsp.enable("lua_ls")
+
+    vim.lsp.config("nil_ls", {
         capabilities = capabilities,
         settings = {
             ["nil"] = {
@@ -213,6 +211,7 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
             },
         },
     })
+    vim.lsp.enable("nil_ls")
 
     local misc_group = api.nvim_create_augroup("misc", { clear = true })
     api.nvim_create_autocmd("FileType", {

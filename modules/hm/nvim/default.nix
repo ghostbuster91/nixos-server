@@ -15,6 +15,8 @@ in
     # EDITOR is already set to nvim in modules/hm/base.nix; leave defaultEditor
     # off so the two don't clash on home.sessionVariables.EDITOR.
     defaultEditor = false;
+    withRuby = false;
+    withPython3 = false;
     extraConfig = ''
       	let mapleader = "${leaderKey}"
     '' +
@@ -51,6 +53,7 @@ in
     plugins = with pkgs.vimPlugins; [
       rec {
         plugin = kanagawa-nvim;
+        type = "viml";
         config = ''
           packadd! ${plugin.pname}
           colorscheme kanagawa
@@ -74,7 +77,7 @@ in
       # lsp stuff
       nvim-lspconfig
 
-      (nvim-treesitter-legacy.withPlugins (
+      (nvim-treesitter.withPlugins (
         # https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/development/tools/parsing/tree-sitter/grammars
         plugins:
           with plugins; [
@@ -106,8 +109,9 @@ in
             tree-sitter-rust
           ]
       ))
-      nvim-treesitter-textobjects-legacy
-      nvim-treesitter-refactor
+      # The treesitter `main` branch dropped the integrated textobjects/refactor
+      # modules, so nvim-treesitter-textobjects-legacy / nvim-treesitter-refactor
+      # are gone; selection/highlight is reimplemented in lua/local/treesitter.lua.
 
       nvim-web-devicons
       lualine-nvim
@@ -136,6 +140,7 @@ in
       nvim-dap
       {
         plugin = nvim-dap-ui;
+        type = "viml";
         config = ''
           lua << EOF
             require("dapui").setup()
@@ -157,6 +162,7 @@ in
       actions-preview-nvim
       {
         plugin = nvim-dap-virtual-text;
+        type = "viml";
         config = ''
           lua <<EOF
             require("nvim-dap-virtual-text").setup()

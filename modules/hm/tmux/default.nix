@@ -16,6 +16,7 @@ in
         plugin = pkgs.tmuxPlugins.yank;
         extraConfig = ''
           set -g @yank_action 'copy-pipe'
+          set -g @custom_copy_command '${pkgs.wl-clipboard}/bin/wl-copy'
         '';
       }
       pkgs.tmuxPlugins.better-mouse-mode
@@ -125,7 +126,7 @@ in
       onedark_white="#aab2bf"
       set -g status-right "#[fg=$onedark_white,bg=$onedark_black] #(${pkgs.tmux-mem-cpu-load}/bin/tmux-mem-cpu-load -g 5 --interval 2) #[fg=$onedark_green,bg=$onedark_black]"
 
-      set-option -g history-limit 5000
+      set-option -g history-limit 100000
     '';
   };
 }

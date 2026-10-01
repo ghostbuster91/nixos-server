@@ -1,132 +1,129 @@
 local api = vim.api
 
+-- ---------------------------------------------------------------------------
+-- Incremental selection
+--
+-- The `main` branch of nvim-treesitter dropped the `incremental_selection`
+-- module, so we reimplement it on top of the core `vim.treesitter` API by
+-- walking the syntax tree via `node:parent()`. Selection history is kept per
+-- window so decrement can step back through the ancestors that increment
+-- visited.
+-- ---------------------------------------------------------------------------
+
+local history = {} -- [winid] = { node, node, ... }, outermost last
+
+local function range_equal(a, b)
+    local a1, a2, a3, a4 = a:range()
+    local b1, b2, b3, b4 = b:range()
+    return a1 == b1 and a2 == b2 and a3 == b3 and a4 == b4
+end
+
+local function visual_select(node)
+    local srow, scol, erow, ecol = node:range()
+    -- treesitter ranges are end-exclusive; convert to an inclusive (row, col)
+    if ecol > 0 then
+        ecol = ecol - 1
+    else
+        -- node ends at column 0 of `erow`, i.e. at the end of the line above
+        erow = erow - 1
+        ecol = math.max(vim.fn.col({ erow + 1, "$" }) - 2, 0)
+    end
+
+    -- leave any active visual selection so `v` starts a fresh charwise one
+    if api.nvim_get_mode().mode:find("[vV\22]") then
+        api.nvim_feedkeys(api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+    end
+
+    api.nvim_win_set_cursor(0, { srow + 1, scol })
+    vim.cmd("normal! v")
+    api.nvim_win_set_cursor(0, { erow + 1, ecol })
+end
+
+local function init_selection()
+    local node = vim.treesitter.get_node()
+    if not node then
+        return
+    end
+    history[api.nvim_get_current_win()] = { node }
+    visual_select(node)
+end
+
+local function node_incremental()
+    local win = api.nvim_get_current_win()
+    local nodes = history[win]
+    if not nodes or #nodes == 0 then
+        return init_selection()
+    end
+
+    local current = nodes[#nodes]
+    local parent = current:parent()
+    -- skip ancestors that cover the exact same range as the current node
+    while parent and range_equal(parent, current) do
+        parent = parent:parent()
+    end
+
+    if parent then
+        table.insert(nodes, parent)
+        visual_select(parent)
+    else
+        visual_select(current)
+    end
+end
+
+local function node_decremental()
+    local win = api.nvim_get_current_win()
+    local nodes = history[win]
+    if not nodes or #nodes == 0 then
+        return
+    end
+    if #nodes > 1 then
+        table.remove(nodes)
+    end
+    visual_select(nodes[#nodes])
+end
+
 local setup = function()
-    -- highlights for treesitter-refactor
-    vim.api.nvim_set_hl(0, "TSDefinition", { bg = "#2A2A37" })
-    vim.api.nvim_set_hl(0, "TSDefinitionUsage", { bg = "#2A2A37" })
+    -- The `main` branch of nvim-treesitter (nixpkgs 26.05) dropped the old
+    -- `nvim-treesitter.configs` module together with the `highlight`,
+    -- `incremental_selection`, `playground` and `query_linter` sub-modules.
+    --   * highlighting is now started per-buffer via `vim.treesitter.start()`
+    --   * incremental selection is reimplemented above
+    --   * playground is replaced by the built-in `:InspectTree`
+    --   * query linting is replaced by the built-in `:EditQuery`
+    -- Parsers are provided by nix (see nvim/default.nix), so we just enable
+    -- highlighting + treesitter indentation for any buffer whose language has
+    -- a parser available; `vim.treesitter.start` errors when it doesn't, which
+    -- the pcall swallows.
+    require("nvim-treesitter").setup({})
 
-    -- remove once https://github.com/nvim-treesitter/nvim-treesitter/pull/5443 is merged
-    vim.treesitter.language.register("scala", "sbt")
+    api.nvim_create_autocmd("FileType", {
+        group = api.nvim_create_augroup("local_treesitter", { clear = true }),
+        callback = function(args)
+            if not pcall(vim.treesitter.start, args.buf) then
+                return
+            end
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 
-    ---@diagnostic disable: missing-fields
-    require("nvim-treesitter.configs").setup({
-        ensure_installed = {},
-        highlight = {
-            enable = true, -- false will disable the whole extension                 -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-            -- Using this option may slow down your editor, and you may see some duplicate highlights.
-            -- Instead of true it can also be a list of languages
-            additional_vim_regex_highlighting = false,
-            disable = function(_, bufnr) -- Disable in large buffers
-                return api.nvim_buf_line_count(bufnr) > 5000 or vim.fn.col("$") > 1000
-            end,
-        },
-        indent = {
-            enable = true,
-        },
-        incremental_selection = {
-            enable = true,
-            keymaps = {
-                init_selection = "<CR>",
-                node_incremental = "<CR>",
-                node_decremental = "<BS>",
-                scope_incremental = "<TAB>",
-            },
-        },
-        textobjects = {
-            enable = true,
-            swap = {
-                enable = true,
-                swap_next = {
-                    ["<m-a>"] = "@parameter.inner",
-                    ["<m-f>"] = "@function.outer",
-                },
-                swap_previous = {
-                    ["<m-A>"] = "@parameter.inner",
-                    ["<m-F>"] = "@function.outer",
-                },
-            },
-            select = {
-                enable = true,
-                -- Automatically jump forward to textobj, similar to targets.vim
-                lookahead = true,
-                keymaps = {
-                    -- You can use the capture groups defined in textobjects.scm
-                    ["af"] = "@function.outer",
-                    ["if"] = "@function.inner",
-                    ["ac"] = "@class.outer",
-                    ["ap"] = "@parameter.outer",
-                    ["ip"] = "@parameter.inner",
-                    -- You can optionally set descriptions to the mappings (used in the desc parameter of
-                    -- nvim_buf_set_keymap) which plugins like which-key display
-                    ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-                    -- You can also use captures from other query groups like `locals.scm`
-                    ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-                },
-                -- You can choose the select mode (default is charwise 'v')
-                --
-                -- Can also be a function which gets passed a table with the keys
-                -- * query_string: eg '@function.inner'
-                -- * method: eg 'v' or 'o'
-                -- and should return the mode ('v', 'V', or '<c-v>') or a table
-                -- mapping query_strings to modes.
-                selection_modes = {
-                    ["@parameter.outer"] = "v", -- charwise
-                    ["@function.outer"] = "V", -- linewise
-                    ["@class.outer"] = "<c-v>", -- blockwise
-                },
-                -- If you set this to `true` (default is `false`) then any textobject is
-                -- extended to include preceding or succeeding whitespace. Succeeding
-                -- whitespace has priority in order to act similarly to eg the built-in
-                -- `ap`.
-                --
-                -- Can also be a function which gets passed a table with the keys
-                -- * query_string: eg '@function.inner'
-                -- * selection_mode: eg 'v'
-                -- and should return true of false
-                include_surrounding_whitespace = false,
-            },
-            move = {
-                enable = true,
-                set_jumps = true,
-                goto_next_start = {
-                    ["]m"] = "@function.outer",
-                    ["]]"] = { query = "@class.outer", desc = "Next class start" },
-                },
-                goto_next_end = {
-                    ["]M"] = "@function.outer",
-                    ["]["] = "@class.outer",
-                },
-                goto_previous_start = {
-                    ["[m"] = "@function.outer",
-                    ["[["] = "@class.outer",
-                },
-                goto_previous_end = {
-                    ["[M"] = "@function.outer",
-                    ["[]"] = "@class.outer",
-                },
-            },
-        },
-        refactor = {
-            enable = true,
-            highlight_definitions = {
-                enable = true,
-                -- Set to false if you have an `updatetime` of ~100.
-                clear_on_cursor_move = true,
-            },
-            highlight_current_scope = { enable = false },
-            navigation = {
-                enable = true,
-                -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
-                keymaps = {
-                    goto_definition = false,
-                    list_definitions = false,
-                    list_definitions_toc = false,
-                    goto_next_usage = ")",
-                    goto_previous_usage = "(",
-                },
-            },
-        },
+            local opts = { buffer = args.buf }
+            vim.keymap.set(
+                "n",
+                "<CR>",
+                init_selection,
+                vim.tbl_extend("force", opts, { desc = "Treesitter: init selection" })
+            )
+            vim.keymap.set(
+                "x",
+                "<CR>",
+                node_incremental,
+                vim.tbl_extend("force", opts, { desc = "Treesitter: increment selection" })
+            )
+            vim.keymap.set(
+                "x",
+                "<BS>",
+                node_decremental,
+                vim.tbl_extend("force", opts, { desc = "Treesitter: decrement selection" })
+            )
+        end,
     })
 end
 
