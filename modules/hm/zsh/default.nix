@@ -1,12 +1,25 @@
 { pkgs, lib, ... }:
 let
-  omz = pkgs.fetchFromGitHub
-    {
-      owner = "ohmyzsh";
-      repo = "ohmyzsh";
-      rev = "68f3ebb4de11aa2013ccc5252d4415840e0d7342";
-      hash = "sha256-5QsedauFgdhRDY6P2eMewGSLPWSaed2xZEcvTRYSrTs=";
-    };
+  omz = "${pkgs.oh-my-zsh}/share/oh-my-zsh/";
+  z-rupa = pkgs.fetchFromGitHub {
+    owner = "ghostbuster91";
+    repo = "z";
+    rev = "b82ac78a2d4457d2ca09973332638f123f065fd1";
+    hash = "sha256-4jMHh1GVRdFNjUjiPH94vewbfLcah7Agu153zjVNE14=";
+  };
+  z-fz = pkgs.fetchFromGitHub {
+    owner = "ghostbuster91";
+    repo = "fz";
+    rev = "7b4e215f5887b24e1ef725ffdb89f3479e913875";
+    hash = "sha256-H+E4Eh7ms8NRQ+JHkj3ynne/pg7MWXOTYVp5baI58aM=";
+  };
+  zsh-autopair = pkgs.fetchFromGitHub {
+    owner = "hlissner";
+    repo = "zsh-autopair";
+    rev = "396c38a7468458ba29011f2ad4112e4fd35f78e6";
+    hash = "sha256-PXHxPxFeoYXYMOC29YQKDdMnqTO0toyA7eJTSCV6PGE=";
+  };
+
 in
 {
   # disabled due to: https://github.com/nix-community/impermanence/issues/184
@@ -64,6 +77,26 @@ in
         name = "zsh-forgit";
         src = pkgs.zsh-forgit;
         file = "share/zsh/zsh-forgit/forgit.plugin.zsh";
+      }
+      {
+        name = "omz-tmux";
+        src = omz;
+        file = "plugins/tmux/tmux.plugin.zsh";
+      }
+      {
+        name = "z-rupa";
+        src = z-rupa;
+        file = "z.sh";
+      }
+      {
+        name = "z-fz";
+        src = z-fz;
+        file = "fz.plugin.zsh";
+      }
+      {
+        name = "zsh-autopair";
+        src = zsh-autopair;
+        file = "zsh-autopair.plugin.zsh";
       }
     ];
     initContent = (lib.mkOrder 550 ''
