@@ -286,4 +286,37 @@
       };
     }];
   }
+  {
+    id = "all_lights_off_mirror";
+    alias = "All lights off (mirror dimmer-1 wall button)";
+    # Reliability backup for the ESPHome UDP all-off mechanism. The dimmer-1
+    # wall button (in_01, "1.1 (433)") turns off dimmer-1's own lights and
+    # broadcasts "udp_all_off" over UDP; the other dimmers listen and switch
+    # off. That broadcast is best-effort and occasionally drops a dimmer. When
+    # HA is up we ALSO press the per-dimmer `ha_all_off` button on every dimmer
+    # directly over the ESPHome native API (acked, reliable), so a dropped UDP
+    # packet still gets covered. When HA is down the UDP path keeps working on
+    # its own, so nothing regresses.
+    #
+    # NOTE: the trigger entity_id is HA's slug of the ESPHome name "1.1 (433)".
+    # If this automation never fires, confirm the exact id in HA Developer
+    # Tools -> States (search for the dimmer-1 inputs) and adjust it here.
+    trigger = [{
+      platform = "state";
+      entity_id = "binary_sensor.boneio_dr_8ch_03_32ce68_1_1_433";
+      to = "on";
+    }];
+    action = [{
+      service = "button.press";
+      target.entity_id = [
+        "button.dimmer_1_hall_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_2_bedroom_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_3_bedroom_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_4_study_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_5_bathroom_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_6_livingroom_wylacz_wszystkie_swiatla_ha"
+        "button.dimmer_7_kitchen_wylacz_wszystkie_swiatla_ha"
+      ];
+    }];
+  }
 ]
