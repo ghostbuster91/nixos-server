@@ -132,6 +132,24 @@
     }];
   }
   {
+    id = "open_bedroom_curtains_at_7_weekdays";
+    alias = "Open bedroom curtains at 07:00 on weekdays";
+    trigger = [{
+      platform = "time";
+      at = "07:00:00";
+    }];
+    # Mon–Fri only; weekends are intentionally skipped so the bedroom stays
+    # dark for sleeping in.
+    condition = [{
+      condition = "time";
+      weekday = [ "mon" "tue" "wed" "thu" "fri" ];
+    }];
+    action = [{
+      service = "button.press";
+      target.entity_id = "button.boneio_24_sw_07_737d50_sypialnia_zaslony_otworz";
+    }];
+  }
+  {
     id = "study_curtains_to_mqtt";
     alias = "study curtains -> MQTT";
     trigger = [{
