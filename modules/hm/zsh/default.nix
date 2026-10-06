@@ -99,30 +99,33 @@ in
         file = "zsh-autopair.plugin.zsh";
       }
     ];
-    initContent = (lib.mkOrder 550 ''
-      # fix delete key
-      bindkey "^[[3~" delete-char
+    initContent = lib.mkMerge [
+      (lib.mkOrder 550 ''
+        # fix delete key
+        bindkey "^[[3~" delete-char
 
-      # turn off beeping
-      unsetopt BEEP
+        # turn off beeping
+        unsetopt BEEP
 
-      # ctrl-d drop stash entry
-      setopt HIST_IGNORE_ALL_DUPS
-      autoload -U edit-command-line
+        # ctrl-d drop stash entry
+        setopt HIST_IGNORE_ALL_DUPS
+        autoload -U edit-command-line
 
-      # Emacs style
-      zle -N edit-command-line
-      bindkey '^xe' edit-command-line
-      bindkey '^x^e' edit-command-line
+        # Emacs style
+        zle -N edit-command-line
+        bindkey '^xe' edit-command-line
+        bindkey '^x^e' edit-command-line
 
-      autoload -U select-word-style
-      select-word-style bash
-    '') // (lib.mkBefore ''
-      export FORGIT_STASH_FZF_OPTS="--bind='ctrl-d:reload(${pkgs.git}/bin/git stash drop $(cut -d: -f1 <<<{}) 1>/dev/null && ${pkgs.git}/bin/git stash list)'"
-      export FZF_CTRL_T_COMMAND="${pkgs.fd}/bin/fd -I --type file"
-      export FZF_CTRL_T_OPTS="--ansi --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}'"
-      export FZF_DEFAULT_COMMAND="${pkgs.fd}/bin/fd --type f --hidden --exclude .git --exclude node_modules --exclude '*.class'";
-    '');
+        autoload -U select-word-style
+        select-word-style bash
+      '')
+      (lib.mkBefore ''
+        export FORGIT_STASH_FZF_OPTS="--bind='ctrl-d:reload(${pkgs.git}/bin/git stash drop $(cut -d: -f1 <<<{}) 1>/dev/null && ${pkgs.git}/bin/git stash list)'"
+        export FZF_CTRL_T_COMMAND="${pkgs.fd}/bin/fd -I --type file"
+        export FZF_CTRL_T_OPTS="--ansi --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}'"
+        export FZF_DEFAULT_COMMAND="${pkgs.fd}/bin/fd --type f --hidden --exclude .git --exclude node_modules --exclude '*.class'";
+      '')
+    ];
     history = { extended = true; };
     shellAliases = {
       lsd = "${pkgs.eza}/bin/exa --long --header --git --all";
