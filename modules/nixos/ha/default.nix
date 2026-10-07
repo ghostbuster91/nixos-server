@@ -66,6 +66,8 @@ in
         "satel_integra"
         "bthome"
         "rest_command"
+        "ezviz"
+        "shelly"
       ];
       config = {
         # Includes dependencies for a basic setup
