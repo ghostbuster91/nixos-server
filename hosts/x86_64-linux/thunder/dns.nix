@@ -47,7 +47,7 @@ in
           ''"healthlog.${ext-domain}.   IN A ${beastIp}"''
           ''"ntfy.${ext-domain}.        IN A ${malina5Ip}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
-          ''"mealie.${ext-domain}.      IN A ${malina5Ip}"''
+          ''"mealie.${ext-domain}.      IN A ${beastIp}"''
           ''"vault.${ext-domain}.       IN A ${thunderIp}"''
           ''"pdf.${ext-domain}.         IN A ${beastIp}"''
           ''"attic.${ext-domain}.       IN A ${malina5Ip}"''
