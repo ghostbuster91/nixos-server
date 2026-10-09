@@ -61,6 +61,10 @@ in
         networks = {
           wlan0 = {
             ssid = "koteczkowo5";
+            # Temporary: debug-level logging (default 2=info) to capture the exact
+            # SAE/FT rejection the Pixel 9 Pro hits ("saved / check password"). Drop
+            # back to the default once the trace is captured.
+            logLevel = 1;
             authentication = {
               mode = "wpa3-sae";
               saePasswordsFile = config.age.secrets.wifiPassword.path;
@@ -75,6 +79,13 @@ in
               ieee80211w = "2";
               ap_max_inactivity = 600;
               disassoc_low_ack = 0;
+              # Force a full SAE handshake on every (re)association instead of
+              # letting clients reconnect via a cached PMKID. Some clients (Pixel
+              # 9 Pro on WPA3-SAE) present a stale PMKSA after a key-state desync
+              # and, when the AP has evicted it, give up with "check password"
+              # rather than falling back to full SAE. This does NOT disable FT
+              # roaming (FT uses the MDE/FTE path, not PMKID caching).
+              disable_pmksa_caching = 1;
             } // roamingSettings // (mkFt "surfer-koteczkowo5-2g");
             dynamicConfigScripts = {
               "20-bssidFile" = pkgs.writeShellScript "bssid-file" ''
@@ -219,6 +230,10 @@ in
         networks = {
           wlan1 = {
             ssid = "koteczkowo5";
+            # Temporary: debug-level logging (default 2=info) to capture the exact
+            # SAE/FT rejection the Pixel 9 Pro hits ("saved / check password"). Drop
+            # back to the default once the trace is captured.
+            logLevel = 1;
             authentication = {
 
               mode = "wpa3-sae";
@@ -229,6 +244,10 @@ in
             bssid = "00:00:00:00:00:00";
             settings = {
               bridge = "br-lan";
+              # See the wlan0 koteczkowo5 BSS for the rationale: force full SAE on
+              # every (re)association so a stale cached PMKID can't cause the
+              # Pixel's "check password" failure. Does not affect FT roaming.
+              disable_pmksa_caching = 1;
             } // roamingSettings // (mkFt "surfer-koteczkowo5-5g");
             dynamicConfigScripts = {
               "20-bssidFile" = pkgs.writeShellScript "bssid-file" ''
