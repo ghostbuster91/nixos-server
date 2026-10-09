@@ -28,6 +28,9 @@
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
+      # Offload aarch64 builds to malina5 (the homelab's only aarch64 remote
+      # builder). Mirrors surfer and the focus machine in ../dot-files.
+      inputs.self.nixosModules.rpi-builder
       inputs.self.nixosModules.logs-alloy
       inputs.self.nixosModules.logs-loki
       inputs.self.nixosModules.grafana
