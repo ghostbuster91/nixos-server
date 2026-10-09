@@ -81,6 +81,27 @@
         CARGO_PROFILE_RELEASE_LTO = "false";
         CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
       });
+      # attic (atticd + the attic-client used by attic-watch-store) links nix's C++
+      # libs, so it builds nixVersions.nix_2_28; this exact aarch64 nix 2.28.7 isn't
+      # on cache.nixos.org, so it compiles on the Pi and runs nix's own unit tests.
+      # The libstore RapidCheck property StorePathTest_RapidCheck.prop_check_regex_eq_parse
+      # falsifies on random store-path names (e.g. "?/") from a parser/nameRegex
+      # mismatch upstream — randomized, so effectively flaky. nix gates building the
+      # unit-test subprojects on `-Dunit-tests`, which it hardcodes to true for any
+      # natively-executable build (not on doCheck), so just setting doCheck=false
+      # leaves the subprojects configured but drops rapidcheck/gtest, failing at
+      # "rapidcheck not found". We don't ship nix's tests, so turn the subprojects
+      # off entirely as well. Remove once a cached aarch64 nix_2_28 is available or
+      # upstream fixes the property.
+      nixVersions = prev.nixVersions // {
+        nix_2_28 = prev.nixVersions.nix_2_28.overrideAttrs (old: {
+          doCheck = false;
+          doInstallCheck = false;
+          mesonFlags =
+            (builtins.filter (f: !prev.lib.hasPrefix "-Dunit-tests=" f) (old.mesonFlags or [ ]))
+              ++ [ (prev.lib.mesonBool "unit-tests" false) ];
+        });
+      };
       # Mirrors nixpkgs commit b9c75a3094f0 — psycopg's `slow`-marked tests have
       # timing-sensitive SIGALRM assertions that race on slower aarch64 builders
       # (upstream psycopg#883). Remove once nixpkgs is bumped past that commit.
@@ -121,6 +142,19 @@
             disabledTests = (old.disabledTests or [ ]) ++ [
               "test_create_state_machine_twice_after_success"
             ];
+          });
+          # paho-mqtt (pulled into the HA 3.14 closure via aiomqtt) isn't cached for
+          # this aarch64 rev, so it compiles on the Pi and runs its full pytest suite,
+          # which drives real MQTT client subprocesses and a fake broker over sockets.
+          # Several tests are timing-fragile on this slow builder — teardown SIGINTs
+          # of helper clients (test_01_* family) and dropped callbacks (e.g.
+          # test_client.py's on_disconnect never fires in time) — and it's whack-a-mole
+          # to disable them one by one. pytestCheckHook ignores doCheck (it gates only
+          # on dontUsePytestCheck), so skip the pytest phase outright; pythonImportsCheck
+          # still verifies the module imports. Remove once a cached aarch64 paho-mqtt
+          # is available.
+          paho-mqtt = pyprev.paho-mqtt.overridePythonAttrs (_old: {
+            dontUsePytestCheck = true;
           });
           # Same flaky test_crafted_xml_performance as the python313 django above,
           # but Home Assistant is on python 3.14 here so that override never hits
