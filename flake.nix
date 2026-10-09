@@ -3,13 +3,11 @@
     extra-substituters = [
       "https://nixos-raspberrypi.cachix.org"
       "https://attic.typesafebrew.dev/system"
-      "https://cuda-maintainers.cachix.org"
       "https://comfyui.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
       "system:WOAVhhRoFrTy1MfcJyEzHLOa737CJZOGZccwOiwhfoU="
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
       "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
     ];
     connect-timeout = 5;
