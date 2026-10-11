@@ -12,6 +12,9 @@
     htop
     tree
     duf
+    fastfetch
+    neovim
+    nix-output-monitor
   ];
 
   users.users.${username} = {

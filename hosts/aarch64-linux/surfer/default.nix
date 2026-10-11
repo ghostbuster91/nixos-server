@@ -26,6 +26,11 @@
         version = "0.3";
         bootstrap.rootFilesystem = "ext4";
         wireless.wifi.acceptRegulatoryResponsibility = true;
+        # Surfer boots from SD (ext4) and has no NVMe/PCIe device, so the bpir3
+        # cold-boot PCIe rescan is a no-op here. Disable it to avoid the
+        # systemd-stage-1 `preDeviceCommands` assertion (26.05 defaults
+        # boot.initrd.systemd.enable = true).
+        board.bananapi.bpir3.pcieFixup = false;
       };
     }
   ];

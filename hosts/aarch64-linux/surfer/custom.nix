@@ -34,15 +34,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    neovim
-    git
-    wget
-    curl
-
-    neofetch
     nnn
     bottom
-    htop
     iotop
     iftop
     nmon

@@ -547,11 +547,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779187731,
-        "narHash": "sha256-6WvGjaxZmHCP3tjGXP3MB9C7qRiN6EgX4yGj4KpXHlI=",
+        "lastModified": 1791709330,
+        "narHash": "sha256-pIMxFMtAKZgJfOwoLTj3gwJKhnwdXG5/bvUXekuefHo=",
         "owner": "ghostbuster91",
         "repo": "nixos-sbc",
-        "rev": "83dca2a75afb1bb68d6aebc4bb81da39c9289d7d",
+        "rev": "d717508e43c1baf4d0eaaf04604a4c17bd9b913c",
         "type": "github"
       },
       "original": {
