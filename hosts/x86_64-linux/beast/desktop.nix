@@ -46,18 +46,37 @@
     firefox
     claude-code
   ];
+  environment.persistence."/state" = {
+    # Persistent home, reboot-only (NOT backed up — real work lives in git). The
+    # shared impermanence module still persists ~/.local/share/zsh_history to
+    # /persist; it simply bind-mounts inside this home.
+    directories = [
+      {
+        directory = "/home/${username}";
+        user = username;
+        group = "users";
+        mode = "0700";
+      }
+      # BlueZ stores adapter + per-device pairing keys here. Without this it lives
+      # on the rolled-back root and every reboot drops all pairings, forcing a
+      # re-pair of each external device. Reboot-persistent, re-pairable → /state
+      # (not backed up), same category as NetworkManager's system-connections.
+      {
+        directory = "/var/lib/bluetooth";
+        user = "root";
+        group = "root";
+        mode = "0700";
+      }
+    ];
 
-  # Persistent home, reboot-only (NOT backed up — real work lives in git). The
-  # shared impermanence module still persists ~/.local/share/zsh_history to
-  # /persist; it simply bind-mounts inside this home.
-  # NOTE: adding this new bind mount means the FIRST activation must be a
-  # `nixos-rebuild boot` + reboot, not a live switch/deploy.
-  environment.persistence."/state".directories = [
-    {
-      directory = "/home/${username}";
-      user = username;
-      group = "users";
-      mode = "0700";
-    }
-  ];
+    # Login password hashes. With mutableUsers = true, `passwd` writes to
+    # /etc/shadow, which otherwise lives on the rolled-back root and is wiped
+    # every boot -- so each reboot NixOS sees "no password yet" and re-applies
+    # initialHashedPassword, silently undoing the passwd change. Persisting it
+    # makes passwd changes stick and reduces initialHashedPassword to a one-time
+    # seed. Backed up (losing it locks you out of the console).
+    files = [
+      "/etc/shadow"
+    ];
+  };
 }
