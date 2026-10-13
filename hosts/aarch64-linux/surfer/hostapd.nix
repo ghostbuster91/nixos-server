@@ -107,7 +107,10 @@ in
             settings = {
               bridge = "br-lan";
               wmm_enabled = false;
-              ieee80211w = "0";
+              # PMF optional: advertise 802.11w so clients that require
+              # PMF will associate, while legacy non-PMF clients still connect. 
+              # "2" (required) would lock those out and is off the table 
+              ieee80211w = "1";
               wpa = lib.mkForce 2;
               wpa_key_mgmt = "WPA-PSK";
               wpa_pairwise = "CCMP";
