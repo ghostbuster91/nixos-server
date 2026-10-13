@@ -76,10 +76,12 @@ in
   "attic-pusher-config.age".publicKeys = [ kghost malina5 beast focus ];
 
   "wifiPassword.age".publicKeys = [ kghost surfer ];
+  "axWifiPassword.age".publicKeys = [ kghost surfer ]; # koteczkowo-ax 
   "legacyWifiPassword.age".publicKeys = [ kghost surfer ];
   "wlan00bssid.age".publicKeys = [ kghost surfer ];
   "wlan01bssid.age".publicKeys = [ kghost surfer ];
   "wlan10bssid.age".publicKeys = [ kghost surfer ];
+  "wlan11bssid.age".publicKeys = [ kghost surfer ]; # koteczkowo-ax BSSID
   "surferFtKey.age".publicKeys = [ kghost surfer ];
 }
 

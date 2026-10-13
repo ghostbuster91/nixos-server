@@ -2,10 +2,12 @@
 let
   hostapdSecrets = {
     wifiPassword = ../../../secrets/wifiPassword.age;
+    axWifiPassword = ../../../secrets/axWifiPassword.age;
     legacyWifiPassword = ../../../secrets/legacyWifiPassword.age;
     wlan00bssid = ../../../secrets/wlan00bssid.age;
     wlan01bssid = ../../../secrets/wlan01bssid.age;
     wlan10bssid = ../../../secrets/wlan10bssid.age;
+    wlan11bssid = ../../../secrets/wlan11bssid.age;
     surferFtKey = ../../../secrets/surferFtKey.age;
   };
 in

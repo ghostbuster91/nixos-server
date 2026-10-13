@@ -260,6 +260,39 @@ in
               '';
             };
           };
+          # Dedicated single-BSS 5 GHz network for Intel AX211 (Windows)
+          # laptop. It must NOT use 802.11r: the AX211 rejects FT's RSN IE in
+          # 4-way-handshake msg 3 ("Security capability matching of the IE in
+          # message 3 failed", WLAN-AutoConfig event 11006), so FT associations
+          # never complete. koteczkowo5 keeps FT for seamless 2.4<->5 band roaming,
+          # so this card gets its own FT-free SSID instead. Single BSS => nothing
+          # to roam to => no FT and no 802.11k/v steering wanted (omitting steering
+          # also avoids nudging the laptop toward koteczkowo5). Confirmed working
+          # via the earlier throwaway plain-SAE test SSID.
+          wlan1-1 = {
+            ssid = "koteczkowo-ax";
+            # Temporary debug logging during rollout; drop to default once stable.
+            logLevel = 1;
+            authentication = {
+              mode = "wpa3-sae";
+              saePasswordsFile = config.age.secrets.axWifiPassword.path;
+            };
+            # fake bssid to satisfy the module assertion
+            # overridden by the dynamicConfigScript
+            bssid = "00:00:00:00:00:00";
+            settings = {
+              bridge = "br-lan";
+              ieee80211w = "2";
+              disable_pmksa_caching = 1;
+            };
+            dynamicConfigScripts = {
+              "20-bssidFile" = pkgs.writeShellScript "bssid-file" ''
+                HOSTAPD_CONFIG_FILE=$1
+                grep -v '\s*#' ${lib.escapeShellArg config.age.secrets.wlan11bssid.path} \
+                  | sed 's/^/bssid=/' >> "$HOSTAPD_CONFIG_FILE"
+              '';
+            };
+          };
         };
       };
     };
