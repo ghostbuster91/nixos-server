@@ -83,5 +83,9 @@ in
   "wlan10bssid.age".publicKeys = [ kghost surfer ];
   "wlan11bssid.age".publicKeys = [ kghost surfer ]; # koteczkowo-ax BSSID
   "surferFtKey.age".publicKeys = [ kghost surfer ];
+
+  # Orange FunBox admin creds (FUNBOX_USER/FUNBOX_PASSWORD) for the topology
+  # device exporter on surfer. See hosts/aarch64-linux/surfer/funbox-metrics.nix.
+  "funbox-admin.age".publicKeys = [ kghost surfer ];
 }
 

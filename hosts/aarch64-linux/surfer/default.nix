@@ -9,6 +9,7 @@
     ./network.nix
     ./hostapd.nix
     ./monitoring.nix
+    ./funbox-metrics.nix
     inputs.self.nixosModules.nix
     inputs.self.nixosModules.meta
     inputs.self.nixosModules.attic-cache
