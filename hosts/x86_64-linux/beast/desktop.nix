@@ -45,6 +45,7 @@
     gnomeExtensions.appindicator
     firefox
     claude-code
+    wl-clipboard # wl-copy / wl-paste for CLI ↔ Wayland clipboard
   ];
   environment.persistence."/state" = {
     # Persistent home, reboot-only (NOT backed up — real work lives in git). The
@@ -67,16 +68,6 @@
         group = "root";
         mode = "0700";
       }
-    ];
-
-    # Login password hashes. With mutableUsers = true, `passwd` writes to
-    # /etc/shadow, which otherwise lives on the rolled-back root and is wiped
-    # every boot -- so each reboot NixOS sees "no password yet" and re-applies
-    # initialHashedPassword, silently undoing the passwd change. Persisting it
-    # makes passwd changes stick and reduces initialHashedPassword to a one-time
-    # seed. Backed up (losing it locks you out of the console).
-    files = [
-      "/etc/shadow"
     ];
   };
 }
