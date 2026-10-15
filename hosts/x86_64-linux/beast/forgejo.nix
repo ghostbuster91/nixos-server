@@ -14,6 +14,9 @@ let
   authName = "kanidm";
   exe = lib.getExe config.services.forgejo.package;
   appIni = "${config.services.forgejo.customDir}/conf/app.ini";
+  # Canonical VPN-only DNS-readiness gate (modules/nixos/lib/wait-for-dns.nix),
+  # same helper oauth2-proxy uses. See the forgejo.service block below for why.
+  waitForDns = import ../../../modules/nixos/lib/wait-for-dns.nix { inherit pkgs lib; };
 in
 {
   # Raw OIDC client secret (bare value). The same secret is kanidm's
@@ -87,6 +90,22 @@ in
 
   # git-over-SSH, reachable only over the tailnet (everything here is VPN-only).
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ sshPort ];
+
+  # Gate forgejo's own startup on thunder's MagicDNS answering for auth.<domain>.
+  # At boot forgejo.service otherwise starts before the tailnet/MagicDNS has
+  # converged; its in-process OIDC provider init then fails to fetch kanidm's
+  # discovery document ("lookup auth.<domain>: no such host"). The provider comes
+  # up without knowing kanidm advertises PKCE, so the first login redirect omits
+  # the code_challenge and kanidm — which enforces PKCE for the forgejo client —
+  # rejects it with a 500 ("No PKCE code challenge … in enforced PKCE mode"); a
+  # retry only works once the provider has re-initialised. The DNS gate (same
+  # helper/ordering as oauth2-proxy) makes discovery reachable before startup, so
+  # PKCE is negotiated on the first login after every boot. mkBefore keeps this
+  # ahead of the module's own preStart (serviceConfig.ExecStartPre is a list).
+  systemd.services.forgejo = {
+    after = [ "tailscaled.service" ];
+    serviceConfig.ExecStartPre = lib.mkBefore [ (waitForDns "auth.${ext}") ];
+  };
 
   # Register (or update) the kanidm OIDC login source. Forgejo stores auth
   # sources in its DB, not app.ini, so this can't be declared in `settings`; a
