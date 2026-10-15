@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 let
   # node_exporter's textfile collector reads *.prom from this dir; the
   # wifi-metrics oneshot below writes into it on a timer.
@@ -141,5 +141,5 @@ in
 
   # Journal->Loki shipping comes from the shared logs-alloy module; surfer has no
   # `meta`/homelab.ext-domain, so point it at the Loki endpoint directly.
-  homelab.logs.lokiPushUrl = "https://loki.typesafebrew.dev/loki/api/v1/push"; ##TODO
+  homelab.logs.lokiPushUrl = "https://loki.${config.homelab.ext-domain}/loki/api/v1/push";
 }
