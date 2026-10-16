@@ -20,7 +20,13 @@
       ./mealie.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
-        disks = [ "/dev/nvme0n1" "/dev/nvme1n1" ];
+        # by-id paths pin disko (and the derived boot.loader.grub.devices) to the
+        # physical disks regardless of nvmeX enumeration order. The first disk is
+        # the bootable one (BIOS boot + ESP + rpool1); the second holds dpool.
+        disks = [
+          "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_250GB_S465NX1KA26549R"
+          "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_500GB_S4EVNM0TC11955W"
+        ];
       })
       ./impermanence.nix
       ./nvidia.nix
