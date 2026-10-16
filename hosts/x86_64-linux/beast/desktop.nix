@@ -46,6 +46,7 @@
     firefox
     claude-code
     wl-clipboard # wl-copy / wl-paste for CLI ↔ Wayland clipboard
+    virt-viewer
   ];
   environment.persistence."/state" = {
     # Persistent home, reboot-only (NOT backed up — real work lives in git). The
