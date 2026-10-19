@@ -153,6 +153,19 @@ in
           }];
         }
         {
+          # SMART/NVMe health. Unlike the jobs above this one is loopback-only:
+          # the exporter is enabled on beast alone (hosts/x86_64-linux/beast/smartctl.nix)
+          # and beast is the monitoring host, so there is no tailnet hop and no
+          # firewall opening. Keep this job after the node_exporter one —
+          # grafana/default.nix derives the datasource's timeInterval from
+          # `elemAt scrapeConfigs 0`.
+          job_name = "smartctl";
+          inherit scrape_interval;
+          static_configs = [{
+            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.smartctl.port}" ];
+          }];
+        }
+        {
           job_name = "unbound";
           inherit scrape_interval;
           static_configs = [{
