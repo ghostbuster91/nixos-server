@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
   # SMART health for beast's two NVMe SSDs (nvme0 = rpool1, nvme1 = dpool).
   #
