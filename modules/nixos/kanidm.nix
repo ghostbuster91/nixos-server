@@ -44,9 +44,15 @@ in
   };
 
   services.kanidm = {
-    package = pkgs.kanidmWithSecretProvisioning_1_9;
-    enableServer = true;
-    serverSettings = {
+    # Pinned on purpose, and the pin has to be walked forward one minor at a
+    # time: kanidm's DB migration only steps N-1 -> N, and downgrades are
+    # impossible. nixpkgs also marks EOL releases `knownVulnerabilities`, which
+    # is a hard eval error - an expired pin blocks *every* thunder deploy, not
+    # just kanidm. See runbooks/upgrade-kanidm.md in homelab-docs before moving
+    # this; 1.11 is the currently supported release (1.9 and 1.10 are EOL).
+    package = pkgs.kanidmWithSecretProvisioning_1_11;
+    server.enable = true;
+    server.settings = {
       origin = "https://${kanidmDomainExt}";
       domain = config.homelab.ext-domain;
       tls_chain = config.age.secrets."kanidm-selfsigned.cert".path;
@@ -61,9 +67,9 @@ in
       };
     };
 
-    enableClient = true;
-    clientSettings = {
-      uri = config.services.kanidm.serverSettings.origin;
+    client.enable = true;
+    client.settings = {
+      uri = config.services.kanidm.server.settings.origin;
       verify_ca = true;
       verify_hostnames = true;
     };

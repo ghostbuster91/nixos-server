@@ -128,15 +128,25 @@ in
     openFirewall = false; # We do this manually to limit opened interfaces
   };
 
-  # The exporter binds to thunder's tailscale IP, which is only assigned once
-  # tailscaled has come up. Without ordering it races tailscale on a
-  # deploy/reboot and dies with "bind: cannot assign requested address". Order
-  # it after tailscaled; the wider start-limit window is a cushion for the brief
-  # residual gap between tailscaled going active and the address landing, so a
-  # late address can't exhaust the restart limit (Restart=always).
+  # The exporter binds to thunder's tailscale IP, which only exists once
+  # tailscaled has come up *and* re-joined the tailnet. Without ordering it
+  # races tailscale on a deploy/reboot and dies with "bind: cannot assign
+  # requested address". Order it after tailscaled, then let Restart=always
+  # retry across the residual gap.
+  #
+  # `RestartSec` is the load-bearing part, not the start limit: at the default
+  # 100ms the 20 allowed starts are spent in ~2s, which is nowhere near enough.
+  # thunder is the worst case precisely because it *hosts* headscale — a deploy
+  # restarts tailscaled and its control server in the same activation, so the
+  # address can be missing for tens of seconds while tailscaled retries the
+  # netmap (observed 2026-10-19: tailscaled stopped 09:36:54, exporter burned
+  # all 20 starts by 09:37:02 and stayed failed). At 5s the retry rate (12/min)
+  # also stays under startLimitBurst/startLimitIntervalSec (20/min), so the
+  # limit never trips and the unit keeps retrying until the address lands.
   systemd.services.prometheus-unbound-exporter = {
     after = [ "tailscaled.service" ];
     startLimitIntervalSec = 60;
     startLimitBurst = 20;
+    serviceConfig.RestartSec = 5;
   };
 }
