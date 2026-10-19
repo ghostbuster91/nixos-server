@@ -4,56 +4,32 @@ let
   pralniaMAC = "1C5F3";
   salonMAC = "1C625";
   gabinetMAC = "1C6ED";
-in
-[
-  {
+  mkTemp = { plName, engName, macAddress }: {
     device_class = "temperature";
-    name = "Temperatura sypialnia";
-    state_topic = "ampio/from/${sypialniaMAC}/state/t/1";
+    name = "Temperatura ${plName}";
+    state_topic = "ampio/from/${macAddress}/state/t/1";
     state_class = "measurement";
-    unique_id = "ampio_bedroom_temp";
+    unique_id = "ampio_${engName}_temp";
     unit_of_measurement = "°C";
-  }
-  {
-    device_class = "temperature";
-    name = "Temperature łazienka";
-    state_topic = "ampio/from/${lazienkaMAC}/state/t/1";
-    state_class = "measurement";
-    unique_id = "ampio_bathroom_temp";
-    unit_of_measurement = "°C";
-  }
-  {
+  };
+  mkHum = { plName, engName, macAddress }: {
     device_class = "humidity";
-    name = "Wilgotność łazienka";
-    object_id = "ampio_bathroom_hum";
-    state_topic = "ampio/from/${lazienkaMAC}/b/44";
+    name = "Wilgotność ${plName}";
+    unique_id = "ampio_${engName}_hum";
+    state_topic = "ampio/from/${macAddress}/b/44";
     value_template = "{{ value_json.d[2] + value_json.d[3] * 256 }}";
     unit_of_measurement = "%";
     state_class = "measurement";
-  }
-  {
-    device_class = "temperature";
-    name = "Temperatura pralnia";
-    state_topic = "ampio/from/${pralniaMAC}/state/t/1";
-    state_class = "measurement";
-    unique_id = "ampio_laundry_temp";
-    unit_of_measurement = "°C";
-  }
-  {
-    device_class = "temperature";
-    name = "Temperatura gabinet";
-    state_topic = "ampio/from/${gabinetMAC}/state/t/1";
-    state_class = "measurement";
-    unique_id = "ampio_study_temp";
-    unit_of_measurement = "°C";
-  }
-  {
-    device_class = "temperature";
-    name = "Temperatura salon";
-    state_topic = "ampio/from/${salonMAC}/state/t/1";
-    state_class = "measurement";
-    unique_id = "ampio_livingroom_temp";
-    unit_of_measurement = "°C";
-  }
-
+  };
+  mkMSensLight = { plName, engName, macAddress }: [
+    (mkTemp { inherit plName engName macAddress; })
+    (mkHum { inherit plName engName macAddress; })
+  ];
+in
+builtins.concatLists [
+  (mkMSensLight { plName = "sypialnia"; engName = "bedroom"; macAddress = sypialniaMAC; })
+  (mkMSensLight { plName = "łazienka"; engName = "bathroom"; macAddress = lazienkaMAC; })
+  (mkMSensLight { plName = "pralnia"; engName = "laundry"; macAddress = pralniaMAC; })
+  [ (mkTemp { plName = "gabinet"; engName = "study"; macAddress = gabinetMAC; }) ]
+  (mkMSensLight { plName = "salon"; engName = "livingroom"; macAddress = salonMAC; })
 ]
