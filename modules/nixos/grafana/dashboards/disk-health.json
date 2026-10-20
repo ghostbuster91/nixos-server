@@ -17,15 +17,33 @@
   "links": [],
   "refresh": "5m",
   "schemaVersion": 41,
-  "tags": ["beast", "disks", "smart"],
-  "templating": { "list": [] },
+  "tags": ["disks", "smart", "beast", "malina5"],
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "definition": "label_values(smartctl_device, host)",
+        "query": { "qryType": 1, "query": "label_values(smartctl_device, host)", "refId": "PrometheusVariableQueryEditor-VariableQuery" },
+        "type": "query",
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": { "text": ["All"], "value": ["$__all"] },
+        "options": [],
+        "refresh": 1,
+        "sort": 1
+      }
+    ]
+  },
   "time": { "from": "now-30d", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
   "title": "Disk health (SMART)",
   "uid": "disk-health",
-  "version": 1,
-  "description": "SMART/NVMe health for beast's two Samsung NVMe SSDs, from smartctl_exporter on 127.0.0.1:9633. nvme0 holds rpool1 (root/persist), nvme1 holds dpool (/data). Written and panelled for NVMe -- there are no ATA/HDD attributes here because beast has no SATA or spinning disks.",
+  "version": 2,
+  "description": "SMART/NVMe health from smartctl_exporter, scraped over the tailnet. beast: nvme0 = rpool1 (root/persist), nvme1 = dpool (/data). malina5: nvme0 = rpool1. Written and panelled for NVMe -- there are no ATA/HDD attributes here because neither host has a SATA or spinning disk. Panels filter on the `host` label set by the scrape job, not on the longer `instance`.",
   "panels": [
     { "type": "row", "id": 1, "title": "Health", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
     {
@@ -35,7 +53,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
       "fieldConfig": { "defaults": { "unit": "short", "mappings": [ { "type": "value", "options": { "0": { "text": "FAILED", "color": "red", "index": 0 }, "1": { "text": "OK", "color": "green", "index": 1 } } } ], "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_smart_status", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_smart_status{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 3, "type": "stat", "title": "Critical warning",
@@ -44,7 +62,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_critical_warning", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_critical_warning{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 4, "type": "stat", "title": "Media errors",
@@ -53,16 +71,16 @@
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
       "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_media_errors", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_media_errors{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
-      "id": 5, "type": "stat", "title": "Devices detected",
-      "description": "Drives smartctl_exporter found on its last rescan (every 10 min). Should be 2.",
+      "id": 5, "type": "stat", "title": "Drives detected",
+      "description": "Drives smartctl_exporter found on its last rescan (every 10 min). Expect 2 on beast, 1 on malina5.",
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
-      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 2 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "auto", "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_devices", "legendFormat": "devices", "range": true, "refId": "A" } ]
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_devices{host=~\"$host\"}", "legendFormat": "{{host}}", "range": true, "refId": "A" } ]
     },
 
     { "type": "row", "id": 10, "title": "Wear & endurance", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }, "panels": [] },
@@ -73,7 +91,7 @@
       "gridPos": { "h": 7, "w": 6, "x": 0, "y": 6 },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "#EAB839", "value": 60 }, { "color": "red", "value": 80 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true, "minVizHeight": 75, "minVizWidth": 75, "sizing": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_percentage_used", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_percentage_used{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 12, "type": "gauge", "title": "Available spare",
@@ -82,7 +100,7 @@
       "gridPos": { "h": 7, "w": 6, "x": 6, "y": 6 },
       "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "#EAB839", "value": 20 }, { "color": "green", "value": 50 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true, "minVizHeight": 75, "minVizWidth": 75, "sizing": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_available_spare", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_available_spare{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 13, "type": "timeseries", "title": "Lifetime used over time",
@@ -91,16 +109,16 @@
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 6 },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never", "stepInterpolation": true }, "unit": "percent", "min": 0, "decimals": 0 }, "overrides": [] },
       "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_percentage_used", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_percentage_used{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 14, "type": "stat", "title": "Total written",
-      "description": "Host writes over the drive's life (NVMe Data Units Written). Compare against the model's rated TBW: 150 TB for the 970 EVO 250GB, 300 TB for the 970 EVO Plus 500GB.",
+      "description": "Host writes over the drive's life (NVMe Data Units Written). Compare against the model's rated TBW -- 150 TB for beast's 970 EVO 250GB, 300 TB for its 970 EVO Plus 500GB, 300 TB for malina5's 980 500GB. See the Drives table for which device is which.",
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "gridPos": { "h": 5, "w": 6, "x": 0, "y": 13 },
       "fieldConfig": { "defaults": { "unit": "decbytes", "decimals": 1, "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "none", "graphMode": "area", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_bytes_written", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_bytes_written{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 15, "type": "timeseries", "title": "Write / read throughput (SMART counters)",
@@ -110,20 +128,20 @@
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1, "showPoints": "never" }, "unit": "Bps", "min": 0 }, "overrides": [] },
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "rate(smartctl_device_bytes_written[1h])", "legendFormat": "{{device}} written", "range": true, "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "rate(smartctl_device_bytes_read[1h])", "legendFormat": "{{device}} read", "range": true, "refId": "B" }
+        { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "rate(smartctl_device_bytes_written{host=~\"$host\"}[1h])", "legendFormat": "{{host}} {{device}} written", "range": true, "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "rate(smartctl_device_bytes_read{host=~\"$host\"}[1h])", "legendFormat": "{{host}} {{device}} read", "range": true, "refId": "B" }
       ]
     },
 
     { "type": "row", "id": 20, "title": "Temperature", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }, "panels": [] },
     {
       "id": 21, "type": "gauge", "title": "Current temperature",
-      "description": "Samsung 970-series throttle around 78C and protect themselves near 82C. Sustained readings above 70C mean the drive needs airflow or a heatsink.",
+      "description": "These Samsung NVMes throttle around 78C and protect themselves near 82C. Sustained readings above 70C mean the drive needs airflow or a heatsink -- worth watching on malina5, where the drive sits in a Pi 5 PCIe hat rather than a ventilated case.",
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "gridPos": { "h": 7, "w": 6, "x": 0, "y": 19 },
       "fieldConfig": { "defaults": { "unit": "celsius", "min": 20, "max": 90, "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "#EAB839", "value": 55 }, { "color": "red", "value": 70 } ] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true, "minVizHeight": 75, "minVizWidth": 75, "sizing": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_temperature{temperature_type=\"current\"}", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_temperature{temperature_type=\"current\", host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 22, "type": "timeseries", "title": "Temperature over time",
@@ -131,7 +149,7 @@
       "gridPos": { "h": 7, "w": 18, "x": 6, "y": 19 },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1, "showPoints": "never", "thresholdsStyle": { "mode": "dashed" } }, "unit": "celsius", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [ { "color": "transparent", "value": null }, { "color": "red", "value": 70 } ] } }, "overrides": [] },
       "options": { "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_temperature{temperature_type=\"current\"}", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_temperature{temperature_type=\"current\", host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
 
     { "type": "row", "id": 30, "title": "Age & activity", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 }, "panels": [] },
@@ -141,7 +159,7 @@
       "gridPos": { "h": 5, "w": 8, "x": 0, "y": 27 },
       "fieldConfig": { "defaults": { "unit": "s", "decimals": 1, "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_power_on_seconds", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_power_on_seconds{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 32, "type": "stat", "title": "Power cycles",
@@ -149,7 +167,7 @@
       "gridPos": { "h": 5, "w": 8, "x": 8, "y": 27 },
       "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "auto", "textMode": "value_and_name", "colorMode": "none", "graphMode": "none", "justifyMode": "auto" },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_power_cycle_count", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_power_cycle_count{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
     {
       "id": 33, "type": "timeseries", "title": "NVMe error-log entries",
@@ -158,50 +176,50 @@
       "gridPos": { "h": 5, "w": 8, "x": 16, "y": 27 },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "fillOpacity": 0, "lineWidth": 1, "showPoints": "never", "stepInterpolation": true }, "unit": "short", "decimals": 0 }, "overrides": [] },
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_num_err_log_entries", "legendFormat": "{{device}}", "range": true, "refId": "A" } ]
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_num_err_log_entries{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true, "refId": "A" } ]
     },
 
     { "type": "row", "id": 40, "title": "Inventory & collector health", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 }, "panels": [] },
     {
       "id": 41, "type": "table", "title": "Drives",
-      "description": "Maps the nvme0/nvme1 labels used above to physical drives. Serial numbers match the by-id paths pinned in beast's disko-config.",
+      "description": "Maps each host's nvmeN labels to physical drives. Serial numbers match the by-id paths pinned in the hosts' disko configs.",
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "gridPos": { "h": 6, "w": 18, "x": 0, "y": 33 },
       "fieldConfig": {
         "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false }, "unit": "none" },
         "overrides": [ { "matcher": { "id": "byName", "options": "Capacity" }, "properties": [ { "id": "unit", "value": "decbytes" }, { "id": "decimals", "value": 1 } ] } ]
       },
-      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false }, "sortBy": [ { "displayName": "Device", "desc": false } ] },
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false }, "sortBy": [ { "displayName": "Host", "desc": false } ] },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device", "format": "table", "instant": true, "range": false },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_capacity_bytes", "format": "table", "instant": true, "range": false }
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device{host=~\"$host\"}", "format": "table", "instant": true, "range": false },
+        { "refId": "B", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_capacity_bytes{host=~\"$host\"}", "format": "table", "instant": true, "range": false }
       ],
       "transformations": [
-        { "id": "joinByField", "options": { "byField": "device", "mode": "outer" } },
+        { "id": "joinByField", "options": { "byField": "instance", "mode": "outer" } },
         { "id": "organize", "options": {
           "excludeByName": {
             "Time 1": true, "Time 2": true, "__name__ 1": true, "__name__ 2": true,
-            "instance 1": true, "instance 2": true, "job 1": true, "job 2": true,
-            "Value #A": true,
+            "instance": true, "job 1": true, "job 2": true,
+            "host 2": true, "device 2": true, "Value #A": true,
             "ata_additional_product_id": true, "ata_version": true, "form_factor": true,
             "model_family": true, "protocol": true, "sata_version": true,
             "scsi_product": true, "scsi_revision": true, "scsi_vendor": true, "scsi_version": true
           },
-          "indexByName": { "device": 0, "model_name": 1, "serial_number": 2, "firmware_version": 3, "interface": 4, "Value #B": 5 },
-          "renameByName": { "device": "Device", "model_name": "Model", "serial_number": "Serial", "firmware_version": "Firmware", "interface": "Interface", "Value #B": "Capacity" }
+          "indexByName": { "host 1": 0, "device 1": 1, "model_name": 2, "serial_number": 3, "firmware_version": 4, "interface": 5, "Value #B": 6 },
+          "renameByName": { "host 1": "Host", "device 1": "Device", "model_name": "Model", "serial_number": "Serial", "firmware_version": "Firmware", "interface": "Interface", "Value #B": "Capacity" }
         } }
       ]
     },
     {
       "id": 42, "type": "stat", "title": "Collector health",
-      "description": "Top: prometheus can reach the exporter on loopback. Bottom: smartctl's own exit status per drive (0 = clean read).",
+      "description": "Top rows: prometheus can reach each host's exporter over the tailnet. Below: smartctl's own exit status per drive (0 = clean read).",
       "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "gridPos": { "h": 6, "w": 6, "x": 18, "y": 33 },
       "fieldConfig": { "defaults": { "unit": "short", "mappings": [ { "type": "value", "options": { "0": { "text": "OK", "color": "green", "index": 0 } } } ], "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [ { "matcher": { "id": "byFrameRefID", "options": "A" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 }, "1": { "text": "UP", "color": "green", "index": 1 } } } ] }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } } ] } ] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "orientation": "vertical", "textMode": "value_and_name", "colorMode": "background", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "up{job=\"smartctl\"}", "legendFormat": "exporter", "range": true },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_smartctl_exit_status", "legendFormat": "{{device}} exit", "range": true }
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "up{job=\"smartctl\", host=~\"$host\"}", "legendFormat": "{{host}} exporter", "range": true },
+        { "refId": "B", "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" }, "editorMode": "code", "expr": "smartctl_device_smartctl_exit_status{host=~\"$host\"}", "legendFormat": "{{host}} {{device}}", "range": true }
       ]
     }
   ]

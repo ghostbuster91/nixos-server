@@ -18,7 +18,6 @@
       ./readeck.nix
       ./healthlog.nix
       ./mealie.nix
-      ./smartctl.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {
         # by-id paths pin disko (and the derived boot.loader.grub.devices) to the
@@ -44,6 +43,7 @@
       inputs.self.nixosModules.grafana
       inputs.self.nixosModules.prometheus-server
       inputs.self.nixosModules.prometheus-client
+      inputs.self.nixosModules.smartctl
       inputs.self.nixosModules.attic-watch-store
       inputs.self.nixosModules.nix-remote-builder
       {

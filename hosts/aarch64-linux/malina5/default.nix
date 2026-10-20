@@ -18,6 +18,8 @@
       ./backup.nix
       ./attic.nix
       ./ntfy.nix
+      inputs.self.nixosModules.prometheus-client
+      inputs.self.nixosModules.smartctl
       inputs.self.nixosModules.impermanence
       inputs.self.nixosModules.zfs
       inputs.self.nixosModules.system-user

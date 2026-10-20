@@ -3,6 +3,7 @@
     grafana = ./grafana;
     prometheus-server = ./prometheus/server.nix;
     prometheus-client = ./prometheus/client.nix;
+    smartctl = ./smartctl.nix;
     logs-loki = ./logs/loki.nix;
     logs-alloy = ./logs/alloy.nix;
     esphome = ./esphome;

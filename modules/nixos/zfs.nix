@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , ...
 }: {
   boot.supportedFilesystems = [ "zfs" ];
@@ -29,9 +30,20 @@
     zfs = {
       enable = true;
       port = 9004;
-      openFirewall = true;
+
+      # `openFirewall` is deliberately off: it renders an *unscoped*
+      # `ip46tables -A nixos-fw -p tcp --dport 9004` (via extraCommands, not
+      # allowedTCPPorts), accepting on every interface including the LAN. The
+      # interface-scoped rule below is what we want -- prometheus reaches every
+      # exporter as `<host>.tail.<domain>` over the tailnet. Same reasoning as
+      # prometheus/client.nix and smartctl.nix.
+      openFirewall = false;
     };
   };
+
+  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [
+    config.services.prometheus.exporters.zfs.port
+  ];
 
   # Roll the root dataset back to a pristine snapshot on every boot (impermanence).
   # systemd stage-1 (the default for ZFS hosts since 25.11/26.05) does not support

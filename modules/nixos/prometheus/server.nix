@@ -115,64 +115,76 @@ in
       ];
 
 
-      scrapeConfigs = let scrape_interval = "60s"; in [
-        {
-          job_name = "node_exporter";
-          inherit scrape_interval;
-          static_configs = [{
-            targets = [
-              "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
-              "surfer.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
-              "malina5.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
-              "thunder.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.node.port}"
-            ];
-          }];
-        }
-        {
-          job_name = "haas";
-          metrics_path = "/api/prometheus";
-          inherit scrape_interval;
-          # Long-Lived Access Token
-          authorization.credentials_file = config.age.secrets."prometheus-hass-token".path;
-          static_configs = [{
-            targets = [ "ha.${config.homelab.ext-domain}" ];
-          }];
-        }
-        {
-          job_name = "zfs";
-          inherit scrape_interval;
-          static_configs = [{
-            targets = [ "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.zfs.port}" ];
-          }];
-        }
-        {
-          job_name = "systemd";
-          inherit scrape_interval;
-          static_configs = [{
-            targets = [ "beast.tail.${config.homelab.ext-domain}:${toString config.services.prometheus.exporters.systemd.port}" ];
-          }];
-        }
-        {
-          # SMART/NVMe health. Unlike the jobs above this one is loopback-only:
-          # the exporter is enabled on beast alone (hosts/x86_64-linux/beast/smartctl.nix)
-          # and beast is the monitoring host, so there is no tailnet hop and no
-          # firewall opening. Keep this job after the node_exporter one —
-          # grafana/default.nix derives the datasource's timeInterval from
-          # `elemAt scrapeConfigs 0`.
-          job_name = "smartctl";
-          inherit scrape_interval;
-          static_configs = [{
-            targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.smartctl.port}" ];
-          }];
-        }
-        {
-          job_name = "unbound";
-          inherit scrape_interval;
-          static_configs = [{
-            targets = [ "thunder.tail.${config.homelab.ext-domain}:9167" ];
-          }];
-        }
-      ];
+      scrapeConfigs =
+        let
+          scrape_interval = "60s";
+          exporters = config.services.prometheus.exporters;
+
+          # Every exporter in the fleet is reached the same way: over the
+          # tailnet as `<host>.tail.<domain>:<port>`. That holds for beast too,
+          # even though it hosts prometheus — it resolves its own name to a
+          # local address, so the packet arrives on `lo`, which nixos-fw accepts
+          # unconditionally. Exporter ports are opened on tailscale0 only, never
+          # via the exporter modules' `openFirewall` (that rule is unscoped).
+          #
+          # One static_config per host, each carrying a short `host` label.
+          # Dashboards and alert rules key off `host` rather than `instance`, so
+          # they read "beast nvme0" instead of repeating the full
+          # `beast.tail.<domain>:9633`; `instance` is still there when wanted.
+          # No currently-scraped exporter exposes a `host` label of its own, so
+          # nothing gets renamed to `exported_host` by this.
+          tailTargets = port: hosts: map
+            (host: {
+              targets = [ "${host}.tail.${config.homelab.ext-domain}:${toString port}" ];
+              labels = { inherit host; };
+            })
+            hosts;
+        in
+        [
+          {
+            # Keep this job first — grafana/default.nix derives the datasource's
+            # timeInterval from `elemAt scrapeConfigs 0`.
+            job_name = "node_exporter";
+            inherit scrape_interval;
+            static_configs = tailTargets exporters.node.port [ "beast" "surfer" "malina5" "thunder" ];
+          }
+          {
+            job_name = "haas";
+            metrics_path = "/api/prometheus";
+            inherit scrape_interval;
+            # Long-Lived Access Token
+            authorization.credentials_file = config.age.secrets."prometheus-hass-token".path;
+            static_configs = [{
+              targets = [ "ha.${config.homelab.ext-domain}" ];
+            }];
+          }
+          {
+            # Every host importing nixosModules.zfs runs this exporter; scrape
+            # all of them so pool health/capacity is actually collected. (deckard
+            # imports it too but is decommissioned.)
+            job_name = "zfs";
+            inherit scrape_interval;
+            static_configs = tailTargets exporters.zfs.port [ "beast" "malina5" ];
+          }
+          {
+            # prometheus-client enables the systemd exporter alongside node, so
+            # scrape it everywhere that module is imported -- otherwise the unit
+            # runs for nothing.
+            job_name = "systemd";
+            inherit scrape_interval;
+            static_configs = tailTargets exporters.systemd.port [ "beast" "malina5" "thunder" ];
+          }
+          {
+            job_name = "smartctl";
+            inherit scrape_interval;
+            static_configs = tailTargets exporters.smartctl.port [ "beast" "malina5" ];
+          }
+          {
+            job_name = "unbound";
+            inherit scrape_interval;
+            static_configs = tailTargets 9167 [ "thunder" ];
+          }
+        ];
     };
 
     nginx.virtualHosts."${roleName}.${config.homelab.ext-domain}" = {
