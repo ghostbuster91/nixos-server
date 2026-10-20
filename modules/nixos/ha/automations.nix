@@ -1,4 +1,79 @@
+let
+  # "sensor value stayed above X for a while" -> one ntfy push, rate-limited.
+  # Uses the generic `rest_command.ntfy` (see ha/default.nix).
+  mkHighAlert =
+    { id
+    , alias
+    , entity
+    , above
+    , sustained ? "00:10:00" # ignore short spikes (someone walking past, etc.)
+    , quietMinutes ? 45 # minimum gap between two pushes from this automation
+    , title
+    , message
+    , priority ? "default"
+    , tags ? "house"
+    }: {
+      inherit id alias;
+      mode = "single";
+      trigger = [{
+        platform = "numeric_state";
+        entity_id = entity;
+        inherit above;
+        for = sustained;
+      }];
+      # A numeric_state trigger only fires on *crossing* the threshold, but a
+      # value hovering around it can cross repeatedly. `last_triggered` advances
+      # only when the action actually runs, so this is a real rate limit.
+      # `this` is the automation's own state object — no hardcoded entity_id.
+      condition = [{
+        condition = "template";
+        value_template = "{{ as_timestamp(now()) - as_timestamp(state_attr(this.entity_id, 'last_triggered') or 0) > ${toString (quietMinutes * 60)} }}";
+      }];
+      action = [{
+        service = "rest_command.ntfy";
+        data = { inherit title message priority tags; };
+      }];
+    };
+
+  # --- CO2, gabinet ---------------------------------------------------------
+  # Entity id is HA's slug of the mqtt sensor's name ("CO2 gabinet", see
+  # ha/mqtt_sensors.nix). If these never fire, confirm it in Developer Tools ->
+  # States.
+  co2Study = "sensor.co2_gabinet";
+  # Measured baseline in this room: ~500 ppm with the door open (outdoor air is
+  # ~420), ~600 ppm occupied, 2500 ppm peak over a week of closed-door work.
+  # Reference points: <800 ppm is "good" by every IAQ guideline (too low to be
+  # actionable here), 1000 ppm is the classic ventilate-now limit where
+  # stuffiness complaints start, ~1400 ppm is where studies measure a drop in
+  # decision-making performance, 2000 ppm brings headaches/drowsiness.
+  # So: nudge at 1000, insist at 1500. On a normally ventilated day neither
+  # fires; the sessions that produced the 2500 peak get caught early.
+  co2WarnPpm = 1000;
+  co2HighPpm = 1500;
+in
 [
+  (mkHighAlert {
+    id = "notify_study_co2_elevated";
+    alias = "Notify when study CO2 is elevated";
+    entity = co2Study;
+    above = co2WarnPpm;
+    title = "Study air is getting stale";
+    message = "CO2 w gabinecie: {{ states('${co2Study}') | round(0) }} ppm (> ${toString co2WarnPpm}). Open a window.";
+    tags = "wind_face,house";
+  })
+  (mkHighAlert {
+    id = "notify_study_co2_high";
+    alias = "Notify when study CO2 is high";
+    entity = co2Study;
+    above = co2HighPpm;
+    # Already clearly stale by now: react faster and nag more often.
+    sustained = "00:05:00";
+    quietMinutes = 20;
+    title = "Study CO2 is high";
+    message = "CO2 w gabinecie: {{ states('${co2Study}') | round(0) }} ppm (> ${toString co2HighPpm}). Wietrz teraz.";
+    priority = "high";
+    tags = "warning,wind_face";
+  })
   {
     id = "notify_front_door_unlocked_at_23";
     alias = "Notify if front door still unlocked at 23:00";

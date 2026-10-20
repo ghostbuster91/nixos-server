@@ -115,6 +115,22 @@ in
             Tags = "lock,house";
           };
         };
+        # Generic ntfy push: the caller supplies title/message/priority/tags as
+        # service-call data (see `mkHighAlert` in ./automations.nix). Same topic
+        # and locality reasoning as ntfy_front_door above.
+        # Keep titles/tags ASCII — ntfy sends them as HTTP headers; the body
+        # (payload) is UTF-8 and may contain Polish characters.
+        rest_command.ntfy = {
+          url = "https://ntfy.${config.homelab.ext-domain}/homelab";
+          method = "POST";
+          content_type = "text/plain; charset=utf-8";
+          payload = "{{ message }}";
+          headers = {
+            Title = "{{ title | default('Home Assistant', true) }}";
+            Priority = "{{ priority | default('default', true) }}";
+            Tags = "{{ tags | default('house', true) }}";
+          };
+        };
         mqtt = {
           sensor = import ./mqtt_sensors.nix;
         };

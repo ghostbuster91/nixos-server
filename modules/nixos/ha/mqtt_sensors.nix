@@ -56,7 +56,7 @@ let
     (mkHum { inherit plName engName macAddress; })
   ];
 
-  # full multisensor (temperature + external probe, /b/21 = [hum, press, noise],
+  # full multisensor (temperature + /b/21 = [hum, press, noise],
   # /b/22 = [lux, IAQ, press], /b/23 = [CO2, IAQ, press])
   mkMSensFull = { plName, engName, macAddress }:
     let
