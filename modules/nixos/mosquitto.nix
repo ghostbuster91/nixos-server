@@ -58,7 +58,13 @@
       ${pkgs.coreutils}/bin/install -d -m 0750 -o mosquitto -g mosquitto /run/mosquitto/conf.d
       {
         echo "connection ampio"
-        echo "addresses ampio.local:1883"
+        # IPv4 literal first, mDNS name as fallback: ampio.local's mDNS answer
+        # can come back as *only* an IPv6 link-local address (the A record
+        # exists, but AF_UNSPEC getaddrinfo doesn't return it), and mosquitto
+        # can't connect to a scopeless fe80:: — every attempt dies with
+        # "Error creating bridge: Invalid argument." The name is kept second so
+        # the bridge self-heals if the panel's IP changes while mDNS works.
+        echo "addresses 192.168.1.43:1883 ampio.local:1883"
         echo "topic ampio/from/# in 0"
         echo "remote_username admin"
         echo "remote_password $(${pkgs.coreutils}/bin/cat ${config.age.secrets.mosquitto-ampio-bridge-pw.path})"
