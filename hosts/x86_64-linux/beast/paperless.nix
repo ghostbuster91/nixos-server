@@ -83,6 +83,32 @@ in
       PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS = true; # ...but only via SSO
       PAPERLESS_ACCOUNT_ALLOW_SIGNUPS = false; # no self-service local accounts
       PAPERLESS_REDIRECT_LOGIN_TO_SSO = true; # skip the native login page
+      # Auto-provisioned SSO users are created with *zero* model permissions,
+      # and paperless guards even /api/ui_settings/ with
+      # PaperlessObjectPermissions (GET needs documents.view_uisettings) — so
+      # without a group the UI 403s on load and the user sees an auth error
+      # right after a successful kanidm login.
+      #
+      # Membership is therefore driven from kanidm: the `paperless` client emits
+      # a `groups` claim via claimMaps (modules/nixos/kanidm.nix) mapping
+      # paperless.access -> "family", and this syncs user.groups from that claim
+      # on every login (handle_social_account_updated in
+      # src/paperless/signals.py, wired to allauth's social_account_updated).
+      #
+      # Two consequences worth knowing:
+      #  - The sync is authoritative: `groups.set(…, clear=True)`. Any group
+      #    assigned by hand in the paperless UI is removed on the user's next
+      #    login, and if the claim ever stops arriving every user is stripped
+      #    back to no permissions. Deploy thunder (the claim) BEFORE beast.
+      #  - `family` is still a DB row, not Nix state — paperless resolves the
+      #    claim with Group.objects.filter(name__in=…) and silently ignores a
+      #    name with no matching group. Create it with the snippet in
+      #    ../homelab-docs/services/paperless.md.
+      #
+      # PAPERLESS_SOCIAL_ACCOUNT_DEFAULT_GROUPS is deliberately *not* set: the
+      # signup path adds those groups and then immediately calls the same
+      # clear=True sync (src/paperless/adapter.py), so it would be a no-op.
+      PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS = true;
     };
   };
 

@@ -83,7 +83,7 @@ in
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" "readeck.admins" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" "readeck.admins" "paperless.admins" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {
@@ -271,6 +271,7 @@ in
       # the user, so a non-member can't obtain a token. allauth auto-provisions
       # the paperless account on first login (PAPERLESS_SOCIAL_AUTO_SIGNUP).
       groups."paperless.access" = { };
+      groups."paperless.admins" = { };
       systems.oauth2.paperless = {
         displayName = "Paperless";
         # allauth's openid_connect callback: /accounts/oidc/<provider_id>/login/callback/
@@ -279,13 +280,35 @@ in
         originLanding = "https://paperless.${config.homelab.ext-domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
         preferShortUsername = true;
-        # allauth requests exactly these scopes; no group/role mapping is wired
-        # into paperless, so the standard OIDC scopes are all that's needed.
+        # allauth requests exactly these scopes. Do NOT add "groups": the
+        # built-in groups claim emits raw group SPNs
+        # (paperless.access@<domain>) and would clobber the claim map below —
+        # same trap as Mealie's mealie_roles map above.
         scopeMaps."paperless.access" = [
           "openid"
           "email"
           "profile"
         ];
+        # Drives paperless's Django group membership. paperless syncs
+        # `user.groups` from this claim on *every* login
+        # (PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS in beast/paperless.nix), so the
+        # value must match a paperless group *row* name exactly — `family`,
+        # which carries the per-model permissions a non-admin user needs.
+        # joinType must stay "array": paperless does Group.objects.filter(
+        # name__in=<claim>), and a joined string would iterate as characters and
+        # match nothing — wiping membership on login.
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup."paperless.access" = [ "family" ];
+          # `paperless-admins` is a *delta* on top of `family` (workflows, mail
+          # rules, app config, audit log) — it is not self-sufficient. That's
+          # safe because the scopeMap above means kanidm only issues a token to
+          # paperless.access members, so an admin always receives both values.
+          # Note Django cannot grant is_staff/is_superuser from a group, so the
+          # /admin page and user management still need the manual promotion in
+          # ../homelab-docs/services/paperless.md.
+          valuesByGroup."paperless.admins" = [ "paperless-admins" ];
+        };
       };
       # Forgejo (native OIDC login source, runs on beast). The auth source is
       # registered against this client by a oneshot on beast
