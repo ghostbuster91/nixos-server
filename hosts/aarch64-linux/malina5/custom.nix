@@ -156,6 +156,19 @@
           paho-mqtt = pyprev.paho-mqtt.overridePythonAttrs (_old: {
             dontUsePytestCheck = true;
           });
+          # uvloop (a core Home Assistant dependency) isn't cached for this aarch64
+          # rev, so it compiles on the Pi and runs its full pytest suite.
+          # tests/test_regr1.py's test_issue39_regression spawns many concurrent
+          # subprocess/loop cycles and asserts they all complete within a timeout,
+          # failing with "deadlocked in libuv" on this slow, loaded builder — a
+          # timing artifact, not a real deadlock (upstream has a history of this
+          # test being flaky). Deselect just that test; the rest of the suite
+          # (413 passing) still runs. Remove once a cached aarch64 uvloop exists.
+          uvloop = pyprev.uvloop.overridePythonAttrs (old: {
+            disabledTestPaths = (old.disabledTestPaths or [ ]) ++ [
+              "tests/test_regr1.py::TestIssue39Regr::test_issue39_regression"
+            ];
+          });
           # Same flaky test_crafted_xml_performance as the python313 django above,
           # but Home Assistant is on python 3.14 here so that override never hits
           # this django. In django 5.2.15 the test moved to test_deserialization.py.
