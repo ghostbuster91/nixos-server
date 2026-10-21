@@ -17,6 +17,7 @@
       ./forgejo.nix
       ./readeck.nix
       ./healthlog.nix
+      ./ha-mcp.nix
       ./mealie.nix
       inputs.disko.nixosModules.default
       (import ./disko-config.nix {

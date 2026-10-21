@@ -45,6 +45,7 @@ in
           ''"git.${ext-domain}.         IN A ${beastIp}"''
           ''"readeck.${ext-domain}.     IN A ${beastIp}"''
           ''"healthlog.${ext-domain}.   IN A ${beastIp}"''
+          ''"ha-mcp.${ext-domain}.      IN A ${beastIp}"''
           ''"ntfy.${ext-domain}.        IN A ${malina5Ip}"''
           ''"actual.${ext-domain}.      IN A ${malina5Ip}"''
           ''"mealie.${ext-domain}.      IN A ${beastIp}"''

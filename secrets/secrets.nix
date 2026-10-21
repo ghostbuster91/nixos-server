@@ -60,6 +60,13 @@ in
   "kanidm-oauth2-healthlog.age".publicKeys = [ kghost thunder ];
   "healthlog-env.age".publicKeys = [ kghost beast ];
 
+  # ha-mcp (standalone HTTP server on beast, see hosts/x86_64-linux/beast/ha-mcp.nix).
+  # Holds HOMEASSISTANT_TOKEN (a long-lived access token for an HA admin) and
+  # MCP_SECRET_PATH (the endpoint path — path secrecy is the auth boundary in
+  # plain HTTP mode, so it must not land in the Nix store). No kanidm client, so
+  # no second file to keep in sync.
+  "ha-mcp-env.age".publicKeys = [ kghost beast ];
+
   "oauth2-cookie-secret.age".publicKeys = [ kghost thunder beast malina5 ];
   "oauth2-cookie-client-secret.age".publicKeys = [ kghost thunder beast malina5 ];
 
