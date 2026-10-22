@@ -137,6 +137,24 @@
           in
           [
             {
+              # deploy-rs prints nix's own progress bar, which is useless for
+              # the long from-source builds this repo triggers. Ask nix for
+              # machine-readable logs instead (`-- …` forwards to the nix
+              # invocation) and let nix-output-monitor render them. nom reads
+              # the json on stdin, and nix writes its log to stderr, hence the
+              # 2>&1; pipefail keeps deploy's exit status.
+              package = pkgs.writeShellScriptBin "deployLog" ''
+                set -euo pipefail
+                if [ "$#" -eq 0 ]; then
+                  echo "usage: deployLog <flake-target> [deploy args…]   e.g. deployLog .#malina5" >&2
+                  exit 1
+                fi
+                ${pkgs.deploy-rs}/bin/deploy "$@" -- --log-format internal-json -v 2>&1 \
+                  | ${pkgs.nix-output-monitor}/bin/nom --json
+              '';
+              help = "deploy a host with nix-output-monitor rendering the build log (e.g. deployLog .#malina5)";
+            }
+            {
               package = pkgs.writeShellScriptBin "nix-build-deckard" ''
                 set -euo pipefail
                 nix build .#nixosConfigurations.deckard.config.system.build.toplevel
