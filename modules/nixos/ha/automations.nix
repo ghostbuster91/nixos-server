@@ -283,6 +283,43 @@ in
     }];
   }
   {
+    id = "front_door_open_hall_light_afternoon";
+    alias = "Front door open -> hall light (afternoon/evening)";
+    # in_13 on boneio-24-sw-07-737d50 is the front-door reed switch
+    # ("Czujnik otwarcia drzwi", see ../../home/boneio-24-sw-07-737d50.yaml).
+    # The HA entity id slugs the *friendly* device name ("boneio-1"), not the
+    # esphome node name, hence binary_sensor.boneio_1_*. It reports
+    # device_class door (on = Open), so the purpose-specific `door.opened`
+    # trigger would fit — but that family is still Labs-gated on this
+    # instance's HA core (2026.5) and only becomes default config in 2026.7.
+    # Keep the plain state trigger until then.
+    trigger = [{
+      platform = "state";
+      entity_id = "binary_sensor.boneio_1_czujnik_otwarcia_drzwi";
+      to = "on";
+    }];
+    condition = [
+      # Afternoon/evening only. A one-sided `after` anchors at midnight, so
+      # this window is 13:00 -> 00:00; mornings and the small hours are
+      # excluded.
+      {
+        condition = "time";
+        after = "13:00:00";
+      }
+      # Only act when the light is actually off, so walking in and out does not
+      # re-issue turn_on against a light someone already dimmed by hand.
+      {
+        condition = "state";
+        entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
+        state = "off";
+      }
+    ];
+    action = [{
+      service = "light.turn_on";
+      target.entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
+    }];
+  }
+  {
     id = "mata_grzewcza_schedule";
     alias = "Mata grzewcza - harmonogram";
     # Drive the ESPHome thermostat (climate) rather than the raw
