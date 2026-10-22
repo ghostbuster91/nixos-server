@@ -18,6 +18,46 @@ in
     "openssl-1.1.1w"
   ];
 
+  nixpkgs.overlays = [
+    (_final: prev: {
+      # ./ezviz-cloud.nix pins pyezvizapi ==1.0.5.0 in its manifest, and
+      # buildHomeAssistantComponent *enforces* manifest requirements
+      # (manifest-requirements-check-hook), so 26.05's 1.0.4.9 fails the build.
+      # 1.0.5.0 also dropped the pandas dependency, hence the trimmed list.
+      #
+      # Nothing else in this config uses pyezvizapi: the built-in `ezviz`
+      # component is out of extraComponents below. (It needed a patch to cope
+      # with this same bump — upstream home-assistant commit 0b831ef02 — which
+      # was dropped once its config entry was deleted. Restore it from git
+      # history if the built-in component ever comes back.)
+      #
+      # Done via pythonPackagesExtensions rather than
+      # `python314.override { packageOverrides = … }` on purpose: malina5's
+      # custom.nix already uses that argument, and `.override` *replaces* it
+      # rather than composing, so a second one would silently drop the aarch64
+      # test-flake fixes there.
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (pyfinal: pyprev: {
+          pyezvizapi = pyprev.pyezvizapi.overridePythonAttrs (_old: rec {
+            version = "1.0.5.0";
+            src = prev.fetchFromGitHub {
+              owner = "RenierM26";
+              repo = "pyEzvizApi";
+              tag = "v${version}";
+              hash = "sha256-m3rj8ELu8/X/3TPtC1wfN8VOs7eHKb4DNvb7JAoKXfE=";
+            };
+            dependencies = with pyfinal; [
+              paho-mqtt
+              pycryptodome
+              requests
+              xmltodict
+            ];
+          });
+        })
+      ];
+    })
+  ];
+
   # TODO: infinite recursion for rpi5 eval
   # topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
   services.home-assistant =
@@ -48,6 +88,19 @@ in
         (pkgs.callPackage ./oidc-auth.nix {
           python3Packages = config.services.home-assistant.package.python3Packages;
         })
+        # "Ezviz(Beta)" (domain ezviz_cloud) — cloud images/clips/push for the
+        # HP2 peephole, which has no RTSP for the built-in ezviz to talk to.
+        # This replaces the built-in `ezviz`, which is out of extraComponents
+        # below and whose config entry was deleted on 2026-10-22. Note that
+        # dropping a component from extraComponents only removes its *deps*
+        # from the service PYTHONPATH — the component's files still ship inside
+        # the home-assistant package, and this component propagates pyezvizapi
+        # anyway — so re-adding an `ezviz` entry in the UI would still load it,
+        # duplicating every entity (second set lands as `*_2`).
+        # Same python-set reasoning as above.
+        (pkgs.callPackage ./ezviz-cloud.nix {
+          python3Packages = config.services.home-assistant.package.python3Packages;
+        })
       ];
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
@@ -66,7 +119,7 @@ in
         "satel_integra"
         "bthome"
         "rest_command"
-        "ezviz"
+        # "ezviz" — superseded by the ezviz_cloud custom component above.
         "shelly"
       ];
       config = {
