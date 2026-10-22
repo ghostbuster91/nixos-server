@@ -81,9 +81,11 @@ in
       platform = "time";
       at = "23:00:00";
     }];
-    # Only remind when the door is actually still unlocked at 23:00. The night
-    # re-lock safety net (relock_front_door_at_night) is intentionally left in
-    # place, so it still auto-locks the door ~10 min later as a fallback.
+    # Only remind when the door is actually still unlocked at 23:00. This push
+    # is now the *only* night-time handling: the automations that used to lock
+    # the door at 23:00 and re-lock it later in the night were deliberately
+    # removed, so nothing auto-locks any more and acting on the push is
+    # manual.
     condition = [{
       condition = "state";
       entity_id = "lock.drzwi_glowne";
@@ -284,9 +286,8 @@ in
   }
   {
     id = "front_door_open_hall_light_afternoon";
-    alias = "Front door open -> hall light (afternoon/evening)";
+    alias = "Front door open -> hall light (afternoon/evening/night)";
     # in_13 on boneio-24-sw-07-737d50 is the front-door reed switch
-    # ("Czujnik otwarcia drzwi", see ../../home/boneio-24-sw-07-737d50.yaml).
     # The HA entity id slugs the *friendly* device name ("boneio-1"), not the
     # esphome node name, hence binary_sensor.boneio_1_*. It reports
     # device_class door (on = Open), so the purpose-specific `door.opened`
@@ -298,25 +299,59 @@ in
       entity_id = "binary_sensor.boneio_1_czujnik_otwarcia_drzwi";
       to = "on";
     }];
-    condition = [
-      # Afternoon/evening only. A one-sided `after` anchors at midnight, so
-      # this window is 13:00 -> 00:00; mornings and the small hours are
-      # excluded.
-      {
-        condition = "time";
-        after = "13:00:00";
-      }
-      # Only act when the light is actually off, so walking in and out does not
-      # re-issue turn_on against a light someone already dimmed by hand.
-      {
-        condition = "state";
-        entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
-        state = "off";
-      }
-    ];
+    # Which light depends on the hour: the overhead "górne" until midnight,
+    # the floor-level "podłogowe" after it, so coming home at 2am doesn't
+    # mean full ceiling light. The two windows are disjoint, so the order of
+    # the branches carries no meaning.
+    #
+    # Each branch also requires its own light to be off, so walking in and out
+    # does not re-issue turn_on against a light someone already dimmed by
+    # hand. When that guard fails the branch is skipped and the other branch's
+    # time condition rejects it too, so nothing happens — which is the intent.
     action = [{
-      service = "light.turn_on";
-      target.entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
+      choose = [
+        {
+          # 13:00 -> 00:00. A one-sided `after` anchors at midnight, which is
+          # exactly the upper bound wanted here; the small hours are the next
+          # branch's job.
+          conditions = [
+            {
+              condition = "time";
+              after = "13:00:00";
+            }
+            {
+              condition = "state";
+              entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
+              state = "off";
+            }
+          ];
+          sequence = [{
+            service = "light.turn_on";
+            target.entity_id = "light.boneio_dr_8ch_03_32ce68_light_a1_d1";
+          }];
+        }
+        {
+          # 00:00 -> 06:00. Both bounds are spelled out: a lone `before` would
+          # work (it anchors at midnight too), but stating both keeps the
+          # window readable next to the branch above.
+          conditions = [
+            {
+              condition = "time";
+              after = "00:00:00";
+              before = "06:00:00";
+            }
+            {
+              condition = "state";
+              entity_id = "light.boneio_dr_8ch_03_39835c_light_c";
+              state = "off";
+            }
+          ];
+          sequence = [{
+            service = "light.turn_on";
+            target.entity_id = "light.boneio_dr_8ch_03_39835c_light_c";
+          }];
+        }
+      ];
     }];
   }
   {
