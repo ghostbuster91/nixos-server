@@ -48,6 +48,13 @@ in
         (pkgs.callPackage ./oidc-auth.nix {
           python3Packages = config.services.home-assistant.package.python3Packages;
         })
+        # Air quality / temperature from an InPost parcel locker. Same
+        # python-set reasoning as above. Set up via the UI config flow
+        # (Settings -> Devices & Services -> Add integration -> InPost Air),
+        # which asks for the locker code (e.g. WAW12BAPP).
+        (pkgs.callPackage ./inpost-air.nix {
+          python3Packages = config.services.home-assistant.package.python3Packages;
+        })
       ];
       extraComponents = onboardingRequiredComponents ++ [
         "prometheus"
