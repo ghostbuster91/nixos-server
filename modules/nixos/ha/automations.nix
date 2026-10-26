@@ -50,6 +50,36 @@ let
   # fires; the sessions that produced the 2500 peak get caught early.
   co2WarnPpm = 1000;
   co2HighPpm = 1500;
+
+  # --- Water valves ---------------------------------------------------------
+  # The four motorised water valves (../home/valves/water_valve.yaml) sit fully
+  # open all year, and a valve that never moves is exactly what limescale
+  # seizes, so they get driven through one full close/open cycle a month.
+  waterValves = [
+    "valve.boneio_1_zawor_kuchnia_ciepla"
+    "valve.boneio_1_zawor_kuchnia_zimna"
+    "valve.boneio_1_zawor_lazienka_ciepla"
+    "valve.boneio_1_zawor_lazienka_zimna"
+  ];
+  # The valves report no position (the template valve is `optimistic` /
+  # `assumed_state`), so the only way to know travel finished is to wait the
+  # motor out. 30s is deliberately generous: internal limit switches cut the
+  # motor at the end of travel, so holding the relays longer costs nothing but
+  # standby current.
+  valveTravel = "00:00:30";
+
+  # Appliance power meters (SDM120 over RS-485). Use `l1_power`, NOT
+  # `total_power_watt`: the latter reads a flat 0.0 even mid-cycle (checked
+  # against a full dishwasher run that `l1_power` showed at 45-70 W), so a
+  # guard built on it would never block anything.
+  pralkaPower = "sensor.boneio_24_sw_07_737d50_licznik_pradu_pralka_l1_power";
+  zmywarkaPower = "sensor.boneio_24_sw_07_737d50_licznik_pradu_zmywarka_l1_power";
+  # Only the two appliances that actually draw water. 
+  applianceMeters = [ pralkaPower zmywarkaPower ];
+  # Standby on these circuits measures ~0.5 W and a running cycle is tens to
+  # thousands of watts, so 10 W separates idle from working with a wide margin
+  # either side.
+  applianceIdleWatts = 10;
 in
 [
   (mkHighAlert {
@@ -415,6 +445,85 @@ in
           }];
         }
       ];
+    }];
+  }
+  {
+    id = "water_valve_monthly_exercise";
+    alias = "Water valves - monthly exercise";
+    # First Sunday of the month at 04:00: drive every water valve through one
+    # close/open cycle so limescale never gets to set around a valve that has
+    # not moved in months. 04:00 on a Sunday is the quietest slot in the week.
+    mode = "single";
+    trigger = [{
+      platform = "time";
+      at = "04:00:00";
+    }];
+    condition = [
+      {
+        condition = "time";
+        weekday = [ "sun" ];
+      }
+      # The first Sunday of a month is the only one landing on day 1-7. HA has
+      # no native "nth weekday" condition, so this is the one template needed.
+      {
+        condition = "template";
+        value_template = "{{ now().day <= 7 }}";
+      }
+    ];
+    # The idle check sits in `choose` rather than in `condition` above so that a
+    # blocked run still reaches `default` and says so, instead of skipping in
+    # silence and leaving the valves un-exercised for another month unnoticed.
+    action = [{
+      choose = [{
+        # Every meter must read idle. A numeric_state condition is false for a
+        # non-numeric state, so `unknown`/`unavailable` blocks the cycle too.
+        # That is deliberate: an unreadable meter is not evidence the appliance
+        # is idle, and shutting the water on a running washer is the single
+        # outcome worth avoiding here.
+        conditions = builtins.map
+          (entity: {
+            condition = "numeric_state";
+            entity_id = entity;
+            below = applianceIdleWatts;
+          })
+          applianceMeters;
+        sequence =
+          # One valve at a time, so no supply point is shut for longer than its
+          # own cycle and the relay board never drives four motors at once.
+          builtins.concatMap
+            (valve: [
+              {
+                service = "valve.close_valve";
+                target.entity_id = valve;
+              }
+              { delay = valveTravel; }
+              {
+                service = "valve.open_valve";
+                target.entity_id = valve;
+              }
+              { delay = valveTravel; }
+            ])
+            waterValves
+          ++ [
+            # Belt and braces: end with every valve commanded open regardless
+            # of what the per-valve steps did. Idempotent, and it repairs a
+            # valve left closed by an earlier run that died mid-sequence.
+            {
+              service = "valve.open_valve";
+              target.entity_id = waterValves;
+            }
+          ];
+      }];
+      # Keep title/tags ASCII - ntfy sends them as HTTP headers (see the
+      # rest_command.ntfy comment in ha/default.nix). The body may be UTF-8.
+      default = [{
+        service = "rest_command.ntfy";
+        data = {
+          title = "Water valve check skipped";
+          message = "Miesięczny przegląd zaworów pominięty: licznik pokazuje pracę albo nie odpowiada (próg ${toString applianceIdleWatts} W). pralka: {{ states('${pralkaPower}') }}, zmywarka: {{ states('${zmywarkaPower}') }}. Zawory nietknięte, następna próba w pierwszą niedzielę kolejnego miesiąca.";
+          tags = "droplet,warning";
+        };
+      }];
     }];
   }
   {
