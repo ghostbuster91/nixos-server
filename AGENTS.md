@@ -135,7 +135,7 @@ Adding a new `environment.persistence."/persist".directories` entry creates a ne
 
 On a **live `nixos-rebuild switch` / `deploy`**, the brand-new mount races: systemd starts the service before the mount has finished mounting, and `RequiresMountsFor` does **not** gate it (when `/var/lib/<svc>` isn't yet a mountpoint the dependency resolves to `/`, not the new bind mount). tmpfiles then writes the skeleton to the ephemeral root fs, and any unit that sandboxes on the new path (`ReadWritePaths=`, `StateDirectory=`) dies at namespace setup with `226/NAMESPACE … No such file or directory`. This is the "boot vs. live switch" race already documented in `hosts/x86_64-linux/beast/paperless.nix`.
 
-With **deploy-rs this is fatal**: `autoRollback`/`magicRollback` see the failed unit and roll the whole generation back, so the mount is torn down before you can reboot — the deploy can never converge. (Exception: **thunder** has both rollbacks disabled in `nix/deployment.nix`, so `deploy .#thunder` leaves the failed unit in place and a plain reboot finishes the job. On every other host use one of the two routes below.) Two ways through, for the first activation only:
+With **deploy-rs this is fatal**: `autoRollback`/`magicRollback` see the failed unit and roll the whole generation back, so the mount is torn down before you can reboot — the deploy can never converge. `nix/deployment.nix` sets both to `true` for **every** host with no per-host override, so there is no exception — use one of the two routes below on every host. Two ways through, for the first activation only:
 
 - **Preferred — stage then boot** (no live switch runs at all):
   ```
