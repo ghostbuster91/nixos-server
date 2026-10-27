@@ -1,0 +1,414 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "tags": [
+    "disks",
+    "capacity",
+    "zfs"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(host)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(host)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "type": "query",
+        "includeAll": false,
+        "multi": false,
+        "current": {
+          "text": "beast",
+          "value": "beast"
+        },
+        "options": [],
+        "refresh": 1,
+        "sort": 1
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Disk space",
+  "uid": "disk-space",
+  "version": 3,
+  "description": "Space USED on the disks of one host, chosen with the Host dropdown. Source is picked per host: the ZFS pool exporter where it exists (beast, malina5 -- one series per pool, exact), otherwise derived from node_filesystem and shown as a single 'all filesystems' series (thunder, surfer). The derived figures were validated against zfs_pool_allocated_bytes on beast and malina5 (agree within 0.1%) and against `zpool list` CAP on thunder (12.2% computed vs 12% reported). Note the inverse -- free space -- is not simply 100% minus these figures on ZFS: pool slop space means allocated + free does not exactly equal size. Giving thunder the ZFS pool exporter would move it onto the exact per-pool source; see homelab-docs decisions/thunder-zfs-module-and-root-rollback.md.",
+  "panels": [
+    {
+      "type": "row",
+      "id": 1,
+      "title": "Space used now",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "gauge",
+      "title": "Space used (%)",
+      "description": "Used as a share of total capacity. ZFS performance degrades as a pool fills; past ~80% used expect fragmentation and slower writes, which is where the amber band starts. Source is picked per host: the ZFS pool exporter where it exists (beast, malina5 -- one series per pool, exact), otherwise derived from node_filesystem and shown as a single 'all filesystems' series (thunder, surfer).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 10,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "sizing": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 * zfs_pool_allocated_bytes{host=\"$host\"} / zfs_pool_size_bytes{host=\"$host\"} or (label_replace(100 * (sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"}))) / ((sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"}))) + max by (host) (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"})), \"pool\", \"all filesystems\", \"\", \"\") unless on(host) zfs_pool_size_bytes{host=\"$host\"})",
+          "legendFormat": "{{pool}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Space used",
+      "description": "Bytes used. Source is picked per host: the ZFS pool exporter where it exists (beast, malina5 -- one series per pool, exact), otherwise derived from node_filesystem and shown as a single 'all filesystems' series (thunder, surfer).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 10,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "vertical",
+        "textMode": "value_and_name",
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "zfs_pool_allocated_bytes{host=\"$host\"} or (label_replace(sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"})), \"pool\", \"all filesystems\", \"\", \"\") unless on(host) zfs_pool_size_bytes{host=\"$host\"})",
+          "legendFormat": "{{pool}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Total size",
+      "description": "Total capacity, for context against the used figures. For the derived hosts this is used + free rather than a reported pool size, so it can read a few percent high (thunder: 78.8 GB derived vs 76 GB actual).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 17,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "vertical",
+        "textMode": "value_and_name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "zfs_pool_size_bytes{host=\"$host\"} or (label_replace(((sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"}))) + max by (host) (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"})), \"pool\", \"all filesystems\", \"\", \"\") unless on(host) zfs_pool_size_bytes{host=\"$host\"})",
+          "legendFormat": "{{pool}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "id": 10,
+      "title": "Change over time",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Space used over time (%)",
+      "description": "The slope is the useful part: a steady climb tells you roughly when a disk will need attention. Dashed line marks 80% used.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 * zfs_pool_allocated_bytes{host=\"$host\"} / zfs_pool_size_bytes{host=\"$host\"} or (label_replace(100 * (sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"}))) / ((sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"}))) + max by (host) (node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"})), \"pool\", \"all filesystems\", \"\", \"\") unless on(host) zfs_pool_size_bytes{host=\"$host\"})",
+          "legendFormat": "{{pool}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Space used over time",
+      "description": "Same trend in bytes. The legend's Max column is the high-water mark over the selected range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "unit": "decbytes",
+          "min": 0,
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "zfs_pool_allocated_bytes{host=\"$host\"} or (label_replace(sum by (host) (max by (host, device) (node_filesystem_size_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"} - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs\", host=\"$host\"})), \"pool\", \"all filesystems\", \"\", \"\") unless on(host) zfs_pool_size_bytes{host=\"$host\"})",
+          "legendFormat": "{{pool}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
