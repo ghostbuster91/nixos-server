@@ -122,6 +122,139 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Side-by-side view of the four indoor temperature probes. All four report device_class=temperature, so they share one metric; friendly_name is dropped because three of them are literally called \"Temperatura\".",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "max without(friendly_name) (homeassistant_sensor_temperature_celsius{entity=\"sensor.homelab_temp1_temperature\"})",
+          "legendFormat": "homelab/temp1",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "max without(friendly_name) (homeassistant_sensor_temperature_celsius{entity=\"sensor.homelab_temp2_temperature\"})",
+          "legendFormat": "homelab/temp2",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "max without(friendly_name) (homeassistant_sensor_temperature_celsius{entity=\"sensor.boneio_edge_temp_boneio_edge_temp_temperature\"})",
+          "legendFormat": "boneIO Edge Temp",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "max without(friendly_name) (homeassistant_sensor_temperature_celsius{entity=\"sensor.czujnik_sypialnia\"})",
+          "legendFormat": "czujnik sypialnia",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Sensor comparison — homelab/temp1 · temp2 · boneIO Edge · czujnik sypialnia",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -179,7 +312,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 18
       },
       "id": 2,
       "options": {
@@ -293,7 +426,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 18
       },
       "id": 3,
       "options": {
@@ -366,7 +499,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 17
+        "y": 26
       },
       "id": 4,
       "options": {
@@ -431,7 +564,7 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 17
+        "y": 26
       },
       "id": 5,
       "options": {
@@ -496,7 +629,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 17
+        "y": 26
       },
       "id": 6,
       "options": {
@@ -540,7 +673,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 31
       },
       "id": 10,
       "panels": [],
@@ -731,7 +864,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 32
       },
       "id": 11,
       "options": {
@@ -974,7 +1107,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 32
       },
       "id": 12,
       "options": {
@@ -1217,7 +1350,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 40
       },
       "id": 13,
       "options": {
@@ -1460,7 +1593,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 40
       },
       "id": 14,
       "options": {
