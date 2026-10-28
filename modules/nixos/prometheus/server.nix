@@ -2,6 +2,9 @@
 let
   roleName = "prometheus";
   cfg = config.services.prometheus;
+  # Loopback-only: alertmanager and the bridge are both on this host. Port 8000
+  # is the upstream default and is free here (the local web apps sit on 808x).
+  ntfyBridgeAddr = "127.0.0.1:8000";
 in
 {
   environment.persistence."/persist".directories = [
@@ -44,6 +47,13 @@ in
       port = 9001;
       listenAddress = "127.0.0.1";
 
+      # Without this, the `generatorURL` prometheus stamps on every alert points
+      # at its own listen address (http://beast:9001) -- loopback-bound, so the
+      # link is dead everywhere except on beast itself. Point it at the public
+      # vhost instead so the notification's click-through actually opens the
+      # alert's query (see the X-Click header on the ntfy bridge below).
+      webExternalUrl = "https://${roleName}.${config.homelab.ext-domain}";
+
       # By default the check verifies also if all referenced paths exist.
       # This however cannot work if any of these paths refers to age/sops secrets as these files are created during the activation phase.
       checkConfig = "syntax-only";
@@ -84,11 +94,50 @@ in
                 }
               ];
             }
+            {
+              # alertmanager's generic webhook posts its own JSON, which ntfy
+              # would publish verbatim as the message body -- hence the
+              # alertmanager-ntfy bridge below, which turns each alert into a
+              # titled ntfy push with a priority derived from `severity`.
+              name = "ntfy";
+              webhook_configs = [
+                {
+                  send_resolved = true;
+                  url = "http://${ntfyBridgeAddr}/hook";
+                }
+              ];
+            }
+          ];
+
+          # Mute the 80% warning while the 90% critical is firing for the same
+          # pool, so a filling disk is one notification, not two. `pool` is
+          # empty on both sides for alerts that don't have it, which counts as
+          # equal -- harmless, since only the disk_space_* pair is labelled
+          # warning/critical today.
+          inhibit_rules = [
+            {
+              source_matchers = [ ''severity="critical"'' ];
+              target_matchers = [ ''severity="warning"'' ];
+              equal = [ "host" "pool" ];
+            }
           ];
 
           route = {
             receiver = "pushover";
             routes = [
+              {
+                # Severity-labelled alerts (currently the disk-space tiers) go
+                # to ntfy. Keep this before the catch-all below: child routes
+                # are matched in order and the first hit wins.
+                matchers = [ ''severity=~"warning|critical"'' ];
+                receiver = "ntfy";
+                group_wait = "30s";
+                group_interval = "5m";
+                # A disk that is filling stays filling; re-pushing every 4h
+                # would just train the phone to ignore it.
+                repeat_interval = "12h";
+                group_by = [ "alertname" "host" "pool" ];
+              }
               {
                 group_wait = "30s";
                 group_interval = "2m";
@@ -97,6 +146,41 @@ in
                 receiver = "pushover";
               }
             ];
+          };
+        };
+      };
+
+      # Forwards alertmanager webhooks to ntfy on malina5 
+      alertmanager-ntfy = {
+        enable = true;
+        settings = {
+          http.addr = ntfyBridgeAddr;
+          ntfy = {
+            baseurl = "https://ntfy.${config.homelab.ext-domain}";
+            notification = {
+              topic = "homelab";
+              # The two tiers the alert rules set up, mapped onto ntfy
+              # priorities: a `warning` arrives as an ordinary notification,
+              # a `critical` as `urgent`, which pops up and overrides the
+              # phone's do-not-disturb. This is the knob to turn if the 90%
+              # alert should be less (or more) insistent. gval expression, with
+              # the alert's fields at the top level.
+              priority = ''status == "resolved" ? "default" : (labels["severity"] == "critical" ? "urgent" : "default")'';
+              tags = [
+                { tag = "white_check_mark"; condition = ''status == "resolved"''; }
+                { tag = "rotating_light"; condition = ''status == "firing" && labels["severity"] == "critical"''; }
+                { tag = "warning"; condition = ''status == "firing" && labels["severity"] == "warning"''; }
+              ];
+              # Titles/descriptions come from the rules' `summary`/`description`
+              # annotations (alert-rules.nix) via the module's default
+              # templates; only the click-through needs adding -- tapping the
+              # push opens the alert's query in prometheus' UI.
+              #
+              # The bridge also appends every alert label as a text tag
+              # (`host = beast`, `pool = rpool1`, ...) with no way to turn that
+              # off, so the push already shows which host and pool it is about.
+              templates.headers."X-Click" = "{{ .GeneratorURL }}";
+            };
           };
         };
       };
