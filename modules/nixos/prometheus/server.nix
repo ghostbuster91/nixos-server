@@ -34,10 +34,7 @@ in
   };
   # There is deliberately no secret for alertmanager: ntfy needs no credentials
   # (the bridge below talks to it over the tailnet, where it is open by design),
-  # and nothing else in alertmanager.yml is sensitive. The old
-  # `secrets/alertmanager.age` held only the pushover user key and API token,
-  # substituted in via `environmentFile`; it went away with the pushover
-  # receiver (`git log -- secrets/alertmanager.age` if it is ever needed back).
+  # and nothing else in alertmanager.yml is sensitive. 
   systemd.services.nginx = {
     requires = [ "prometheus.service" ];
   };
