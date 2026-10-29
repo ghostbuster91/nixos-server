@@ -11,7 +11,6 @@ in
   "nginx-selfsigned.key.age".publicKeys = [ kghost deckard ];
   "nginx-selfsigned.cert.age".publicKeys = [ kghost deckard ];
   "prometheus-hass-token.age".publicKeys = [ kghost beast malina5 ];
-  "alertmanager.age".publicKeys = [ kghost beast ];
   "grafana-secret-key.age".publicKeys = [ kghost beast ];
 
   "zigbee2mqtt-network-key.age".publicKeys = [ kghost malina5 ];

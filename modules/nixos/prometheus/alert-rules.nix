@@ -45,9 +45,12 @@ lib.mapAttrsToList
     alert = name;
     expr = opts.condition;
     for = opts.time or "2m";
-    # `severity` is what routes an alert to ntfy instead of pushover, and what
-    # the critical -> warning inhibit rule keys off (see prometheus/server.nix).
-    labels = opts.labels or { };
+    # Every alert carries a severity: it picks the ntfy priority (`critical`
+    # becomes an `urgent` push, which overrides the phone's do-not-disturb) and
+    # it drives the critical -> warning inhibit rule -- see
+    # prometheus/server.nix. Rules default to `warning` and opt up with
+    # `severity = "critical"`.
+    labels.severity = opts.severity or "warning";
     annotations = {
       # alertmanager-ntfy renders `summary` as the push title; default it to the
       # alert name so a rule that doesn't set one still gets a usable title.
@@ -83,17 +86,16 @@ lib.mapAttrsToList
       };
 
       # --- Disk space ---------------------------------------------------------
-      # Two tiers over the same `diskUsedPercent` expression. Both carry a
-      # `severity` label, which is what sends them to ntfy (pushover keeps
-      # everything else) with the warning muted while the critical one is
-      # firing -- see the route and inhibit_rules in prometheus/server.nix.
+      # Two tiers over the same `diskUsedPercent` expression. The 80% tier rides
+      # the default `warning` severity (an ordinary ntfy push); the 90% tier is
+      # `critical` (an `urgent` push) and mutes the 80% one for the same pool
+      # while it fires -- see inhibit_rules in prometheus/server.nix.
       disk_space_high = {
         condition = ''${diskUsedPercent} > 80'';
         # Pools fill over days, so a long `for` costs nothing and rides out the
         # transient spikes that do exist: a big nix build before GC, a borg run,
         # a large paperless/comfyui import.
         time = "30m";
-        labels.severity = "warning";
         summary = "Disk {{ $value | printf \"%.0f\" }}% full on {{$labels.host}}";
         description = ''{{$labels.host}} {{$labels.pool}}: {{ $value | printf "%.1f" }}% of capacity used -- free space or prune snapshots. ZFS also starts to fragment and slow down past 80%.'';
       };
@@ -103,7 +105,7 @@ lib.mapAttrsToList
         # Shorter than the warning tier: past 90% there is little headroom left,
         # so trading a bit of noise for earlier notice is the right way round.
         time = "10m";
-        labels.severity = "critical";
+        severity = "critical";
         summary = "Disk {{ $value | printf \"%.0f\" }}% FULL on {{$labels.host}}";
         description = ''{{$labels.host}} {{$labels.pool}}: {{ $value | printf "%.1f" }}% of capacity used -- act now. A full pool fails writes, wedges services and leaves no room for snapshots or a rollback.'';
       };

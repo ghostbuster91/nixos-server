@@ -32,12 +32,12 @@ in
     owner = "prometheus";
     group = "prometheus";
   };
-  age.secrets."alertmanager" = {
-    file = ../../../secrets/alertmanager.age;
-    mode = "440";
-    owner = "prometheus";
-    group = "prometheus";
-  };
+  # There is deliberately no secret for alertmanager: ntfy needs no credentials
+  # (the bridge below talks to it over the tailnet, where it is open by design),
+  # and nothing else in alertmanager.yml is sensitive. The old
+  # `secrets/alertmanager.age` held only the pushover user key and API token,
+  # substituted in via `environmentFile`; it went away with the pushover
+  # receiver (`git log -- secrets/alertmanager.age` if it is ever needed back).
   systemd.services.nginx = {
     requires = [ "prometheus.service" ];
   };
@@ -58,8 +58,10 @@ in
       # This however cannot work if any of these paths refers to age/sops secrets as these files are created during the activation phase.
       checkConfig = "syntax-only";
 
-      # Test alertmanager
-      # curl -H 'Content-Type: application/json' -d '[{"labels":{"alertname":"myalert"}}]' http://127.0.0.1:9093/api/v2/alerts
+      # Test alertmanager (include `severity` -- the ntfy bridge's priority and
+      # tag expressions are keyed off it, and an alert without it is forwarded
+      # at ntfy's default priority with a warning in the bridge's log):
+      # curl -H 'Content-Type: application/json' -d '[{"labels":{"alertname":"myalert","severity":"critical"}}]' http://127.0.0.1:9093/api/v2/alerts
       alertmanagers = [
         {
           scheme = "http";
@@ -73,27 +75,13 @@ in
         enable = true;
         logLevel = "debug";
 
-        # Secret content all variables content
-        # example:
-        # alertmanager: |
-        #  var_name1=value1
-        #  var_name2=value2
-        environmentFile = config.age.secrets.alertmanager.path;
         extraFlags = [
           "--cluster.listen-address=" # disables HA mode
         ];
         configuration = {
+          # ntfy is the only channel; there is nothing to route between, so one
+          # receiver and one route is the whole config.
           receivers = [
-            {
-              name = "pushover";
-              pushover_configs = [
-                {
-                  send_resolved = true;
-                  user_key = "$PUSHOVER_USER_KEY";
-                  token = "$PUSHOVER_TOKEN";
-                }
-              ];
-            }
             {
               # alertmanager's generic webhook posts its own JSON, which ntfy
               # would publish verbatim as the message body -- hence the
@@ -110,10 +98,7 @@ in
           ];
 
           # Mute the 80% warning while the 90% critical is firing for the same
-          # pool, so a filling disk is one notification, not two. `pool` is
-          # empty on both sides for alerts that don't have it, which counts as
-          # equal -- harmless, since only the disk_space_* pair is labelled
-          # warning/critical today.
+          # pool, so a filling disk is one notification, not two.
           inhibit_rules = [
             {
               source_matchers = [ ''severity="critical"'' ];
@@ -123,29 +108,15 @@ in
           ];
 
           route = {
-            receiver = "pushover";
-            routes = [
-              {
-                # Severity-labelled alerts (currently the disk-space tiers) go
-                # to ntfy. Keep this before the catch-all below: child routes
-                # are matched in order and the first hit wins.
-                matchers = [ ''severity=~"warning|critical"'' ];
-                receiver = "ntfy";
-                group_wait = "30s";
-                group_interval = "5m";
-                # A disk that is filling stays filling; re-pushing every 4h
-                # would just train the phone to ignore it.
-                repeat_interval = "12h";
-                group_by = [ "alertname" "host" "pool" ];
-              }
-              {
-                group_wait = "30s";
-                group_interval = "2m";
-                repeat_interval = "4h";
-                group_by = [ "alertname" "alias" ];
-                receiver = "pushover";
-              }
-            ];
+            receiver = "ntfy";
+            group_wait = "30s";
+            group_interval = "2m";
+            repeat_interval = "4h";
+            # `host` and `pool` are the labels that distinguish one disk from
+            # another, so group on them: beast/rpool1 filling up is a different
+            # notification from malina5/rpool1 filling up. (The previous
+            # grouping included `alias`, which nothing in this fleet emits.)
+            group_by = [ "alertname" "host" "pool" ];
           };
         };
       };
@@ -165,6 +136,12 @@ in
               # phone's do-not-disturb. This is the knob to turn if the 90%
               # alert should be less (or more) insistent. gval expression, with
               # the alert's fields at the top level.
+              #
+              # gval errors on a missing map key rather than yielding nothing,
+              # so an alert without a `severity` label is forwarded at ntfy's
+              # default priority and logs a warning here. Every rule gets one
+              # from the mapper in alert-rules.nix, so in practice only a
+              # hand-posted alert can hit that.
               priority = ''status == "resolved" ? "default" : (labels["severity"] == "critical" ? "urgent" : "default")'';
               tags = [
                 { tag = "white_check_mark"; condition = ''status == "resolved"''; }
