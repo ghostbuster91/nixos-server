@@ -67,6 +67,7 @@ in
             ({ title = "Forgejo"; url = svc "git"; description = "Git forge"; icon = "hl-forgejo"; } // gate "forgejo")
             ({ title = "Readeck"; url = svc "readeck"; description = "Read-it-later & bookmarks"; icon = "hl-readeck"; } // gate "readeck")
             ({ title = "HealthLog"; url = svc "healthlog"; description = "Health tracking"; icon = "mdi-heart-pulse"; } // gate "healthlog")
+            ({ title = "Gramps Web"; url = svc "gramps"; description = "Family tree & genealogy"; icon = "mdi-family-tree"; } // gate "gramps")
             { title = "Mattermost"; url = svc "mattermost"; description = "Team chat"; icon = "hl-mattermost"; }
             # Own accounts (kept independent of OIDC), so shown to everyone.
             { title = "Vaultwarden"; url = svc "vault"; description = "Password manager"; icon = "hl-vaultwarden"; }

@@ -28,6 +28,7 @@ in
   age.secrets.kanidm-oauth2-forgejo = mkSecret ../../secrets/kanidm-oauth2-forgejo.age;
   age.secrets.kanidm-oauth2-readeck = mkSecret ../../secrets/kanidm-oauth2-readeck.age;
   age.secrets.kanidm-oauth2-healthlog = mkSecret ../../secrets/kanidm-oauth2-healthlog.age;
+  age.secrets.kanidm-oauth2-gramps = mkSecret ../../secrets/kanidm-oauth2-gramps.age;
 
   age.secrets."kanidm-selfsigned.cert" = {
     file = ../../secrets/kanidm-selfsigned.cert.age;
@@ -79,11 +80,11 @@ in
       persons =
         let
           forgejoAccess = [ "forgejo.access" ];
-          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" "readeck.access" "healthlog.access" ];
+          familyGroups = [ "web-sentinel.access" "web-sentinel.openwebui" "web-sentinel.homepage" "web-sentinel.stirling" "web-sentinel.calibre" "mealie.access" "paperless.access" "readeck.access" "healthlog.access" "gramps.access" ];
           martaGroups = familyGroups ++ [ "ha.access" ];
           grafanaAdmin = [ "grafana.admins" "grafana.server-admins" "grafana.access" "prometheus.access" ];
           smartHomeAdmin = [ "ha.access" "ha.admins" "web-sentinel.zigbee" ];
-          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" "readeck.admins" "paperless.admins" ];
+          adminGroups = familyGroups ++ grafanaAdmin ++ smartHomeAdmin ++ forgejoAccess ++ [ "mealie.admins" "linkwarden.access" "forgejo.admins" "readeck.admins" "paperless.admins" "gramps.admins" ];
           # Family members only differ by their group set; the mail address and
           # display name derive mechanically from the username (attr key).
           mkPerson = name: groups: {
@@ -206,6 +207,7 @@ in
             "forgejo.access" = [ "forgejo" ];
             "readeck.access" = [ "readeck" ];
             "healthlog.access" = [ "healthlog" ];
+            "gramps.access" = [ "gramps" ];
           };
         };
       };
@@ -407,6 +409,60 @@ in
           "email"
           "profile"
         ];
+      };
+      # Gramps Web (native OIDC, runs on beast as oci-containers). Membership in
+      # gramps.access is the real gate: kanidm won't authorize a scope the user's
+      # scopeMap doesn't grant, so a non-member can't obtain a token. Gramps Web
+      # auto-provisions the account on first login, with the role taken from the
+      # groups claim below.
+      #
+      # The role mapping is fail-closed: with GRAMPSWEB_OIDC_GROUP_* configured
+      # (hosts/x86_64-linux/beast/gramps.nix), a user whose groups claim matches
+      # none of the mapped values is set to Gramps' *disabled* role on every
+      # login. So gramps.access must always emit `gramps-members` — the elevated
+      # groups are deltas on top of it, and the highest matching role wins.
+      groups."gramps.access" = { };
+      groups."gramps.editors" = { };
+      groups."gramps.admins" = { };
+      systems.oauth2.gramps = {
+        displayName = "Gramps Web";
+        # kanidm has no wildcard origins, so register the non-wildcard form
+        # upstream documents for such providers: the `custom` provider id is what
+        # a self-configured (non-Google/Microsoft) OIDC provider is called in
+        # Gramps Web. Byte-exact; it is built from GRAMPSWEB_BASE_URL.
+        originUrl = "https://gramps.${config.homelab.ext-domain}/api/oidc/callback/custom";
+        originLanding = "https://gramps.${config.homelab.ext-domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-gramps.path;
+        # Gramps Web derives the username from OIDC_USERNAME_CLAIM, which
+        # defaults to preferred_username — short names, not SPNs. The username is
+        # assigned once at account creation and can never be changed afterwards,
+        # so this must be right the first time.
+        preferShortUsername = true;
+        # authlib (the app's OIDC client) verifies kanidm's default ES256
+        # id_token fine, so no enableLegacyCrypto here — unlike
+        # readeck/mealie/linkwarden/forgejo. Symptom if that ever regresses: a
+        # token signature/alg error on first login.
+        scopeMaps."gramps.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        # Drives the Gramps role. Do NOT grant the built-in "groups" scope: it
+        # would emit raw group SPNs (gramps.access@<domain>) and clobber this
+        # map, which — given the fail-closed mapping above — would disable every
+        # user on their next login. Claim-mapped claims are delivered regardless
+        # of the requested scopes, same as the readeck/forgejo/dashy pattern.
+        #
+        # gramps-owners maps to Gramps' *Owner* role (the per-tree administrator
+        # that can manage this tree's users), not its site-wide Admin role.
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup = {
+            "gramps.access" = [ "gramps-members" ];
+            "gramps.editors" = [ "gramps-editors" ];
+            "gramps.admins" = [ "gramps-owners" ];
+          };
+        };
       };
       # Home Assistant (hass-oidc-auth custom component)
       groups."ha.access" = { };

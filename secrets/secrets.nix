@@ -58,6 +58,13 @@ in
   # ENCRYPTION_KEY, API_TOKEN_HMAC_KEY and the full DATABASE_URL.
   "kanidm-oauth2-healthlog.age".publicKeys = [ kghost thunder ];
   "healthlog-env.age".publicKeys = [ kghost beast ];
+  # Same raw OIDC client secret in both files: kanidm's basicSecretFile lives on
+  # thunder, Gramps Web reads it (as GRAMPSWEB_OIDC_CLIENT_SECRET) on beast. Keep
+  # the two in sync when rekeying. gramps-env.age also carries
+  # GRAMPSWEB_SECRET_KEY (the flask secret — changing it invalidates all issued
+  # Gramps Web tokens).
+  "kanidm-oauth2-gramps.age".publicKeys = [ kghost thunder ];
+  "gramps-env.age".publicKeys = [ kghost beast ];
 
   # ha-mcp (standalone HTTP server on beast, see hosts/x86_64-linux/beast/ha-mcp.nix).
   # Holds HOMEASSISTANT_TOKEN (a long-lived access token for an HA admin) and
