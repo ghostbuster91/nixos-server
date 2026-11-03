@@ -329,6 +329,22 @@ in
       entity_id = "binary_sensor.boneio_1_czujnik_otwarcia_drzwi";
       to = "on";
     }];
+    # Entering, not leaving. Walking out means crossing the hall to reach the
+    # door, which trips the Satel PIR; arriving cannot, because the PIR only
+    # sees the inside. So "no motion in the hall for the last 2 minutes" reads
+    # as "this door opening came from outside".
+    #
+    # The PIR reports in ~4s pulses while motion continues, so any activity in
+    # the hall keeps re-stamping `last_changed` and the 2 minutes never
+    # accumulate - which is what makes the window work at all. Note `for` is
+    # measured from `last_changed` and HA re-stamps that on restart, so the
+    # guard holds the automation off for the first 2 minutes after a restart.
+    condition = [{
+      condition = "state";
+      entity_id = "binary_sensor.hall";
+      state = "off";
+      for = "00:02:00";
+    }];
     # Which light depends on the hour: the overhead "górne" until midnight,
     # the floor-level "podłogowe" after it, so coming home at 2am doesn't
     # mean full ceiling light. The two windows are disjoint, so the order of
