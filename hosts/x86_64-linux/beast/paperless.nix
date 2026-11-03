@@ -28,6 +28,33 @@ let
   };
 in
 {
+  # fpdf2's test suite byte-compares generated PDFs against reference PDFs
+  # committed to its tarball. Pillow 13.0.0 (which nixos-26.05 picked up)
+  # changed the pixel output of Image.resize() for non-trivial scale factors,
+  # and test_image_with_explicit_dimensions renders through
+  # `img.resize(dims, resample=LANCZOS)` — so the embedded image stream, and
+  # hence the PDF hash, no longer matches the Pillow-12-era reference. Verified
+  # on the test's own input: 724x1024 -> 500x500 LANCZOS differs between Pillow
+  # 12.3.0 and 13.0.0, while an exact-half downscale is still identical.
+  # Nothing about fpdf2 is actually broken, but the failing check takes
+  # paperless-ngx (and ocrmypdf) down with it. Drop once upstream nixpkgs
+  # disables the test or fpdf2 regenerates its references.
+  #
+  # pythonPackagesExtensions rather than overriding `python313Packages`: it
+  # applies to whichever interpreter's package set paperless-ngx resolves
+  # fpdf2 from, and only fpdf2 + its dependents change hash.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (_pfinal: pprev: {
+          fpdf2 = pprev.fpdf2.overridePythonAttrs (o: {
+            disabledTests = (o.disabledTests or [ ]) ++ [ "test_image_with_explicit_dimensions" ];
+          });
+        })
+      ];
+    })
+  ];
+
   # Raw OIDC client secret (bare value, no env prefix). The same secret also
   # lives in kanidm-oauth2-paperless.age (kanidm's basicSecretFile on thunder);
   # keep the two in sync.
