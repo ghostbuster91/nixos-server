@@ -21,7 +21,7 @@ in
       ExecStart = "${pkgs.python3}/bin/python3 ${./funbox-exporter.py}";
       EnvironmentFile = config.age.secrets."funbox-admin".path;
       Environment = [
-        "FUNBOX_URL=http://192.168.1.1/ws"
+        "FUNBOX_URL=http://${config.homelab.lan.gateway.ip}/ws"
         "TEXTFILE_DIR=${textfileDir}"
       ];
       # Hardening: no privileges needed, only the textfile dir is written.

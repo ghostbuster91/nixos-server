@@ -1,6 +1,15 @@
-{ config, ... }:
-let domain = "headscale.${config.homelab.sec-domain}";
-in {
+{ config, pkgs, ... }:
+let
+  domain = "headscale.${config.homelab.sec-domain}";
+
+  # The ACL file names one LAN device by address. Substituting it from
+  # meta.nix.age keeps the home network layout out of git; the rendered file is
+  # otherwise byte-identical to the checked-in template.
+  policyFile = pkgs.replaceVars ./headscale-policy.hujson {
+    printerIp = config.homelab.lan.devices.printer3d.ip;
+  };
+in
+{
 
   networking.firewall.allowedTCPPorts = [
     443
@@ -35,7 +44,7 @@ in {
 
         policy = {
           mode = "file";
-          path = ./headscale-policy.hujson;
+          path = policyFile;
         };
 
         dns = {

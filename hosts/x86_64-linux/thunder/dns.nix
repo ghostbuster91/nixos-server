@@ -9,6 +9,16 @@ let
   unbound-zones-adblock = pkgs.callPackage ./unbound-zones-adblock.nix { };
 in
 {
+  # All homelab DNS funnels through here, so make it visible on the topology
+  # diagram -- nix-topology has no unbound extractor.
+  topology.self.services.unbound = {
+    name = "Unbound";
+    # nix-topology ships no unbound icon; this is the upstream placeholder.
+    icon = "services.not-available";
+    info = "Authoritative for *.${ext-domain} (VPN-only) + recursive resolver";
+    details.listen.text = "0.0.0.0:53, [::]:53";
+  };
+
   services.resolved.enable = false;
   networking.nameservers = [ "127.0.0.1" ];
   services.unbound = {

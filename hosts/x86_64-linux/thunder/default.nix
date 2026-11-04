@@ -22,7 +22,7 @@
       inputs.self.nixosModules.meta
       ./impermanence.nix
       inputs.impermanence.nixosModules.impermanence
-      inputs.nix-topology.nixosModules.default
+      inputs.self.nixosModules.topology
       inputs.home-manager.nixosModules.home-manager
       inputs.agenix.nixosModules.default
       inputs.self.nixosModules.proxy

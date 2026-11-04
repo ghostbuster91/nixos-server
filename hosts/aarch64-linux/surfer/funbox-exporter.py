@@ -3,7 +3,8 @@
 textfile metrics for node_exporter's textfile collector.
 
 Config comes from the environment:
-  FUNBOX_URL       ws endpoint            (default http://192.168.1.1/ws)
+  FUNBOX_URL       ws endpoint            (required; set by the unit from
+                   homelab.lan.gateway.ip, which lives in meta.nix.age)
   FUNBOX_USER      admin username         (from the agenix EnvironmentFile)
   FUNBOX_PASSWORD  the credential the web UI SENDS in createContext -- the FunBox
                    JS transforms the typed password client-side with no server
@@ -38,7 +39,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
-URL = os.environ.get("FUNBOX_URL", "http://192.168.1.1/ws")
+URL = os.environ["FUNBOX_URL"]
 USER = os.environ.get("FUNBOX_USER", "")
 PASSWORD = os.environ.get("FUNBOX_PASSWORD", "")
 TEXTFILE_DIR = os.environ.get("TEXTFILE_DIR", "/run/node-exporter-textfile")

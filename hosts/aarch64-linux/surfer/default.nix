@@ -4,9 +4,11 @@
 
   imports = [
     inputs.agenix.nixosModules.default
+    inputs.self.nixosModules.topology
     ./secrets.nix
     ./custom.nix
     ./network.nix
+    ./topology.nix
     ./hostapd.nix
     ./monitoring.nix
     ./funbox-metrics.nix

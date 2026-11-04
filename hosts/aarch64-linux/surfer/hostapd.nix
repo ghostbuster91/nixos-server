@@ -40,6 +40,19 @@ let
   };
 in
 {
+  # surfer is the WiFi AP for the home LAN; hostapd has no nix-topology
+  # extractor, so without this the node renders as if it only ran Alloy.
+  topology.self.services.hostapd = {
+    name = "hostapd";
+    icon = "services.not-available";
+    info = "WiFi 6 AP — every BSS bridged into br-lan";
+    details = lib.mapAttrs'
+      (radio: cfg: lib.nameValuePair "radio.${radio}" {
+        text = lib.concatMapStringsSep "\n" (net: "${net.ssid} (${cfg.band})") (lib.attrValues cfg.networks);
+      })
+      config.services.hostapd.radios;
+  };
+
   # wireless access point
   services.hostapd = {
     enable = true;

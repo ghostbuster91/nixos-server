@@ -15,6 +15,16 @@ in
     credentialsFile = config.age.secrets.attic-pusher-config.path;
   };
 
+  # The homelab Nix binary cache. nix-topology has no atticd extractor, so the
+  # cache would otherwise be invisible on the diagram despite every host
+  # substituting from it.
+  topology.self.services.atticd = {
+    name = "Attic";
+    icon = "services.not-available";
+    info = "https://${domain}";
+    details.listen.text = config.services.atticd.settings.listen;
+  };
+
   services.atticd = {
     enable = true;
 

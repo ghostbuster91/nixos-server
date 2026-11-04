@@ -18,8 +18,7 @@ in
     "openssl-1.1.1w"
   ];
 
-  # TODO: infinite recursion for rpi5 eval
-  # topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
+  topology.self.services.home-assistant.info = "https://${roleName}.${config.homelab.ext-domain}";
   services.home-assistant =
     let
       # Components required to complete the onboarding

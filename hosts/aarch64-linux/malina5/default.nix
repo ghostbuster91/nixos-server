@@ -6,12 +6,14 @@
       inputs.disko.nixosModules.disko
       inputs.impermanence.nixosModules.impermanence
       inputs.agenix.nixosModules.default
+      inputs.self.nixosModules.topology
       # Hardware configuration
       ./hw.nix
       ./disko-nvme-zfs.nix
       ./impermanence.nix
       ./kernel.nix
       ./network.nix
+      ./topology.nix
       # Further user configuration
       ./custom.nix
       ./nice-looking-console.nix

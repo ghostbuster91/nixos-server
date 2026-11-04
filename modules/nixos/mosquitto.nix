@@ -64,7 +64,7 @@
         # can't connect to a scopeless fe80:: — every attempt dies with
         # "Error creating bridge: Invalid argument." The name is kept second so
         # the bridge self-heals if the panel's IP changes while mDNS works.
-        echo "addresses 192.168.1.43:1883 ampio.local:1883"
+        echo "addresses ${config.homelab.lan.devices.ampio.ip}:1883 ampio.local:1883"
         echo "topic ampio/from/# in 0"
         echo "remote_username admin"
         echo "remote_password $(${pkgs.coreutils}/bin/cat ${config.age.secrets.mosquitto-ampio-bridge-pw.path})"

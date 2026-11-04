@@ -26,6 +26,7 @@
     attic-cache = ./attic-cache.nix;
     nix-remote-builder = ./nix-remote-builder.nix;
     rpi-builder = ./rpi-builder.nix;
+    topology = ./topology.nix;
   };
 
 }

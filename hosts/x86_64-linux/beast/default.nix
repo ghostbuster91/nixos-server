@@ -32,9 +32,11 @@
       })
       ./impermanence.nix
       ./nvidia.nix
+      ./topology.nix
       inputs.impermanence.nixosModules.impermanence
       inputs.home-manager.nixosModules.home-manager
       inputs.agenix.nixosModules.default
+      inputs.self.nixosModules.topology
       inputs.self.nixosModules.ssh
       inputs.self.nixosModules.nix
       # Offload aarch64 builds to malina5 (the homelab's only aarch64 remote

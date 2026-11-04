@@ -3,6 +3,9 @@
 }:
 let
   zigbeeDomain = "zigbee.${config.homelab.ext-domain}";
+  # The SLZB-06 is a networked coordinator; its LAN address lives in
+  # secrets/meta.nix.age rather than in git.
+  coordinator = config.homelab.lan.devices.slzb06.ip;
 in
 {
   age.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
@@ -25,8 +28,7 @@ in
     }
   ];
 
-  # TODO: infinite recursion for rpi5 eval
-  # topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
+  topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
   services.zigbee2mqtt = {
     enable = true;
     settings = {
@@ -47,7 +49,7 @@ in
       };
       permit_join = true;
       serial = {
-        port = "tcp://192.168.1.30:6638";
+        port = "tcp://${coordinator}:6638";
         adapter = "zstack";
         # mdns doesn't work due to some hardening that happens in the serivce definition
         # port = "mdns://SLZB-06";

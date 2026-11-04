@@ -1,6 +1,6 @@
 {
   "hosts": {
-    "3d-printer": "192.168.1.112/32"
+    "3d-printer": "@printerIp@/32"
   },
 
   "groups": {

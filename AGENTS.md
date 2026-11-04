@@ -52,7 +52,7 @@ Build/eval/format commands you run *here* on the flake:
 - Eval a host without building (cheap check): `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath`.
 - Build a host's toplevel: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`. Shortcut for deckard: `nix-build-deckard` (devshell command). Hosts are auto-discovered from `hosts/<arch>/<name>/`.
 - Build the installer ISO: `nix build .#live-iso`. Flash it to USB (interactive fzf disk picker): `flash-deckard-iso` (devshell command). Boot the USB, then run `sudo install-system` to format with disko and `nixos-install`. The installer is currently wired to deckard's `disko-config.nix`.
-- Render network topology: `nix build .#topology.x86_64-linux.config.output` (defined in `topology.nix` via `nix-topology`).
+- Render the topology diagrams: `nix build .#topology.x86_64-linux.config.output` — the result directory holds `main.svg` (physical view) and `network.svg` (network-centric view). See the Topology section below.
 
 **Operational procedures live in the docs' runbooks** (`../homelab-docs/runbooks/`), not here — deploy, roll back, restore from Borg, and edit/rekey secrets each have a page. This file keeps only the flake mechanics an agent needs in-repo.
 
@@ -92,6 +92,56 @@ A host `default.nix` (see `hosts/x86_64-linux/deckard/default.nix` for the canon
 
 The fleet (which hosts exist, roles, build kinds) is single-sourced in the docs — see `../homelab-docs/inventory/hosts.md`; the per-service map (host · domain · port · auth · config) is in `../homelab-docs/services/index.md`. Don't restate them here. (deckard is decommissioned but its `hosts/x86_64-linux/deckard/` config is kept as the canonical reference example.)
 
+### Topology diagrams (nix-topology)
+
+`nix build .#topology.x86_64-linux.config.output` renders two SVGs: `main.svg`
+(physical view — cards per host with their interfaces and services) and
+`network.svg` (network-centric view — who sits on which network). The diagrams
+are build artifacts; nothing is committed.
+
+Most of the content is **extracted automatically** from each host's NixOS
+config: interfaces from `systemd.network` / `networking.interfaces`, and
+services from nix-topology's own extractor (nginx with its vhost→upstream map,
+grafana, forgejo, paperless, kanidm, headscale, vaultwarden, mosquitto,
+home-assistant, …). Three layers add what no extractor can see:
+
+| Layer | File | Holds |
+|---|---|---|
+| Fleet-wide | `topology.nix` (repo root) | the `internet` + `funbox` + `slzb-06` nodes, the physical cabling, the `home` network (its addresses are read back out of `config.nixosConfigurations.surfer.config.homelab.lan` — they are secrets, see below) |
+| Per host | `hosts/<arch>/<host>/topology.nix` | `hardware.info`, interfaces the extractors miss, address formatting |
+| Per service | the service's own `.nix` file | `topology.self.services.<id>` for services nix-topology has no extractor for (unbound, atticd, hostapd, and the `info` URLs on home-assistant / zigbee2mqtt) |
+
+Opt a host in by importing `inputs.self.nixosModules.topology`
+(`modules/nixos/topology.nix`) — **not** `inputs.nix-topology.nixosModules.default`
+directly. That module pulls in the upstream NixOS module *and* declares the
+host's `tailscale0` interface from `homelab.<host>.vlan.ip`, which no extractor
+can derive (headscale hands the address out at runtime). A host that doesn't
+import it simply doesn't appear on the diagram — that's how decommissioned
+deckard is kept out.
+
+Things worth knowing when you touch this:
+
+- **Network membership propagates along connections**, so a host usually needs
+  no `network = …` of its own: `home` flows from `funbox.lan1` through the cable
+  to `beast.eno1` etc. Propagation is *directional* — see surfer's
+  `topology.nix`, where `br-lan` has to share towards the hostapd BSSes because
+  networkd never declares that bridge membership.
+- **The tailnet is a full mesh**, so its edges are hidden in the physical view
+  (`renderer.hidePhysicalConnections`) and anchored on thunder (the headscale
+  host), which is also where `topology.networks.tailnet` is defined.
+- **The renderer collapses an interface's address list onto one line.** Several
+  addresses on one interface run together — thunder's `topology.nix` works
+  around it with an explicit `addressFormatter` and by dropping the link-local
+  v6 address.
+- **Interface labels are stacked at fixed spacing**, so a node with many
+  interfaces (surfer: br-lan + 4× lan + wan + 4× BSS) crowds its labels in
+  `network.svg`. Keep per-interface `addresses` short; put detail on the
+  service card instead (surfer's SSIDs live on its `hostapd` service).
+
+Adding a host: import the module, add a `topology.nix` next to its
+`default.nix`, and add its cable to the `funbox` node in the root `topology.nix`.
+Adding a service: usually nothing — check whether it shows up first.
+
 ### Adding a new web service (runbook)
 
 Most new services follow the same shape. Copy the closest existing example rather than starting blank — the three canonical templates are:
@@ -117,7 +167,11 @@ Steps (a service on host H reachable at `svc.<ext-domain>`):
 
 ### Secrets and `homelab.*` options
 
-`modules/nixos/meta.nix` declares the `homelab.*` option tree (hostname, `ext-domain`, `sec-domain`, `vpnCidr`, per-host VLAN IPs, VPS interfaces). The *values* live in `secrets/meta.nix.age` and are read at flake-eval time via the custom `extraBuiltins.ageImportEncrypted` from `nix/extra-builtins.nix` (which calls `nix/age-decrypt-and-cache.sh`). This is why the devshell is required — outside it, the builtin is missing and `meta.nix` throws.
+`modules/nixos/meta.nix` declares the `homelab.*` option tree (hostname, `ext-domain`, `sec-domain`, `vpnCidr`, per-host VLAN IPs, VPS interfaces, and the home LAN under `homelab.lan.*`). The *values* live in `secrets/meta.nix.age` and are read at flake-eval time via the custom `extraBuiltins.ageImportEncrypted` from `nix/extra-builtins.nix` (which calls `nix/age-decrypt-and-cache.sh`). This is why the devshell is required — outside it, the builtin is missing and `meta.nix` throws.
+
+**No IP address of the home network belongs in git.** `homelab.lan.cidrv4`, `homelab.lan.gateway.ip` (the FunBox) and `homelab.lan.devices.<name>.ip` cover it; `devices` is a free-form attrset, so adding a device is a `meta.nix.age` edit with no option change. Consumers today: the topology diagram, `modules/nixos/zigbee2mqtt.nix` (SLZB-06 coordinator), `modules/nixos/mosquitto.nix` (ampio bridge), `hosts/aarch64-linux/surfer/funbox-metrics.nix` (FunBox API) and thunder's headscale ACL (rendered from `headscale-policy.hujson` with `pkgs.replaceVars`). The one address deliberately left in git is thunder's `172.31.1.1` default gateway — that is Hetzner's, identical for every VPS, and says nothing about this fleet.
+
+Editing `meta.nix.age` non-interactively: `agenix` forces `EDITOR=cp /dev/stdin` when stdin is not a TTY, so pipe the whole new file in (`agenix -d meta.nix.age | <transform> | agenix -e meta.nix.age`) rather than trying to set the `EDITOR` variable.
 
 Other agenix secrets are referenced through `config.age.secrets.<name>.path` inside individual modules (e.g. `modules/nixos/backup.nix`, `modules/nixos/proxy.nix`). Recipients per file are in `secrets/secrets.nix`; the master identity is `~/.ssh/id_ed25519`.
 
