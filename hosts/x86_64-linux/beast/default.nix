@@ -95,6 +95,7 @@
         inputs.self.homeModules.zsh
         inputs.self.homeModules.git
         inputs.self.homeModules.nvim
+        inputs.self.homeModules.nvim-mcp
         inputs.self.homeModules.tmux
         inputs.self.homeModules.alacritty
       ];

@@ -44,7 +44,8 @@
     # GNOME "Extensions" after first login.
     gnomeExtensions.appindicator
     firefox
-    claude-code
+    # claude-code comes from home-manager (modules/hm/nvim-mcp.nix) so it is
+    # the wrapper carrying --mcp-config for the nvim MCP server.
     wl-clipboard # wl-copy / wl-paste for CLI ↔ Wayland clipboard
     virt-viewer
   ];

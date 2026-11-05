@@ -81,6 +81,14 @@
       url = "github:AshleyYakeley/NixVirt";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # MCP server + Neovim plugin that lets Claude Code talk to a running
+    # Neovim (LSP diagnostics, hover, code actions). Deliberately not
+    # following our nixpkgs: upstream builds the Rust server with its own
+    # fenix toolchain pinned against nixpkgs-unstable.
+    nvim-mcp = {
+      url = "github:linw1995/nvim-mcp";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
