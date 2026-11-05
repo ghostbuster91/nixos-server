@@ -119,6 +119,15 @@ in
         autoload -U select-word-style
         select-word-style bash
       '')
+      (lib.mkOrder 1000 ''
+        # forgit overrides the omz-git aliases with its own fzf functions, which
+        # have no completion registered, so TAB falls back to files. Tell zsh
+        # which git command each alias ultimately runs. Must run after compinit.
+        compdef _git gsw=git-switch
+        compdef _git gcb=git-switch
+        compdef _git gco=git-checkout
+        compdef _git gbd=git-branch
+      '')
       (lib.mkBefore ''
         export FORGIT_STASH_FZF_OPTS="--bind='ctrl-d:reload(${pkgs.git}/bin/git stash drop $(cut -d: -f1 <<<{}) 1>/dev/null && ${pkgs.git}/bin/git stash list)'"
         export FZF_CTRL_T_COMMAND="${pkgs.fd}/bin/fd -I --type file"
