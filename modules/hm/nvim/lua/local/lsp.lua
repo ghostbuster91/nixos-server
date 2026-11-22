@@ -47,17 +47,6 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
             end
         end,
     }
-    -- setup neodev in a way that it loads all plugins when editing dot-files
-    local username = vim.fn.expand("$USER")
-    local dotfiles_dir = "/home/" .. username .. "/workspace/dot-files"
-    require("neodev").setup({
-        override = function(root_dir, library)
-            if root_dir:find(dotfiles_dir, 1, true) then
-                library.enabled = true
-                library.plugins = true
-            end
-        end,
-    })
 
     -- Use an on_attach function to only map the following keys
     -- after the language server attaches to the current buffer
@@ -178,19 +167,15 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
     })
     vim.lsp.enable("ts_ls")
 
-    local library = vim.api.nvim_get_runtime_file("*.lua", true)
+    -- No `settings.Lua.workspace` here on purpose: local/lazydev.lua owns the
+    -- runtime/library configuration and merges whatever it finds in
+    -- `client.settings`, so anything set here would be pinned forever. The old
+    -- `library = vim.api.nvim_get_runtime_file("*.lua", true)` globbed only the
+    -- top level of each runtime dir and resolved to six unrelated files
+    -- (example_init.lua, a plugin's repro.lua, ...), never the vim.* meta files.
     vim.lsp.config("lua_ls", {
         capabilities = capabilities,
         cmd = { binaries.lua_language_server },
-        settings = {
-            Lua = {
-                workspace = {
-                    -- Make the server aware of Neovim runtime files
-                    checkThirdParty = false,
-                    library = library,
-                },
-            },
-        },
     })
     vim.lsp.enable("lua_ls")
 

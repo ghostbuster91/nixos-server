@@ -127,6 +127,9 @@ local setup = function(binaries)
     require("local/noice").setup(telescope.core)
     ---@diagnostic disable-next-line: undefined-global
     local lsp = require("local/lsp").setup(telescope.core, telescope.builtin, navic, binaries)
+    -- after local/lsp: lazydev's lspconfig integration only patches root_dir for
+    -- servers that vim.lsp.enable has already enabled.
+    require("local/lazydev").setup()
     require("local/gitsigns").setup()
     require("local/luasnip").setup()
     require("local/blink").setup()

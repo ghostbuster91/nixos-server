@@ -170,7 +170,9 @@ in
       telescope-undo-nvim
       dial-nvim
       smart-splits-nvim
-      neodev-nvim
+      # lazydev replaces neodev: neodev hooked lspconfig's lua_ls.setup{}, which
+      # this config stopped using when it moved to vim.lsp.config.
+      lazydev-nvim
       hydra-nvim
       substitute-nvim
       baleia-nvim

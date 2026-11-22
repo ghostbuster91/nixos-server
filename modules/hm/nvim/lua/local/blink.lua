@@ -71,8 +71,16 @@ local setup = function()
         },
 
         sources = {
-            default = { "lsp", "buffer", "snippets", "path" },
+            -- lazydev only fires inside `require("…")` / `---@module "…"` in lua
+            -- buffers; elsewhere it returns nothing, so the high score_offset
+            -- costs nothing but makes module names win when it does fire.
+            default = { "lazydev", "lsp", "buffer", "snippets", "path" },
             providers = {
+                lazydev = {
+                    name = "LazyDev",
+                    module = "lazydev.integrations.blink",
+                    score_offset = 100,
+                },
                 lsp = { score_offset = 0 },
                 buffer = { score_offset = -2 },
                 snippets = { score_offset = 0 },
