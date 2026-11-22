@@ -80,6 +80,111 @@ let
   # thousands of watts, so 10 W separates idle from working with a wide margin
   # either side.
   applianceIdleWatts = 10;
+
+  # --- Wardrobe strips (bedroom) --------------------------------------------
+  # Two Shelly Plus RGBW PM boards in the 4x-dimmer profile light the bedroom
+  # wardrobes. Each strip is CCT, wired as a channel *pair*: the even channel
+  # is warm white, the odd one above it is cold white (verified live - with
+  # only ch1 lit the strip reads cold, with only ch0 lit it reads warm).
+  #
+  # The door reed switch -> strip mapping lives in the Shelly itself, so HA
+  # never switches these on; it only re-levels a strip right after the Shelly
+  # has turned it on. That is also why the trigger is the strip coming on
+  # rather than a time: a time trigger would switch the lights on inside a
+  # shut wardrobe.
+  #
+  # In the 4x-dimmer profile HA sees four independent brightness-only `light`
+  # entities per board - there is no color_temp to set (checked:
+  # supported_color_modes = ["brightness"]). So "warmer" has to be a mix:
+  # warm channel up, cold channel off. Same idea as dimmer-2's `light_i`
+  # cwww light (6500 K / 2000 K) in ../home/dimmer-2.yaml, except the mixing
+  # is ours to do here.
+  bedroomMainLight = "light.boneio_dr_8ch_03_3812b0_light_f"; # "główne"
+
+  # Warm channel level inside the dim window. 128/255 is the same 0.5 as the
+  # `night_brightness` in dimmer-2.yaml's `.night_mode` anchor, so the
+  # wardrobe agrees with what the bedroom wall buttons already do at night.
+  #
+  # Deliberately absolute rather than a fraction of each strip's own `normal`:
+  # it makes all four strips land on the same warm 128 at night even though
+  # their daytime levels differ (128 vs 255). The drop in total output is
+  # therefore not uniform - roughly half for Kasper's strips (one of two
+  # channels goes out at an unchanged level) and a quarter for Marta's - but
+  # both are clearly dimmer and warmer than their own daytime state, which is
+  # what this is for.
+  wardrobeDimBrightness = 128;
+  # Evening -> morning, wrapping midnight. HA's time condition wraps when
+  # `after` is later than `before`, so this is one window, not two. 20:30 is
+  # the dimmers' own `night_start`; 08:00 extends it over the morning.
+  wardrobeDimAfter = "20:30:00";
+  wardrobeDimBefore = "08:00:00";
+
+  # One automation per strip. `warm`/`cold` are the two channels of that
+  # strip's pair; `label` only shows up in the alias. `normal` is the level
+  # that strip's Shelly turns it on at by itself, which the normal branch
+  # restores - it is NOT the same on every strip (Kasper's two strips come on
+  # at 128, Marta's at 255, both read off the live entities), so a single
+  # shared constant here would permanently dim the 255 pairs down to 128.
+  mkWardrobeStrip = { key, label, warm, cold, normal }: {
+    id = "wardrobe_${key}_dim_warm";
+    alias = "Wardrobe ${label} - dim & warm when main light is off";
+    # One strip, one trigger: a re-open mid-run should just redo the levelling.
+    mode = "restart";
+    # Anchored on the warm channel because it stays on in both branches. No
+    # `from:` - a Shelly reconnect reports `unavailable -> on` only when the
+    # strip really is on (a shut wardrobe comes back `off`), and that case
+    # wants re-levelling too. Our own `light.turn_on` here only changes
+    # brightness on an already-on channel, which is an attribute change and
+    # does not re-fire a `to:` trigger.
+    trigger = [{
+      platform = "state";
+      entity_id = warm;
+      to = "on";
+    }];
+    action = [{
+      choose = [{
+        conditions = [
+          {
+            condition = "time";
+            after = wardrobeDimAfter;
+            before = wardrobeDimBefore;
+          }
+          # Only when the room is otherwise dark. With the main light on there
+          # is nothing to protect, so the strip stays at its normal level.
+          {
+            condition = "state";
+            entity_id = bedroomMainLight;
+            state = "off";
+          }
+        ];
+        # Warm first, then drop the cold channel: ordering it this way means
+        # the strip is never momentarily dark mid-adjustment. The Shelly has
+        # already lit both channels by the time this runs, so a short cold
+        # flash before the cold channel goes out is expected and is not
+        # avoidable from HA - removing it would need Shelly-side config.
+        sequence = [
+          {
+            service = "light.turn_on";
+            target.entity_id = warm;
+            data.brightness = wardrobeDimBrightness;
+          }
+          {
+            service = "light.turn_off";
+            target.entity_id = cold;
+          }
+        ];
+      }];
+      # Daytime, or the main light is on: put the strip back to the Shelly's
+      # own level on both channels. Without this branch the cold channel would
+      # stay off and the strip would read warm-and-dim for good after the
+      # first night.
+      default = [{
+        service = "light.turn_on";
+        target.entity_id = [ warm cold ];
+        data.brightness = normal;
+      }];
+    }];
+  };
 in
 [
   (mkHighAlert {
@@ -542,6 +647,36 @@ in
       }];
     }];
   }
+  # Board 2043a827a380 is Kasper's wardrobe, ecc9ff4ddac8 is Marta's; on both
+  # the lower channel pair is the right door and the upper pair the left.
+  (mkWardrobeStrip {
+    key = "kasper_right";
+    label = "Kasper right door";
+    warm = "light.shellyplusrgbwpm_2043a827a380_light_0";
+    cold = "light.shellyplusrgbwpm_2043a827a380_light_1";
+    normal = 128;
+  })
+  (mkWardrobeStrip {
+    key = "kasper_left";
+    label = "Kasper left door";
+    warm = "light.shellyplusrgbwpm_2043a827a380_light_2";
+    cold = "light.shellyplusrgbwpm_2043a827a380_light_3";
+    normal = 128;
+  })
+  (mkWardrobeStrip {
+    key = "marta_right";
+    label = "Marta right door";
+    warm = "light.shellyplusrgbwpm_ecc9ff4ddac8_light_0";
+    cold = "light.shellyplusrgbwpm_ecc9ff4ddac8_light_1";
+    normal = 255;
+  })
+  (mkWardrobeStrip {
+    key = "marta_left";
+    label = "Marta left door";
+    warm = "light.shellyplusrgbwpm_ecc9ff4ddac8_light_2";
+    cold = "light.shellyplusrgbwpm_ecc9ff4ddac8_light_3";
+    normal = 255;
+  })
   {
     id = "light_to_m5dial";
     alias = "light -> M5Dial";
