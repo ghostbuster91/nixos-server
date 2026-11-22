@@ -744,6 +744,26 @@
         "type": "github"
       }
     },
+    "nvim-next": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795384584,
+        "narHash": "sha256-0UFtC4CMMb7mLfaN1QxcOnk3tqYdgIGIS1nNac20Oig=",
+        "owner": "ghostbuster91",
+        "repo": "nvim-next",
+        "rev": "b7ee6b383cf2d8cbe316d907a374f1aabe9142ba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ghostbuster91",
+        "repo": "nvim-next",
+        "type": "github"
+      }
+    },
     "paper-mod": {
       "flake": false,
       "locked": {
@@ -784,6 +804,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvirt": "nixvirt",
         "nvim-mcp": "nvim-mcp",
+        "nvim-next": "nvim-next",
         "treefmt-nix": "treefmt-nix_2",
         "workmux": "workmux"
       }

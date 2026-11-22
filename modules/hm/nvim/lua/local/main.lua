@@ -77,19 +77,9 @@ local setup = function(binaries)
         diag.open_float()
     end, { desc = "show diagnostic under the cursor" })
 
-    map("n", "[q", function()
-        local status = pcall(vim.cmd, "cprevious")
-        if not status then
-            vim.notify("No more items", vim.log.levels.INFO, { title = "Quickfix" })
-        end
-    end, { desc = "prev qfix" })
-
-    map("n", "[d", function()
-        diag.jump({ count = -1, float = false, wrap = false, severity = { min = diag.severity.WARN } })
-    end, { desc = "previous diagnostic" })
-    map("n", "]d", function()
-        diag.jump({ count = 1, float = false, wrap = false, severity = { min = diag.severity.WARN } })
-    end, { desc = "next diagnostic" })
+    -- Owns `;` / `,` plus the ]q/[q and ]d/[d jumps; set up before gitsigns,
+    -- which registers repeatable hunk moves against it.
+    local next_integrations = require("local/nvim-next").setup()
 
     local hocon_group = vim.api.nvim_create_augroup("hocon", { clear = true })
     vim.api.nvim_create_autocmd(
@@ -113,7 +103,7 @@ local setup = function(binaries)
     })
 
     require("local/trouble").setup()
-    local diffview = require("local/diffview").setup()
+    local diffview = require("local/diffview").setup(next_integrations)
     -- snacks owns the picker, indent guides, smooth scrolling, notifications,
     -- vim.ui.input/select and git permalinks; set it up before the modules
     -- that reach for `Snacks.*`.
@@ -124,7 +114,7 @@ local setup = function(binaries)
     -- after local/lsp: lazydev's lspconfig integration only patches root_dir for
     -- servers that vim.lsp.enable has already enabled.
     require("local/lazydev").setup()
-    require("local/gitsigns").setup()
+    require("local/gitsigns").setup(next_integrations)
     require("local/luasnip").setup()
     require("local/blink").setup()
     require("local/lualine").setup(navic)

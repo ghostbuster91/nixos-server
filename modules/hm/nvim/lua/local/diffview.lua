@@ -1,21 +1,26 @@
 local map = vim.keymap.set
 
-local setup = function()
+local setup = function(next_integrations)
     local diffview_actions = require("diffview.actions")
     local diffview = require("diffview")
+
+    -- Conflict navigation through nvim-next, so `;` / `,` repeat it while
+    -- resolving a merge.
+    local nndv = next_integrations.diffview(diffview_actions)
+
     diffview.setup({
         keymaps = {
             view = {
                 {
                     "n",
                     "[x",
-                    diffview_actions.prev_conflict,
+                    nndv.prev_conflict,
                     { desc = "In the merge-tool: jump to the previous conflict" },
                 },
                 {
                     "n",
                     "]x",
-                    diffview_actions.next_conflict,
+                    nndv.next_conflict,
                     { desc = "In the merge-tool: jump to the next conflict" },
                 },
                 {

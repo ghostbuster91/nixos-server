@@ -1,6 +1,9 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, inputs, ... }:
 let
   leaderKey = "\\<Space>";
+  # `with pkgs.vimPlugins` below does not shadow let bindings, so this name
+  # wins over any nixpkgs package that may later use it.
+  nvim-next = inputs.nvim-next.packages.${pkgs.stdenv.hostPlatform.system}.nvim-next;
 in
 {
   # Vendored lua config, sourced from the store (immutable). Editing requires a
@@ -177,6 +180,11 @@ in
       baleia-nvim
       hover-nvim
       ssr-nvim
+
+      # Repeatable movements engine: `;` / `,` repeat the last next/prev move
+      # (f/t, diagnostic, git hunk, merge conflict) regardless of which plugin
+      # provided it. Built from its own flake, see lua/local/nvim-next.lua.
+      nvim-next
     ];
   };
 }

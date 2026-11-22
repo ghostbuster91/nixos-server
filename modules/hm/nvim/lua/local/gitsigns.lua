@@ -1,8 +1,12 @@
-local setup = function()
+local setup = function(next_integrations)
     require("gitsigns").setup({
         on_attach = function(bufnr)
             local gs = package.loaded.gitsigns
             local prefix_key = "<leader>h"
+            -- Hunk navigation goes through nvim-next, so `;` / `,` repeat it.
+            -- The keys are mapped here rather than via `nngs.on_attach`: that
+            -- one covers normal mode only and drops the `wrap = false`.
+            local nngs = next_integrations.gitsigns(gs)
 
             local function map(mode, l, r, opts)
                 opts = opts or {}
@@ -16,7 +20,7 @@ local setup = function()
                     return "]c"
                 end
                 vim.schedule(function()
-                    gs.next_hunk({ wrap = false })
+                    nngs.next_hunk({ wrap = false })
                 end)
                 return "<Ignore>"
             end, { expr = true })
@@ -26,7 +30,7 @@ local setup = function()
                     return "[c"
                 end
                 vim.schedule(function()
-                    gs.prev_hunk({ wrap = false })
+                    nngs.prev_hunk({ wrap = false })
                 end)
                 return "<Ignore>"
             end, { expr = true })

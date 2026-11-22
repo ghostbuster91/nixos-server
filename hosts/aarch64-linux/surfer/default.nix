@@ -49,7 +49,8 @@
         inputs.self.homeModules.git
       ];
     };
-    extraSpecialArgs = { inherit username; };
+    # inputs: the nvim home module builds the nvim-next plugin from its flake.
+    extraSpecialArgs = { inherit username inputs; };
   };
 
   system.stateVersion = "24.05";

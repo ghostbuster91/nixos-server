@@ -86,6 +86,15 @@
       url = "github:linw1995/nvim-mcp";
     };
 
+    # Repeatable-movements engine for Neovim: `;` / `,` repeat whatever
+    # next/prev motion was used last (diagnostic, git hunk, merge conflict,
+    # f/t), instead of every plugin stealing `;` for itself. Upstream's flake
+    # only uses nixpkgs for `vimUtils.buildVimPlugin`, so it can follow ours.
+    nvim-next = {
+      url = "github:ghostbuster91/nvim-next";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Parallel development: one git worktree + tmux window per task, with the
     # agent's status rendered into the window name. Upstream's flake tracks
     # nixos-unstable, but the package is a plain `rustPlatform.buildRustPackage`
