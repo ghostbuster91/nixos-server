@@ -68,10 +68,6 @@
       url = "github:nvmd/nixos-raspberrypi/main";
     };
 
-    comfyui-nix = {
-      url = "github:utensils/comfyui-nix";
-    };
-
     nixos-sbc = {
       url = "github:ghostbuster91/nixos-sbc/main";
       inputs.nixpkgs.follows = "nixpkgs";
