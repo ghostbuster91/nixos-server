@@ -85,6 +85,16 @@
     nvim-mcp = {
       url = "github:linw1995/nvim-mcp";
     };
+
+    # Parallel development: one git worktree + tmux window per task, with the
+    # agent's status rendered into the window name. Upstream's flake tracks
+    # nixos-unstable, but the package is a plain `rustPlatform.buildRustPackage`
+    # with no toolchain pinning, so following our nixpkgs keeps one rustc in the
+    # closure instead of two.
+    workmux = {
+      url = "github:raine/workmux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {

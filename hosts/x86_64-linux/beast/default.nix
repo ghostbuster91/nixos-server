@@ -98,6 +98,7 @@
         inputs.self.homeModules.nvim-mcp
         inputs.self.homeModules.tmux
         inputs.self.homeModules.alacritty
+        inputs.self.homeModules.workmux
       ];
     };
     extraSpecialArgs = { inherit username inputs pkgs-unstable; };

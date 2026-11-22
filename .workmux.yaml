@@ -1,0 +1,15 @@
+# Project overrides for workmux (parallel worktrees + tmux windows). The global
+# defaults — agent, rebase merges, worktree_dir, the `direnv allow` hook, the
+# pane layout — live in modules/hm/workmux/default.nix.
+#
+# Hook and file lists are *replaced* by a project config unless they re-include
+# "<global>".
+
+post_create:
+  - "<global>"
+
+pre_merge:
+  # treefmt (nixpkgs-fmt + deadnix, see treefmt.nix) across the worktree. --ci
+  # makes it check instead of rewrite, so `workmux merge` aborts on unformatted
+  # Nix rather than dragging reformatting noise into the merge commit.
+  - nix fmt -- --ci

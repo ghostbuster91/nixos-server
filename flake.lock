@@ -784,7 +784,8 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvirt": "nixvirt",
         "nvim-mcp": "nvim-mcp",
-        "treefmt-nix": "treefmt-nix_2"
+        "treefmt-nix": "treefmt-nix_2",
+        "workmux": "workmux"
       }
     },
     "rust-analyzer-src": {
@@ -923,6 +924,26 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "workmux": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795273019,
+        "narHash": "sha256-UHfMPyxXVB+aSwKiQ6LJnW+giXKaXpDAounPlXlfE6g=",
+        "owner": "raine",
+        "repo": "workmux",
+        "rev": "748997d6e9a6cf4d8f25035ee996f85251bd65a9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raine",
+        "repo": "workmux",
         "type": "github"
       }
     }

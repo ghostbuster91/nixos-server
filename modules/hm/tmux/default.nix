@@ -116,10 +116,6 @@ in
       # shortcut for new session
       bind n new-session
 
-      # fast switch to previous session
-      unbind t
-      bind t switch-client -l
-
       onedark_black="#282c34"
       onedark_green="#98c379"
       onedark_visual_grey="#3e4452"

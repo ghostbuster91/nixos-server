@@ -8,6 +8,7 @@
     zsh = ./zsh;
     tmux = ./tmux;
     alacritty = ./alacritty;
+    workmux = ./workmux;
   };
 
 }
