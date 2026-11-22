@@ -59,8 +59,13 @@ in
           colorscheme kanagawa
         '';
       }
-      telescope-nvim
-      telescope-fzf-native-nvim
+      # snacks.nvim is a bundle of small modules. It replaces telescope (+
+      # telescope-fzf-native, telescope-ui-select, telescope-undo,
+      # telescope-dap) with snacks.picker, indent-blankline with snacks.indent,
+      # neoscroll with snacks.scroll and gitlinker with snacks.gitbrowse; it
+      # also takes over vim.notify, vim.ui.input and vim.ui.select.
+      # Configured in lua/local/snacks.lua.
+      snacks-nvim
       which-key-nvim
       nvim-autopairs
       vim-sandwich
@@ -122,15 +127,12 @@ in
       friendly-snippets
 
       nvim-neoclip-lua
-      indent-blankline-nvim
       nvim-tree-lua
       vim-tmux-clipboard
-      telescope-ui-select-nvim
       noice-nvim
       nui-nvim
       fidget-nvim
       nvim-lightbulb
-      neoscroll-nvim
       neogit
       undotree
       diffview-nvim
@@ -152,11 +154,9 @@ in
           EOF
         '';
       }
-      telescope-dap-nvim
       trouble-nvim
       vim-repeat
       flash-nvim
-      gitlinker-nvim
       actions-preview-nvim
       {
         plugin = nvim-dap-virtual-text;
@@ -167,7 +167,6 @@ in
           EOF
         '';
       }
-      telescope-undo-nvim
       dial-nvim
       smart-splits-nvim
       # lazydev replaces neodev: neodev hooked lspconfig's lua_ls.setup{}, which

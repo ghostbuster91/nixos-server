@@ -6,7 +6,7 @@ local setup = function()
         disable_commit_confirmation = true,
         integrations = {
             diffview = true,
-            telescope = true,
+            snacks = true,
         },
         mappings = {
             status = {

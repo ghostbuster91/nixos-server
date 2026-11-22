@@ -23,27 +23,40 @@ local setup = function()
 
         require("nvim-tree.api").tree.reload()
     end
-    local telescope_actions = require("telescope.actions")
+    -- `fd --type directory`: snacks' files source always passes `--type f
+    -- --type l`, so this needs its own proc finder.
     local function find_directory_and_focus()
-        local action_state = require("telescope.actions.state")
-
-        local function open_nvim_tree(prompt_bufnr, _)
-            telescope_actions.select_default:replace(function()
-                telescope_actions.close(prompt_bufnr)
-                local selection = action_state.get_selected_entry()
-                api.tree.open()
-                api.tree.find_file(selection.cwd .. "/" .. selection.value)
-            end)
-            return true
-        end
-
-        require("telescope.builtin").find_files({
-            find_command = { "fd", "--type", "directory", "--hidden", "--exclude", ".git/*" },
-            attach_mappings = open_nvim_tree,
+        Snacks.picker.pick({
+            title = "Directories",
+            format = "file",
+            finder = function(_, ctx)
+                local cwd = ctx:cwd()
+                return require("snacks.picker.source.proc").proc({
+                    cmd = "fd",
+                    args = { "--type", "directory", "--hidden", "--color", "never", "--exclude", ".git" },
+                    cwd = cwd,
+                    transform = function(item)
+                        item.cwd = cwd
+                        item.file = item.text
+                        item.dir = true
+                    end,
+                }, ctx)
+            end,
+            confirm = function(picker, item)
+                picker:close()
+                if not item then
+                    return
+                end
+                local path = Snacks.picker.util.path(item)
+                vim.schedule(function()
+                    api.tree.open()
+                    api.tree.find_file(path)
+                end)
+            end,
         })
     end
 
-    vim.keymap.set("n", "<leader>id", find_directory_and_focus, { desc = "telescope focus directory" })
+    vim.keymap.set("n", "<leader>id", find_directory_and_focus, { desc = "focus directory" })
 
     local function my_on_attach(bufnr)
         local function opts(desc)

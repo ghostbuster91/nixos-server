@@ -1,43 +1,45 @@
 local api = require("nvim-tree.api")
 local openfile = require("nvim-tree.actions.node.open-file")
-local actions = require("telescope.actions")
-local action_state = require("telescope.actions.state")
 local M = {}
 
-local view_selection = function(prompt_bufnr, map)
-    actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = action_state.get_selected_entry()
-        local filename = selection.filename
-        if filename == nil then
-            filename = selection[1]
-        end
-        openfile.fn("edit", filename)
-    end)
-    return true
-end
-
-function M.launch_live_grep(opts)
-    return M.launch_telescope("live_grep", opts)
-end
-
-function M.launch_find_files(opts)
-    return M.launch_telescope("find_files", opts)
-end
-
-function M.launch_telescope(func_name, opts)
-    local telescope_status_ok, _ = pcall(require, "telescope")
-    if not telescope_status_ok then
+-- Pickers launched from inside the tree have to hand the file to nvim-tree's
+-- own open-file, or it would be edited in the tree window itself.
+local function view_selection(picker, item)
+    picker:close()
+    if not item then
         return
     end
+    local path = Snacks.picker.util.path(item)
+    vim.schedule(function()
+        openfile.fn("edit", path)
+        -- grep results carry a position; the telescope version dropped it
+        if item.pos and item.pos[1] > 0 then
+            vim.api.nvim_win_set_cursor(0, { item.pos[1], item.pos[2] })
+            vim.cmd("norm! zzzv")
+        end
+    end)
+end
+
+-- directory of the node under the cursor
+local function basedir()
     local node = api.tree.get_node_under_cursor()
     local is_folder = node.fs_stat and node.fs_stat.type == "directory" or false
-    local basedir = is_folder and node.absolute_path or vim.fn.fnamemodify(node.absolute_path, ":h")
-    opts = opts or {}
-    opts.cwd = basedir
-    opts.search_dirs = { basedir }
-    opts.attach_mappings = view_selection
-    return require("telescope.builtin")[func_name](opts)
+    return is_folder and node.absolute_path or vim.fn.fnamemodify(node.absolute_path, ":h")
+end
+
+function M.launch_live_grep()
+    return Snacks.picker.grep({
+        cwd = basedir(),
+        layout = { preset = "vertical" },
+        confirm = view_selection,
+    })
+end
+
+function M.launch_find_files()
+    return Snacks.picker.files({
+        cwd = basedir(),
+        confirm = view_selection,
+    })
 end
 
 return M

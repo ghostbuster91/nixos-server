@@ -15,6 +15,20 @@
 --   * a `.luarc.json` in the workspace, which overrides what lazydev negotiates
 --     (lazydev warns about it in :LazyDev debug).
 local setup = function()
+    local library = {
+        -- luv types, pulled in only once a file mentions vim.uv
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+    }
+
+    -- `Snacks` is a global, so most files never `require("snacks")` and
+    -- lazydev's require-tracking never picks its types up. Nixpkgs installs
+    -- plugins under store paths, so the directory can't be named either (that
+    -- lookup matches the rtp dir's basename) — resolve it off the runtimepath.
+    local snacks_init = vim.api.nvim_get_runtime_file("lua/snacks/init.lua", false)[1]
+    if snacks_init then
+        table.insert(library, { path = vim.fn.fnamemodify(snacks_init, ":h:h:h"), words = { "Snacks" } })
+    end
+
     require("lazydev").setup({
         integrations = {
             -- nvim-cmp and coq aren't installed; the blink.cmp source for
@@ -25,10 +39,7 @@ local setup = function()
             -- matters because vim.lsp.config resolves roots from markers only.
             lspconfig = true,
         },
-        library = {
-            -- luv types, pulled in only once a file mentions vim.uv
-            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-        },
+        library = library,
     })
 end
 

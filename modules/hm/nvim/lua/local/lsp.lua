@@ -3,7 +3,7 @@ local map = vim.keymap.set
 local lsp = vim.lsp
 local diag = vim.diagnostic
 
-local setup = function(telescope, telescope_builtin, navic, binaries)
+local setup = function(navic, binaries)
     local M = {
         on_attach_dap_subscribers = {},
     }
@@ -48,6 +48,10 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
         end,
     }
 
+    -- actions-preview picks the first available of
+    -- { telescope, minipick, snacks, nui }; be explicit now telescope is gone.
+    require("actions-preview").setup({ backend = { "snacks" } })
+
     -- Use an on_attach function to only map the following keys
     -- after the language server attaches to the current buffer
     local lsp_group = api.nvim_create_augroup("lsp", { clear = true })
@@ -62,36 +66,36 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
 
         -- Mappings.
 
-        local vertical_layout = { layout_strategy = "vertical", fname_width = 80 }
+        local vertical = { layout = { preset = "vertical" } }
         -- See `:help vim.lsp.*` for documentation on any of the below functions
         mapB("n", "<leader>rn", lsp.buf.rename, "[lsp] rename")
         mapB("n", "<leader>gD", function()
-            lsp.buf.declaration(vertical_layout)
+            lsp.buf.declaration()
         end, "[lsp] goto declaration")
         mapB("n", "<leader>nd", function()
-            telescope_builtin.lsp_definitions(vertical_layout)
+            Snacks.picker.lsp_definitions(vertical)
         end, "[lsp] goto definition")
         mapB("n", "<leader>nD", function()
-            telescope_builtin.lsp_type_definitions(vertical_layout)
+            Snacks.picker.lsp_type_definitions(vertical)
         end, "[lsp] goto type definition")
         mapB("n", "<leader>ni", function()
-            telescope_builtin.lsp_implementations(vertical_layout)
+            Snacks.picker.lsp_implementations(vertical)
         end, "[lsp] goto implementation")
         mapB("n", "<leader>f", lsp.buf.format, "[lsp] format")
         mapB("n", "<leader>nt", function()
-            telescope_builtin.lsp_document_symbols(
-                vim.tbl_extend("force", { symbols = { "class", "method", "function" } }, vertical_layout)
-            )
+            -- the class/method/function filter now lives in the picker's
+            -- `lsp_symbols` source config, see local/snacks.lua
+            Snacks.picker.lsp_symbols(vertical)
         end, "[lsp] document symbols")
         map("n", "<Leader>ns", function()
-            telescope_builtin.lsp_dynamic_workspace_symbols(vertical_layout)
+            Snacks.picker.lsp_workspace_symbols(vertical)
         end, { desc = "[lsp] workspace symbols" })
         mapB({ "v", "n" }, "<leader>ca", require("actions-preview").code_actions, "[lsp] code actions")
         mapB("n", "<leader>cl", lsp.codelens.run, "[lsp] code lenses")
 
         -- mapB("n", "K", lsp.buf.hover, "lsp hover")
         mapB("n", "<Leader>nr", function()
-            telescope_builtin.lsp_references(vertical_layout)
+            Snacks.picker.lsp_references(vertical)
         end, "[lsp] references")
         mapB("n", "<leader>sh", lsp.buf.signature_help, "[lsp] signature")
 

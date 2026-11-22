@@ -1,15 +1,12 @@
-local setup = function(telescope)
+local setup = function()
     local noice = require("noice")
     noice.setup({
         lsp = { progress = { enabled = false } },
         notify = {
-            -- Noice can be used as `vim.notify` so you can route any notification like other messages
-            -- Notification messages have their level and other properties set.
-            -- event is always "notify" and kind can be any log level as a string
-            -- The default routes will forward notifications to nvim-notify
-            -- Benefit of using Noice for this is the routing and consistent history view
-            enabled = true,
-            view = "mini",
+            -- vim.notify belongs to snacks.notifier now (see local/snacks.lua).
+            -- Flip this back to `enabled = true, view = "mini"` to hand
+            -- notifications back to noice.
+            enabled = false,
         },
         messages = {
             enabled = true, -- enables the Noice messages UI
@@ -29,7 +26,6 @@ local setup = function(telescope)
             },
         },
     })
-    telescope.load_extension("noice")
 
     -- TODO: for some reason it stopped working
     -- it should be fixed in newer version of alacritty. The current one on 23.11 is 0.12.3

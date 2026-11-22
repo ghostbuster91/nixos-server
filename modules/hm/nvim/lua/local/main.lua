@@ -61,14 +61,7 @@ local setup = function(binaries)
     local ft = require("Comment.ft")
     ft.smithy = "//%s"
 
-    require("neoclip").setup()
-    require("telescope").load_extension("neoclip")
-    map("n", "<leader>'", require("telescope").extensions.neoclip.star, { desc = "clipboard" })
-
-    require("ibl").setup({
-        indent = { char = "▏" },
-        scope = { enabled = false },
-    })
+    require("local/neoclip").setup()
 
     require("fidget").setup()
 
@@ -98,8 +91,6 @@ local setup = function(binaries)
         diag.jump({ count = 1, float = false, wrap = false, severity = { min = diag.severity.WARN } })
     end, { desc = "next diagnostic" })
 
-    require("gitlinker").setup()
-
     local hocon_group = vim.api.nvim_create_augroup("hocon", { clear = true })
     vim.api.nvim_create_autocmd(
         { "BufNewFile", "BufRead" },
@@ -123,10 +114,13 @@ local setup = function(binaries)
 
     require("local/trouble").setup()
     local diffview = require("local/diffview").setup()
-    local telescope = require("local/telescope").setup(diffview)
-    require("local/noice").setup(telescope.core)
+    -- snacks owns the picker, indent guides, smooth scrolling, notifications,
+    -- vim.ui.input/select and git permalinks; set it up before the modules
+    -- that reach for `Snacks.*`.
+    require("local/snacks").setup(diffview)
+    require("local/noice").setup()
     ---@diagnostic disable-next-line: undefined-global
-    local lsp = require("local/lsp").setup(telescope.core, telescope.builtin, navic, binaries)
+    local lsp = require("local/lsp").setup(navic, binaries)
     -- after local/lsp: lazydev's lspconfig integration only patches root_dir for
     -- servers that vim.lsp.enable has already enabled.
     require("local/lazydev").setup()
@@ -135,7 +129,6 @@ local setup = function(binaries)
     require("local/blink").setup()
     require("local/lualine").setup(navic)
     require("local/treesitter").setup()
-    require("local/neoscroll").setup()
     require("local/smart-split").setup()
     require("local/dial").setup()
     require("local/hydra").setup(lsp)
