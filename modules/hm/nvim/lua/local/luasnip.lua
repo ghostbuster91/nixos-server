@@ -6,12 +6,12 @@ local setup = function()
         ext_opts = {
             [types.choiceNode] = {
                 active = {
-                    virt_text = { { "●", "CmpItemKindValue" } },
+                    virt_text = { { "●", "BlinkCmpKindValue" } },
                 },
             },
             [types.insertNode] = {
                 active = {
-                    virt_text = { { "󰔶", "CmpItemKindUnit" } },
+                    virt_text = { { "󰔶", "BlinkCmpKindUnit" } },
                 },
             },
         },

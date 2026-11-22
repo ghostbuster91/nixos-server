@@ -68,11 +68,10 @@ in
       plenary-nvim
 
       # completions
-      nvim-cmp
-      cmp-nvim-lsp
-      cmp-buffer
-      cmp-path
-      cmp_luasnip
+      # blink.cmp replaces nvim-cmp + the cmp-* sources + lspkind: lsp, buffer,
+      # path and luasnip are all built-in sources. The nixpkgs derivation ships
+      # the prebuilt Rust fuzzy matcher, see lua/local/blink.lua.
+      blink-cmp
 
       # lsp stuff
       nvim-lspconfig
@@ -120,7 +119,6 @@ in
 
       # snippets
       luasnip
-      lspkind-nvim
       friendly-snippets
 
       nvim-neoclip-lua

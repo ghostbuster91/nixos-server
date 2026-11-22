@@ -152,8 +152,7 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
     -- lsp/<name>.lua nowadays; the old require("lspconfig")[name].setup{}
     -- framework is deprecated. Shared config goes through the "*" pseudo-name;
     -- capabilities are set per-server so ts_ls can keep its own set below.
-    -- local capabilities = vim.lsp.protocol.make_client_capabilities()
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    local capabilities = require("blink.cmp").get_lsp_capabilities({}, true)
     vim.lsp.config("*", { on_attach = on_attach })
 
     local servers = { "bashls", "vimls", "yamlls", "rust_analyzer", "gopls" }
@@ -162,7 +161,7 @@ local setup = function(telescope, telescope_builtin, navic, binaries)
     end
     vim.lsp.enable(servers)
 
-    local capabilities_no_format = lsp.protocol.make_client_capabilities()
+    local capabilities_no_format = vim.deepcopy(capabilities)
     capabilities_no_format.textDocument.formatting.dynamicRegistration = false
     capabilities_no_format.textDocument.rangeFormatting.dynamicRegistration = false
 
