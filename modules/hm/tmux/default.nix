@@ -109,9 +109,7 @@ in
       set -g pane-border-style 'fg=colour235,bg=colour238' 
       set -g pane-active-border-style 'fg=colour39,bg=colour236'
 
-      # use "a" for switching layouts
       unbind Space
-      bind a next-layout
 
       # shortcut for new session
       bind n new-session

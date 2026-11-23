@@ -49,13 +49,21 @@ let
     # z/fzf match worktrees as if they were top-level checkouts.
     worktree_dir = "~/workspace/.worktrees/{project}";
 
-    # `split: horizontal` is tmux's `-h`, so: agent on the left at 70%, a plain
-    # shell on the right for git/nix commands. Pane commands are typed into an
-    # interactive shell (workmux uses send-keys), which is what lets direnv load
-    # the devshell before the agent starts.
+    # Neovim down the left half, the agent top right (focused), a plain shell
+    # for git/nix commands bottom right. `split: horizontal` is tmux's `-h`
+    # (left/right), `vertical` is `-v` (top/bottom); each pane splits the one
+    # before it, so the shell halves the agent's pane and nvim keeps full
+    # height. Pane commands are typed into an interactive shell (workmux uses
+    # send-keys), which is what lets direnv load the devshell before the
+    # commands run.
+    #
+    # nvim is listed *first* on purpose: ../nvim-mcp's plugin opens the per-repo
+    # RPC socket when Neovim starts, and the agent's `nvim-mcp --connect auto`
+    # resolves it by git root — so the editor has to be up before the agent is.
     panes = [
-      { command = "<agent>"; focus = true; }
-      { split = "horizontal"; percentage = 30; }
+      { command = "nvim"; }
+      { command = "<agent>"; split = "horizontal"; percentage = 50; focus = true; }
+      { split = "vertical"; percentage = 50; }
     ];
 
     files.symlink = [
@@ -129,6 +137,7 @@ in
     # Show/hide the agent sidebar. The bare command is itself a toggle, so one
     # key does both; it pins the sidebar into every window of every session
     # (add `--session` to scope it to this one). Shadows tmux's mark-pane.
+    unbind m
     bind m run-shell "${workmux}/bin/workmux sidebar"
 
     # The dashboard is a full-screen TUI, so unlike the three above it cannot go
@@ -137,5 +146,14 @@ in
     # the dashboard exits.
     unbind t
     bind t display-popup -w 90% -h 90% -E "${workmux}/bin/workmux dashboard"
+
+    # prefix+A asks for a name and spawns a worktree for it. command-prompt does
+    # the asking; the popup is what gives `add` a terminal, so its output — and
+    # the one-time status-hook wizard — is visible rather than swallowed, and -d
+    # pins it to the repo of the pane you pressed it from. The window `add`
+    # creates at the end still becomes the client's active one from inside the
+    # overlay.
+    unbind a
+    bind a command-prompt -p "workmux add:" "display-popup -E -d \"#{pane_current_path}\" -w 80% -h 60% \"${workmux}/bin/workmux add '%%'\""
   '';
 }
