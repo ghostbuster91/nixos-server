@@ -33,34 +33,39 @@ no target given.
    `connection_id`. More than one connection and no obvious match → ask, do not
    pick at random.
 
-2. **"fragment" / a region → check the selection range first.** Get the last
-   visual selection via `exec_lua`:
+2. **Ask the editor where they are pointing.** One `exec_lua` call — the editor
+   owns this answer, so do *not* re-derive it:
 
    ```lua
-   local s, e = vim.fn.getpos("'<"), vim.fn.getpos("'>")
-   local cur = vim.api.nvim_win_get_cursor(0)
-   return {
-     buf = vim.api.nvim_get_current_buf(),
-     name = vim.api.nvim_buf_get_name(0),
-     mode = vim.fn.mode(),
-     -- 1-based rows, as in the file; 0 means "no selection in this buffer"
-     sel_start_row = s[2], sel_start_col = s[3],
-     sel_end_row = e[2], sel_end_col = e[3],
-     cursor_row = cur[1],
-   }
+   return NvimMcpPointer.resolve()
    ```
 
-   `'<` / `'>` are per-buffer and **survive the selection** — they can be stale.
-   Trust the range only when it is non-degenerate (`sel_start_row > 0` and
-   `sel_end_row >= sel_start_row`) and it contains `cursor_row`. Otherwise fall
-   back to step 3.
+   It returns `kind`, `buffer_id`, `buffer_name`, `modified`, `mode`,
+   `cursor_row`, `cursor_col`, plus `start_row`/`start_col`, `end_row`/`end_col`
+   and `linewise` when `kind == "selection"`. **Every row and column is
+   1-based**, as the file shows them.
 
-3. **A single spot → cursor position.** Call `cursor_position`; it returns
-   `buffer_name`, `buffer_id`, `row` and `col`, **zero-based**. The file line
-   number the user sees is `row + 1` — convert before quoting a line or editing.
+   - `kind == "selection"` — the user is holding a selection right now (visual
+     mode is live; switching panes does not end it). That range *is* "this
+     fragment"; use it as given and do not widen it. If they expected a
+     selection and got `"cursor"`, they pressed `<Esc>` before switching — say
+     so, and that leaving the selection up is what hands it over.
+   - `kind == "cursor"` — a single spot, nothing selected. Widen per step 3.
 
-4. **Widen to what they actually mean.** "This line" is literally the line;
-   "this function" / "this fragment" (with no usable selection) is the enclosing
+   Never read `'<` / `'>` yourself. They outlive the selection by design, and
+   leaving visual mode parks the cursor *at* the range end — so every "are the
+   marks still current?" heuristic ends up answering about a long-dead range
+   instead of the cursor line. `resolve()` is the only source; the editor paints
+   what it returns when focus leaves the pane (`pointer.lua`), so the user can
+   see what you are about to answer about, and a second implementation of the
+   rule would mean the screen lying about what you got.
+
+   `NvimMcpPointer` nil → an editor older than this helper: fall back to
+   `cursor_position` (`row`/`col` **zero-based** there — the user's line number
+   is `row + 1`) and say the selection could not be checked.
+
+3. **Widen to what they actually mean.** "This line" is literally the line;
+   "this function" / "this fragment" with `kind == "cursor"` is the enclosing
    symbol — get its range from `lsp_document_symbols` for that document and pick
    the innermost symbol containing the cursor. Then `read` the buffer
    (`{"buffer_id": N}`) over that range plus a few lines of context.
@@ -68,13 +73,13 @@ no target given.
    Read from the **buffer**, not the file on disk: unsaved edits are exactly the
    state the question is about.
 
-5. **Say what you resolved, in one line**, before answering — e.g.
+4. **Say what you resolved, in one line**, before answering — e.g.
    `modules/hm/nvim-mcp/default.nix:34-41 (fn mkPlugin)`. A wrong guess is then
    one word to correct instead of a wasted answer.
 
-6. **Editing** still goes through the normal file tools (Edit/Write) on the path
+5. **Editing** still goes through the normal file tools (Edit/Write) on the path
    from `buffer_name`; `lsp_apply_edit` is for applying LSP code actions, not for
-   your own edits. Mention it if the buffer is modified — the user may want to
+   your own edits. Mention it if the buffer is `modified` — the user may want to
    `:w` first.
 
 ## When Neovim is not reachable

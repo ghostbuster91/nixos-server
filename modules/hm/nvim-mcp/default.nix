@@ -32,6 +32,9 @@ in
         end
         if not transient then
           require("nvim-mcp").setup({})
+          -- Keeps whatever Claude resolves "this line" / "ten fragment" to
+          -- visible once focus moves to its pane; see pointer.lua.
+          ${builtins.readFile ./pointer.lua}
         end
       '';
     }
