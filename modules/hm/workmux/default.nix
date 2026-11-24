@@ -44,10 +44,19 @@ let
     # This repo's history is linear and so is every other one here.
     merge_strategy = "rebase";
 
-    # Upstream's default is a `<project>__worktrees` sibling, which would put a
-    # second visible entry per project into ~/workspace (~40 repos) and make
-    # z/fzf match worktrees as if they were top-level checkouts.
-    worktree_dir = "~/workspace/.worktrees/{project}";
+    # Upstream puts worktrees in a `<project>__worktrees` sibling of the repo,
+    # which would add a second visible entry per project to ~/workspace (~40
+    # repos) and make z/fzf match worktrees as if they were top-level checkouts
+    # — hence the hidden `.worktrees/` parent. The `__worktrees` suffix stays,
+    # though, because it is a sentinel and not just a convention: the dashboard,
+    # the sidebar and the project picker all label agents through
+    # `extract_project_name` (src/agent_display.rs), which only understands
+    # `<project>__worktrees/<branch>` and `<repo>/.worktrees/<branch>` (the
+    # latter by finding a `.git` *directory*, which a linked worktree never
+    # has). A plain `.worktrees/{project}/<branch>` matches neither and falls
+    # through to the last resort — the leaf directory name — so every agent gets
+    # labelled with its branch instead of its project.
+    worktree_dir = "~/workspace/.worktrees/{project}__worktrees";
 
     # Neovim down the left half, the agent top right (focused), a plain shell
     # for git/nix commands bottom right. `split: horizontal` is tmux's `-h`
