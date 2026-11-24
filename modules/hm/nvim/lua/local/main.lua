@@ -128,6 +128,7 @@ local setup = function(binaries)
     require("local/neogit").setup()
     require("local/flash").setup()
     require("local/hover").setup()
+    require("local/focus-dim").setup()
 end
 
 return { setup = setup }
