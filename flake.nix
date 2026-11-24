@@ -119,6 +119,15 @@
       url = "github:raine/workmux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Prints the public API of any JVM dependency from the terminal, so an agent
+    # can look up a signature instead of guessing one. Not in nixpkgs. The flake
+    # only fetches the upstream release tarball and autopatchelfs it, so it can
+    # follow our nixpkgs rather than dragging in a second unstable tree.
+    cellar = {
+      url = "github:VirtusLab/cellar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {

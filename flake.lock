@@ -39,6 +39,26 @@
         "type": "github"
       }
     },
+    "cellar": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795521623,
+        "narHash": "sha256-ExasEPKKcaVt26RTHtCat30SwPMsK9JCF3JIxDtRk3E=",
+        "owner": "VirtusLab",
+        "repo": "cellar",
+        "rev": "b65d0bbb0feb4b4ec9d453e447a2882de96b34ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "VirtusLab",
+        "repo": "cellar",
+        "type": "github"
+      }
+    },
     "claudecode-nvim": {
       "inputs": {
         "nixpkgs": [
@@ -803,6 +823,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "cellar": "cellar",
         "claudecode-nvim": "claudecode-nvim",
         "deploy-rs": "deploy-rs",
         "devshell": "devshell",

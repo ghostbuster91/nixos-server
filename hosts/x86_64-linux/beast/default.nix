@@ -1,4 +1,4 @@
-{ inputs, username, pkgs-unstable, ... }:
+{ inputs, username, pkgs, pkgs-unstable, ... }:
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   imports =
@@ -100,6 +100,13 @@
         inputs.self.homeModules.tmux
         inputs.self.homeModules.alacritty
         inputs.self.homeModules.workmux
+      ];
+
+      # Desktop-only tooling: beast is the only host anything is developed on.
+      # cellar prints the public API of a JVM dependency, so an agent can look
+      # a signature up instead of guessing it (see the input in flake.nix).
+      home.packages = [
+        inputs.cellar.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
     };
     extraSpecialArgs = { inherit username inputs pkgs-unstable; };
