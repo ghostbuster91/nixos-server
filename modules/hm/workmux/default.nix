@@ -41,8 +41,7 @@ let
     # explicitly also stops the first-run wizard from asking.
     nerdfont = true;
     agent = "claude";
-    # This repo's history is linear and so is every other one here.
-    merge_strategy = "rebase";
+    merge_strategy = "merge";
 
     # Upstream puts worktrees in a `<project>__worktrees` sibling of the repo,
     # which would add a second visible entry per project to ~/workspace (~40
