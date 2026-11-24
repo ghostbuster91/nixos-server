@@ -57,12 +57,19 @@ let
     # send-keys), which is what lets direnv load the devshell before the
     # commands run.
     #
-    # nvim is listed *first* on purpose: ../nvim-mcp's plugin opens the per-repo
-    # RPC socket when Neovim starts, and the agent's `nvim-mcp --connect auto`
-    # resolves it by git root — so the editor has to be up before the agent is.
+    # nvim is listed *first* on purpose, and both bridges to Claude depend on it:
+    # ../nvim-mcp's plugin opens the per-repo RPC socket when Neovim starts and
+    # the agent's `nvim-mcp --connect auto` resolves it by git root, while
+    # ../claudecode's plugin writes a ~/.claude/ide/<port>.lock that `--ide`
+    # below resolves the same way — so the editor has to be up before the agent.
+    #
+    # `--ide` rides on the placeholder rather than replacing it with `claude`:
+    # workmux appends whatever follows `<agent>` to the command it resolves
+    # (`parse_agent_placeholder_with_args`), so the status tracking and the
+    # native prompt-injection flag still apply.
     panes = [
       { command = "nvim"; }
-      { command = "<agent>"; split = "horizontal"; percentage = 50; focus = true; }
+      { command = "<agent> --ide"; split = "horizontal"; percentage = 50; focus = true; }
       { split = "vertical"; percentage = 50; }
     ];
 

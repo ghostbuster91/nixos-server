@@ -19,18 +19,10 @@ in
       inherit plugin;
       type = "lua";
       config = ''
-        -- git spawns throwaway Neovim instances to edit commit/merge/rebase
-        -- messages. Those load this config too, and every setup() call
-        -- registers another socket for the same git root — which makes
-        -- `--connect auto` pick an editor that is about to exit. Skip them.
-        local transient = false
-        for _, arg in ipairs(vim.fn.argv()) do
-          if arg:match("COMMIT_EDITMSG$") or arg:match("MERGE_MSG$")
-            or arg:match("git%-rebase%-todo$") or arg:match("TAG_EDITMSG$") then
-            transient = true
-          end
-        end
-        if not transient then
+        -- Every setup() call registers another socket for the same git root,
+        -- which makes `--connect auto` pick an editor that is about to exit.
+        ${builtins.readFile ../lib/transient-nvim.lua}
+        if not _G.ClaudeNvimTransient() then
           require("nvim-mcp").setup({})
           -- Keeps whatever Claude resolves "this line" / "ten fragment" to
           -- visible once focus moves to its pane; see pointer.lua.

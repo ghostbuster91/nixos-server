@@ -39,6 +39,26 @@
         "type": "github"
       }
     },
+    "claudecode-nvim": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795511478,
+        "narHash": "sha256-wAo8FVTgxgWhaQ3eg8+dtASctkhLtpazk0i/IKzGRNA=",
+        "owner": "ghostbuster91",
+        "repo": "claudecode.nvim",
+        "rev": "73dbbce9ea215bf50219c430d13c57a7b1f59702",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ghostbuster91",
+        "repo": "claudecode.nvim",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -783,6 +803,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "claudecode-nvim": "claudecode-nvim",
         "deploy-rs": "deploy-rs",
         "devshell": "devshell",
         "disko": "disko",

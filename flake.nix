@@ -90,6 +90,17 @@
       url = "github:ghostbuster91/nvim-mcp";
     };
 
+    # The other half of the Claude↔Neovim bridge: a WebSocket server in the
+    # editor that the Claude CLI connects to, so a keymap can push a selection
+    # into its prompt (nvim-mcp only goes the other way). Our fork carries
+    # `diff_opts.review = false`, without which every edit Claude makes waits
+    # in a diff for a keypress, and the flake itself, which upstream dropped
+    # when it moved to mise. Lua only, so it can follow our nixpkgs.
+    claudecode-nvim = {
+      url = "github:ghostbuster91/claudecode.nvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Repeatable-movements engine for Neovim: `;` / `,` repeat whatever
     # next/prev motion was used last (diagnostic, git hunk, merge conflict,
     # f/t), instead of every plugin stealing `;` for itself. Upstream's flake
