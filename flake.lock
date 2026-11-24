@@ -731,15 +731,15 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1791681913,
-        "narHash": "sha256-RBD8o8LCjqA/KUNw3eFCu8PnlpuOagh81eQoTBRzqos=",
-        "owner": "linw1995",
+        "lastModified": 1795515274,
+        "narHash": "sha256-j3zrgqwF58DpGR1BrqX3vyfRNP2XYB6oedggSNVqTrs=",
+        "owner": "ghostbuster91",
         "repo": "nvim-mcp",
-        "rev": "cf3947c3c386cf1389a9d1c5ce49a52b04146786",
+        "rev": "d53a7d394b302a61aea833e8f6dae114d92d1219",
         "type": "github"
       },
       "original": {
-        "owner": "linw1995",
+        "owner": "ghostbuster91",
         "repo": "nvim-mcp",
         "type": "github"
       }

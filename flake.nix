@@ -82,8 +82,12 @@
     # Neovim (LSP diagnostics, hover, code actions). Deliberately not
     # following our nixpkgs: upstream builds the Rust server with its own
     # fenix toolchain pinned against nixpkgs-unstable.
+    # Fork, for one fix: upstream's injected autocmds notify `rpcnotify(0, ...)`,
+    # which broadcasts to every channel — including nvim 0.12's TUI, which runs as
+    # a separate process over RPC and answers an unknown method with a visible
+    # `Invalid method: NVIM_MCP_LspAttach` on every LSP attach.
     nvim-mcp = {
-      url = "github:linw1995/nvim-mcp";
+      url = "github:ghostbuster91/nvim-mcp";
     };
 
     # Repeatable-movements engine for Neovim: `;` / `,` repeat whatever
