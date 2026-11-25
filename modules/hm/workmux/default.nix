@@ -4,8 +4,8 @@
 # creates the worktree, opens the window and starts the agent in it; `workmux
 # merge` rebases, merges and tears the whole thing down again.
 #
-# Needs tmux (../tmux) and, for the status icons and skills, claude-code —
-# both are imported alongside this module on beast.
+# Needs tmux (../tmux), plus agy (default agent) and/or claude-code (`-a claude`)
+# for the status icons and skills — all imported alongside this module on beast.
 let
   workmux =
     (inputs.workmux.packages.${pkgs.stdenv.hostPlatform.system}.default).overrideAttrs
@@ -35,12 +35,56 @@ let
     cp -r ${inputs.workmux}/.claude-plugin ${inputs.workmux}/skills $out/
   '';
 
+  # Status hooks for Antigravity (`agy`), matching upstream's
+  # `src/agent_setup/antigravity.rs` so `workmux` sees them as already installed
+  # and drives the 🤖/✅ icons + sidebar registration. Each command ends with
+  # `printf '{}\n'` because Antigravity hooks must return a JSON object on stdout.
+  agy-hooks = (pkgs.formats.json { }).generate "workmux-agy-hooks.json" {
+    workmux-status = {
+      PreInvocation = [
+        {
+          type = "command";
+          command = "workmux register-agent >/dev/null 2>&1 || true; printf '{}\\n'";
+        }
+        {
+          type = "command";
+          command = "workmux set-window-status working >/dev/null 2>&1 || true; printf '{}\\n'";
+        }
+      ];
+      Stop = [
+        {
+          type = "command";
+          command = "workmux set-window-status done >/dev/null 2>&1 || true; printf '{}\\n'";
+        }
+      ];
+    };
+  };
+
+  # Expose workmux's bundled skills (/merge /rebase /worktree /coordinator
+  # /open-pr /workmux) to Antigravity globally as un-namespaced skills so
+  # `dashboard.merge = "/merge"` works identically in agy and Claude.
+  agy-skills = lib.mapAttrs'
+    (name: _:
+      lib.nameValuePair ".gemini/config/skills/${name}" {
+        source = "${inputs.workmux}/skills/${name}";
+      })
+    (lib.filterAttrs (_: type: type == "directory") (builtins.readDir "${inputs.workmux}/skills"));
+
   settings = {
     # Alacritty and tmux render JetBrains Mono Nerd Font (see ../alacritty), so
     # the glyph window prefix resolves instead of showing tofu. Setting it
     # explicitly also stops the first-run wizard from asking.
     nerdfont = true;
-    agent = "claude";
+    agent = "agy";
+
+    # Named agent overrides. Carrying Claude's `--ide` flag here instead of on
+    # `<agent> --ide` below lets `agy` (which has no `--ide` flag) be the
+    # default while `workmux add -a claude <name>` still launches `claude --ide`
+    # with Claude's native profile and claudecode.nvim bridge intact.
+    agents = {
+      claude = "claude --ide";
+    };
+
     merge_strategy = "merge";
 
     # Upstream puts worktrees in a `<project>__worktrees` sibling of the repo,
@@ -65,19 +109,15 @@ let
     # send-keys), which is what lets direnv load the devshell before the
     # commands run.
     #
-    # nvim is listed *first* on purpose, and both bridges to Claude depend on it:
+    # nvim is listed *first* on purpose, and the editor bridges depend on it:
     # ../nvim-mcp's plugin opens the per-repo RPC socket when Neovim starts and
-    # the agent's `nvim-mcp --connect auto` resolves it by git root, while
-    # ../claudecode's plugin writes a ~/.claude/ide/<port>.lock that `--ide`
-    # below resolves the same way — so the editor has to be up before the agent.
-    #
-    # `--ide` rides on the placeholder rather than replacing it with `claude`:
-    # workmux appends whatever follows `<agent>` to the command it resolves
-    # (`parse_agent_placeholder_with_args`), so the status tracking and the
-    # native prompt-injection flag still apply.
+    # `nvim-mcp --connect auto` resolves it by git root, while ../claudecode's
+    # plugin writes a ~/.claude/ide/<port>.lock that `claude --ide` (resolved
+    # via `agents.claude` when `-a claude` is passed) connects to the same way —
+    # so the editor has to be up before the agent.
     panes = [
       { command = "nvim"; }
-      { command = "<agent> --ide"; split = "horizontal"; percentage = 50; focus = true; }
+      { command = "<agent>"; split = "horizontal"; percentage = 50; focus = true; }
       { split = "vertical"; percentage = 50; }
     ];
 
@@ -117,6 +157,15 @@ in
   # scheme with `T`. Set `theme` here instead.
   xdg.configFile."workmux/config.yaml".source =
     (pkgs.formats.yaml { }).generate "workmux-config.yaml" settings;
+
+  # Antigravity status hooks (matching workmux's `antigravity.rs` check) +
+  # workmux's bundled skills under ~/.gemini/config/skills/<name>. Unlike
+  # Claude's settings.json, agy keeps its own settings under
+  # ~/.gemini/antigravity-cli/settings.json, so managing hooks.json here does
+  # not interfere with agy's runtime settings.
+  home.file = {
+    ".gemini/config/hooks.json".source = agy-hooks;
+  } // agy-skills;
 
   programs.claude-code = {
     # Already enabled by ../nvim-mcp on the host that imports both; repeated so

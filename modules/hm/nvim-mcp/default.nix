@@ -38,6 +38,17 @@ in
 
   programs.claude-code = {
     enable = true;
+
+    # This module is what puts the `claude` binary on a host, so the package
+    # choice lives here rather than in ../workmux, which also sets `enable` but
+    # only to stand on its own (`package` is a plain option — defining it twice
+    # would be a conflict, not a merge).
+    #
+    # From numtide/llm-agents.nix instead of nixpkgs: see the input in
+    # flake.nix. It tracks upstream daily and wraps the official release
+    # binary, so it is both current and the build Anthropic ships.
+    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+
     # Deliberately no `settings` / `context`: the MCP server is injected by
     # wrapping the claude binary with `--plugin-dir`, so the only thing this
     # adds under ~/.claude is the skill below — settings.json, CLAUDE.md and

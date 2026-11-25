@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, inputs, username, ... }:
 {
   # TEMPORARY: turns beast into a physical GNOME dev + chat workstation while the
   # laptop is out for repair. Remove this file + its import from default.nix and
@@ -48,7 +48,16 @@
     # the wrapper carrying --mcp-config for the nvim MCP server.
     wl-clipboard # wl-copy / wl-paste for CLI ↔ Wayland clipboard
     virt-viewer
-  ];
+  ] ++ (
+    let
+      antigravity = inputs.antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system};
+    in
+    [
+      # Google Antigravity: agentic IDE, see the input in flake.nix.
+      antigravity.google-antigravity-ide
+      antigravity.google-antigravity-cli
+    ]
+  );
   environment.persistence."/state" = {
     # Persistent home, reboot-only (NOT backed up — real work lives in git). The
     # shared impermanence module still persists ~/.local/share/zsh_history to

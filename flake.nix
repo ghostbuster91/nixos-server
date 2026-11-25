@@ -4,11 +4,14 @@
       "https://nixos-raspberrypi.cachix.org"
       "https://attic.typesafebrew.dev/system"
       "https://comfyui.cachix.org"
+      "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [
       "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
       "system:WOAVhhRoFrTy1MfcJyEzHLOa737CJZOGZccwOiwhfoU="
       "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
+      # numtide/llm-agents.nix (claude-code) — see the input below.
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
     connect-timeout = 5;
   };
@@ -126,6 +129,29 @@
     # follow our nixpkgs rather than dragging in a second unstable tree.
     cellar = {
       url = "github:VirtusLab/cellar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Claude Code, packaged from Anthropic's own release channel and updated
+    # daily by CI — nixpkgs lags it by weeks (2.1.223 in 26.05 against 2.1.331
+    # here at the time of writing), which matters for a tool that ships several
+    # releases a week and whose auto-updater is disabled under Nix.
+    #
+    # Deliberately *not* following our nixpkgs, unlike almost every other input
+    # here. Two reasons: upstream only builds against nixpkgs-unstable and warns
+    # that pointing it at a stable release branch *will* break (our `nixpkgs` is
+    # nixos-26.05), and their binary cache — cache.numtide.com, wired into
+    # `nixConfig` above — is keyed on an exact nixpkgs match, so any `follows`
+    # turns every package here into a local build. The price is a third nixpkgs
+    # in the lock, evaluated but never built against.
+    llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # Google Antigravity: an agentic IDE (Gemini-based, Cursor/Windsurf-style).
+    # Not in nixpkgs; exports packages only (no nixosModule). The flake just
+    # FHS-wraps/patchelfs upstream's prebuilt binaries, so it can follow our
+    # nixpkgs.
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
